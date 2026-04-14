@@ -1,0 +1,56 @@
+<div class="min-h-screen flex items-center justify-center bg-neutral-primary-soft">
+
+  <div class="w-full max-w-md p-8 bg-white border border-default rounded-2xl shadow-lg">
+    <div class="w-90 mx-auto mb-4 flex items-center justify-center">
+      <img src="assets/icon/liga sm logo.png" alt="Liga San Miguel" class="w-full h-full object-contain">
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="login()">
+
+      <div class="mb-5">
+        <label for="email" class="block mb-2 text-sm font-medium text-heading">
+          Email
+        </label>
+        <input
+          formControlName="email"
+          type="email"
+          id="email"
+          class="w-full px-3 py-2.5 text-sm border rounded-lg bg-neutral-secondary-medium focus:ring-2 focus:ring-brand focus:border-brand"
+          placeholder="name@flowbite.com"
+        />
+      </div>
+
+      <div class="mb-6">
+        <label for="password" class="block mb-2 text-sm font-medium text-heading">
+          Contraseña
+        </label>
+        <input
+          formControlName="password"
+          type="password"
+          id="password"
+          class="w-full px-3 py-2.5 text-sm border rounded-lg bg-neutral-secondary-medium focus:ring-2 focus:ring-brand focus:border-brand"
+          placeholder="••••••••"
+        />
+      </div>
+
+      <div *ngIf="errorMessage"
+          class="mb-4 flex items-center gap-2 text-sm text-red-700 bg-red-100 border border-red-300 rounded-lg px-3 py-2">
+        <i class="fa-solid fa-circle-exclamation"></i>
+        {{ errorMessage }}
+      </div>
+
+      <button
+        type="submit"
+        [disabled]="loading"
+        class="w-full text-white bg-brand hover:bg-brand-strong focus:ring-4 focus:ring-brand-medium font-medium rounded-lg text-sm px-4 py-2.5 transition disabled:opacity-50"
+      >
+        <span *ngIf="!loading">Ingresar</span>
+        <span *ngIf="loading">Ingresando...</span>
+      </button>
+
+    </form>
+
+  </div>
+
+</div>
+

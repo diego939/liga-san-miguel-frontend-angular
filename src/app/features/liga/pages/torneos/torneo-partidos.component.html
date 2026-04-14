@@ -1,0 +1,117 @@
+<div class="space-y-4">
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-400">Partidos</h2>
+    <button
+      type="button"
+      (click)="openModal()"
+      class="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-5 py-2.5"
+    >
+      + Crear partido
+    </button>
+  </div>
+  <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+    <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+      <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+        <tr>
+          <th
+            scope="col"
+            class="px-6 py-3 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-600 whitespace-nowrap"
+            (click)="onSort('id')"
+          >
+            <span class="inline-flex items-center"
+              ># <app-liga-sort-indicator [active]="sortBy === 'id'" [order]="sortOrder"></app-liga-sort-indicator
+            ></span>
+          </th>
+          <th
+            scope="col"
+            class="px-6 py-3 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-600"
+            (click)="onSort('fecha')"
+          >
+            <span class="inline-flex items-center"
+              >Fecha
+              <app-liga-sort-indicator [active]="sortBy === 'fecha'" [order]="sortOrder"></app-liga-sort-indicator
+            ></span>
+          </th>
+          <th scope="col" class="px-6 py-3">Local vs Visitante</th>
+          <th scope="col" class="px-6 py-3">Resultado</th>
+          <th
+            scope="col"
+            class="px-6 py-3 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-600"
+            (click)="onSort('estado')"
+          >
+            <span class="inline-flex items-center"
+              >Estado
+              <app-liga-sort-indicator [active]="sortBy === 'estado'" [order]="sortOrder"></app-liga-sort-indicator
+            ></span>
+          </th>
+          <th scope="col" class="px-6 py-3 text-right">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          *ngFor="let p of items"
+          class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
+        >
+          <td class="px-6 py-4 text-gray-500">{{ p.id }}</td>
+          <td class="px-6 py-4 whitespace-nowrap">{{ formatDt(p.fecha) }}</td>
+          <td class="px-6 py-4">
+            {{ p.equipoLocal?.club?.nombre }} vs {{ p.equipoVisitante?.club?.nombre }}
+          </td>
+          <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">{{ marcador(p) }}</td>
+          <td class="px-6 py-4">
+            <select
+              class="rounded border border-gray-300 dark:border-gray-600 text-sm px-2 py-1.5 bg-white dark:bg-gray-800 min-w-[10rem]"
+              [ngModel]="p.estado"
+              (ngModelChange)="cambiarEstado(p, $event)"
+              [disabled]="estadoSavingId === p.id"
+            >
+              <option *ngFor="let e of estadosPartido" [ngValue]="e">{{ labelEstado(e) }}</option>
+            </select>
+          </td>
+          <td class="px-6 py-4 text-right space-x-2">
+            <button
+              type="button"
+              (click)="planilla(p)"
+              class="font-medium text-blue-600 dark:text-blue-500 hover:underline text-sm"
+            >
+              Planilla
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p *ngIf="!loading && items.length === 0" class="p-6 text-center text-gray-500">Sin partidos</p>
+    <p *ngIf="loading" class="p-6 text-center">Cargando…</p>
+  </div>
+  <app-liga-pagination [page]="page" [total]="total" [limit]="limit" (prev)="prevPage()" (next)="nextPage()"></app-liga-pagination>
+</div>
+
+<div *ngIf="modal" [class]="lm.backdrop" (click)="modal = false">
+  <div [class]="lm.panelMd" (click)="$event.stopPropagation()">
+    <h3 [class]="lm.titleSm">Nuevo partido</h3>
+    <form [formGroup]="form" (ngSubmit)="crear()" class="space-y-3">
+      <div>
+        <label [class]="lm.label">Local</label>
+        <select formControlName="equipoLocalId" [class]="lm.field">
+          <option [ngValue]="0">—</option>
+          <option *ngFor="let e of equipos" [ngValue]="e.id">{{ e.club?.nombre }}</option>
+        </select>
+      </div>
+      <div>
+        <label [class]="lm.label">Visitante</label>
+        <select formControlName="equipoVisitanteId" [class]="lm.field">
+          <option [ngValue]="0">—</option>
+          <option *ngFor="let e of equipos" [ngValue]="e.id">{{ e.club?.nombre }}</option>
+        </select>
+      </div>
+      <div>
+        <label [class]="lm.label">Fecha y hora</label>
+        <input type="datetime-local" formControlName="fecha" [class]="lm.field" />
+      </div>
+      <div class="flex justify-end gap-2">
+        <button type="button" (click)="modal = false" [class]="lm.btnSecondary">Cancelar</button>
+        <button type="submit" [class]="lm.btnPrimary">Crear</button>
+      </div>
+    </form>
+  </div>
+</div>

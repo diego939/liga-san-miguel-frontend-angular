@@ -1,0 +1,82 @@
+<div class="space-y-4">
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-400">Usuarios</h1>
+    <button
+      type="button"
+      (click)="openCreate()"
+      class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700"
+    >
+      + Crear usuario
+    </button>
+  </div>
+  <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+    <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+      <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+        <tr>
+          <th
+            scope="col"
+            class="px-6 py-3 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-600"
+            (click)="onSort('email')"
+          >
+            <span class="inline-flex items-center"
+              >Email
+              <app-liga-sort-indicator [active]="sortBy === 'email'" [order]="sortOrder"></app-liga-sort-indicator
+            ></span>
+          </th>
+          <th
+            scope="col"
+            class="px-6 py-3 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-600"
+            (click)="onSort('rolId')"
+          >
+            <span class="inline-flex items-center"
+              >Rol <app-liga-sort-indicator [active]="sortBy === 'rolId'" [order]="sortOrder"></app-liga-sort-indicator
+            ></span>
+          </th>
+          <th scope="col" class="px-6 py-3 text-right">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          *ngFor="let u of items"
+          class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
+        >
+          <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">{{ u.email }}</td>
+          <td class="px-6 py-4">{{ u.rol?.descripcion ?? u.rolId }}</td>
+          <td class="px-6 py-4 text-right space-x-2">
+            <button
+              type="button"
+              (click)="openEdit(u)"
+              class="font-medium text-blue-600 dark:text-blue-500 hover:underline text-sm"
+            >
+              Editar
+            </button>
+            <button type="button" (click)="remove(u)" class="font-medium text-red-600 hover:underline text-sm">
+              Eliminar
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p *ngIf="items.length === 0" class="p-6 text-center text-gray-500">Sin usuarios</p>
+  </div>
+  <app-liga-pagination [page]="page" [total]="total" [limit]="limit" (prev)="prev()" (next)="next()"></app-liga-pagination>
+</div>
+
+<div *ngIf="modal" [class]="lm.backdrop" (click)="modal = false">
+  <div [class]="lm.panelMd" (click)="$event.stopPropagation()">
+    <h3 [class]="lm.titleSm">{{ editing ? 'Editar usuario' : 'Nuevo usuario' }}</h3>
+    <form [formGroup]="form" (ngSubmit)="save()" class="space-y-3">
+      <input formControlName="email" type="email" placeholder="Email" [class]="lm.field" />
+      <input formControlName="password" type="password" placeholder="Contraseña (mín. 6)" [class]="lm.field" />
+      <label [class]="lm.label">Rol</label>
+      <select formControlName="rolId" [class]="lm.field">
+        <option [ngValue]="0">— Rol —</option>
+        <option *ngFor="let r of roles" [ngValue]="r.id">{{ r.descripcion }}</option>
+      </select>
+      <div class="flex justify-end gap-2">
+        <button type="button" (click)="modal = false" [class]="lm.btnSecondary">Cancelar</button>
+        <button type="submit" [class]="lm.btnPrimary">Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>

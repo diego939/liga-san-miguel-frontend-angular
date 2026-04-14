@@ -1,0 +1,80 @@
+<!-- SIDEBAR -->
+<div
+  class="fixed top-0 left-0 z-60 w-64 h-full bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 pt-4 shadow-lg transition-transform duration-300
+
+  -translate-x-full   <!-- 👈 oculto por defecto (mobile) -->
+  sm:translate-x-0    <!-- 👈 visible SIEMPRE en desktop -->
+
+  "
+  [class.translate-x-0]="isSidebarOpen"
+>
+
+  <!-- Header -->
+  <div class="px-4 mb-4">
+    <!-- LOGO / TITULO -->
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 flex items-center justify-center rounded text-white shadow-sm">
+          <img src="assets/icon/balon.png" alt="Liga San Miguel" class="w-full h-full object-contain">
+        </div>
+
+        <span class="font-semibold text-lg text-gray-200">
+          Liga San Miguel
+        </span>
+      </div>
+      <hr class="border border-gray-400 mb-4 mt-4">
+  </div>
+
+  <div class="flex items-center justify-between ml-6 mb-2 mr-6">
+  <h1 class="text-sm font-semibold text-gray-500 uppercase dark:text-gray-400">
+    Menú
+  </h1>
+
+  <button class="text-gray-500 hover:text-red-500 sm:hidden"
+          (click)="closeAll()">
+    <i class="fa-solid fa-x"></i>
+  </button>
+</div>
+  <!-- Menu -->
+  <ul class="px-3 space-y-2">
+    <ng-container *ngFor="let menu of menus">
+      <li *ngIf="menu.children?.length">
+        <div
+          class="px-3 py-2 text-xs font-semibold text-gray-500 uppercase dark:text-gray-400"
+        >
+          {{ menu.menuNombre }}
+        </div>
+        <ul class="pl-2 space-y-1 mb-2">
+          <li *ngFor="let c of menu.children">
+            <a
+              [routerLink]="c.menuUrl"
+              (click)="closeAll()"
+              routerLinkActive="bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300"
+              class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
+            >
+              <i class="text-base" [class]="c.menuIcono"></i>
+              <span class="font-medium">{{ c.menuNombre }}</span>
+            </a>
+          </li>
+        </ul>
+      </li>
+      <li *ngIf="!menu.children?.length && menu.menuUrl">
+        <a
+          [routerLink]="menu.menuUrl"
+          (click)="closeAll()"
+          routerLinkActive="bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300"
+          class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
+        >
+          <i class="text-base" [class]="menu.menuIcono"></i>
+          <span class="font-medium">{{ menu.menuNombre }}</span>
+        </a>
+      </li>
+    </ng-container>
+  </ul>
+
+</div>
+
+<!-- OVERLAY MOBILE -->
+<div *ngIf="isSidebarOpen"
+     (click)="closeAll()"
+     class="fixed inset-0 bg-black/50 backdrop-blur-sm z-30 sm:hidden">
+</div>

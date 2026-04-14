@@ -1,0 +1,114 @@
+<div class="space-y-6" *ngIf="partido as p">
+  <nav class="text-sm">
+    <a [routerLink]="['/pages/torneos', torneoId, 'partidos']" class="text-blue-600 hover:underline">← Partidos del torneo</a>
+  </nav>
+
+  <div class="flex flex-wrap justify-between items-center gap-3">
+    <h2 class="text-xl font-bold dark:text-gray-400">Planilla del partido</h2>
+    <div class="flex flex-wrap items-center gap-2">
+      <label for="estado-planilla" class="text-sm text-gray-600 dark:text-gray-400">Estado</label>
+      <select
+        id="estado-planilla"
+        class="text-sm rounded border border-gray-300 dark:border-gray-600 px-2 py-1.5 bg-white dark:bg-gray-800 min-w-[11rem]"
+        [ngModel]="p.estado"
+        (ngModelChange)="onEstadoChange($event)"
+        [disabled]="estadoSaving"
+      >
+        <option *ngFor="let e of estadosPartido" [ngValue]="e">{{ labelEstado(e) }}</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="grid md:grid-cols-2 gap-4 text-sm">
+    <div class="p-4 border rounded-lg dark:border-gray-700">
+      <h3 class="font-semibold mb-2">Local — {{ p.equipoLocal?.club?.nombre }}</h3>
+      <ul class="space-y-1">
+        <li *ngFor="let l of local; let i = index" class="flex justify-between items-center gap-2">
+          <span>{{ l.nombre || ('#' + l.jugadorId) }}</span>
+          <span class="text-xs">{{ l.titular ? 'Titular' : 'Suplente' }}</span>
+          <button type="button" (click)="toggleTitular('local', i)" class="text-blue-600 text-xs">Cambiar rol</button>
+          <button type="button" (click)="removeLine('local', i)" class="text-red-600 text-xs">Quitar</button>
+        </li>
+      </ul>
+    </div>
+    <div class="p-4 border rounded-lg dark:border-gray-700">
+      <h3 class="font-semibold mb-2">Visitante — {{ p.equipoVisitante?.club?.nombre }}</h3>
+      <ul class="space-y-1">
+        <li *ngFor="let l of visit; let i = index" class="flex justify-between items-center gap-2 flex-wrap">
+          <span>{{ l.nombre || ('#' + l.jugadorId) }}</span>
+          <span class="text-xs">{{ l.titular ? 'Titular' : 'Suplente' }}</span>
+          <button type="button" (click)="toggleTitular('vis', i)" class="text-blue-600 text-xs">Cambiar rol</button>
+          <button type="button" (click)="removeLine('vis', i)" class="text-red-600 text-xs">Quitar</button>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 rounded-lg text-sm">
+    <p class="font-medium text-amber-900 dark:text-amber-200">Agregar jugador (validación en tiempo real)</p>
+    <div class="flex flex-wrap gap-2 mt-2 items-end">
+      <input type="number" [(ngModel)]="addJugadorId" [ngModelOptions]="{standalone: true}" placeholder="ID jugador" class="rounded border p-2 w-28 dark:bg-gray-800" />
+      <select [(ngModel)]="addEquipo" [ngModelOptions]="{standalone: true}" class="rounded border p-2 dark:bg-gray-800">
+        <option value="local">Local</option>
+        <option value="vis">Visitante</option>
+      </select>
+      <label class="flex items-center gap-1 text-sm">
+        <input type="checkbox" [(ngModel)]="addTitular" [ngModelOptions]="{standalone: true}" /> Titular
+      </label>
+      <button type="button" (click)="previewAdd()" class="px-3 py-2 bg-gray-600 text-white rounded text-sm">Preview</button>
+      <button type="button" (click)="addLine()" class="px-3 py-2 bg-blue-700 text-white rounded text-sm">Agregar</button>
+    </div>
+    <p *ngIf="previewMsg" class="mt-2 text-sm">{{ previewMsg }}</p>
+  </div>
+
+  <button
+    type="button"
+    (click)="guardarPlanilla()"
+    [disabled]="saving"
+    class="px-5 py-2.5 bg-green-700 text-white rounded-lg disabled:opacity-50"
+  >
+    {{ saving ? 'Guardando…' : 'Guardar planilla completa' }}
+  </button>
+
+  <section class="border-t border-gray-200 dark:border-gray-700 pt-6">
+    <h3 class="font-semibold mb-2 dark:text-white">Eventos (requiere partido EN_JUEGO)</h3>
+    <form [formGroup]="evForm" (ngSubmit)="registrarEvento()" class="flex flex-wrap gap-2 items-end">
+      <input type="number" formControlName="jugadorId" placeholder="Jugador ID" class="rounded border p-2 w-28 dark:bg-gray-800" />
+      <select formControlName="tipo" class="rounded border p-2 dark:bg-gray-800">
+        <option value="GOL">Gol</option>
+        <option value="AMARILLA">Amarilla</option>
+        <option value="ROJA">Roja</option>
+      </select>
+      <input type="number" formControlName="minuto" placeholder="Min" class="rounded border p-2 w-20 dark:bg-gray-800" />
+      <button type="submit" class="px-4 py-2 bg-blue-700 text-white rounded text-sm">Registrar evento</button>
+    </form>
+    <ul class="mt-3 text-sm space-y-1">
+      <li *ngFor="let e of eventos">{{ e.minuto }}' — {{ e.tipo }} — jug. {{ e.jugadorId }}</li>
+    </ul>
+  </section>
+
+  <section class="border-t pt-6">
+    <h3 class="font-semibold mb-2 dark:text-white">Cambios</h3>
+    <form [formGroup]="cambioForm" (ngSubmit)="registrarCambio()" class="flex flex-wrap gap-2 items-end">
+      <input type="number" formControlName="saleId" placeholder="Sale ID" class="rounded border p-2 w-28 dark:bg-gray-800" />
+      <input type="number" formControlName="entraId" placeholder="Entra ID" class="rounded border p-2 w-28 dark:bg-gray-800" />
+      <input type="number" formControlName="minuto" placeholder="Min" class="rounded border p-2 w-20 dark:bg-gray-800" />
+      <button type="submit" class="px-4 py-2 bg-blue-700 text-white rounded text-sm">Registrar cambio</button>
+    </form>
+    <ul class="mt-3 text-sm space-y-1">
+      <li *ngFor="let c of cambios">{{ c.minuto }}' — sale {{ c.jugadorSaleId }} / entra {{ c.jugadorEntraId }}</li>
+    </ul>
+  </section>
+
+  <section class="border-t pt-6">
+    <h3 class="font-semibold mb-2 dark:text-white">Datos adicionales (solo en pantalla; el API aún no persiste estos campos)</h3>
+    <div class="grid sm:grid-cols-2 gap-3 text-sm">
+      <input [(ngModel)]="capitanLocal" [ngModelOptions]="{standalone: true}" placeholder="Capitán local" class="rounded border p-2 dark:bg-gray-800" />
+      <input [(ngModel)]="capitanVis" [ngModelOptions]="{standalone: true}" placeholder="Capitán visitante" class="rounded border p-2 dark:bg-gray-800" />
+      <input [(ngModel)]="arbitro" [ngModelOptions]="{standalone: true}" placeholder="Árbitro" class="rounded border p-2 dark:bg-gray-800" />
+      <input [(ngModel)]="jueces" [ngModelOptions]="{standalone: true}" placeholder="Jueces" class="rounded border p-2 dark:bg-gray-800" />
+    </div>
+    <textarea [(ngModel)]="observaciones" [ngModelOptions]="{standalone: true}" rows="2" placeholder="Observaciones" class="mt-3 w-full rounded border p-2 dark:bg-gray-800"></textarea>
+  </section>
+</div>
+<p *ngIf="loading" class="p-8 text-center">Cargando…</p>

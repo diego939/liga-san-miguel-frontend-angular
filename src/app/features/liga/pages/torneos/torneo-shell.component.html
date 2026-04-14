@@ -1,0 +1,47 @@
+<div class="space-y-4" *ngIf="torneo as t">
+  <nav class="text-sm text-gray-500">
+    <a routerLink="/pages/torneos" class="hover:underline">Torneos</a>
+    <span class="mx-2">/</span>
+    <span class="text-gray-900 dark:text-gray-400 font-medium">{{ t.nombre }}</span>
+  </nav>
+
+  <div class="border-b border-gray-200 dark:border-gray-700">
+    <ul class="flex flex-wrap -mb-px text-sm font-medium text-center text-gray-500 dark:text-gray-400">
+      <li class="me-2">
+        <a
+          [routerLink]="['/pages/torneos', torneoId, 'equipos']"
+          routerLinkActive="text-blue-600 border-blue-600"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300"
+        >
+          Equipos
+        </a>
+      </li>
+      <li class="me-2">
+        <span class="inline-block p-4 text-gray-400 cursor-default" title="Elegí un equipo en la pestaña Equipos">Inscripciones</span>
+      </li>
+      <li class="me-2">
+        <a
+          [routerLink]="['/pages/torneos', torneoId, 'partidos']"
+          routerLinkActive="text-blue-600 border-blue-600"
+          class="inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600"
+        >
+          Partidos
+        </a>
+      </li>
+      <li>
+        <a
+          [routerLink]="['/pages/torneos', torneoId, 'estadisticas']"
+          routerLinkActive="text-blue-600 border-blue-600"
+          class="inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600"
+        >
+          Estadísticas
+        </a>
+      </li>
+    </ul>
+  </div>
+
+  <router-outlet></router-outlet>
+</div>
+<p *ngIf="loading" class="p-8 text-center">Cargando torneo…</p>
+<p *ngIf="!loading && !torneo" class="text-red-600">Torneo no encontrado</p>

@@ -1,0 +1,126 @@
+<div class="space-y-4" *ngIf="jugador as j">
+  <nav class="text-sm text-gray-500 dark:text-gray-400">
+    <a routerLink="/pages/jugadores" class="hover:underline">Jugadores</a>
+    <span class="mx-2">/</span>
+    <span class="text-gray-900 dark:text-gray-400">{{ j.apellido }}, {{ j.nombre }}</span>
+  </nav>
+
+  <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-400">
+    {{ j.apellido }}, {{ j.nombre }}
+  </h1>
+
+  <div class="border-b border-gray-200 dark:border-gray-700">
+    <ul class="flex flex-wrap -mb-px text-sm font-medium text-center">
+      <li class="me-2">
+        <button
+          type="button"
+          (click)="setTab('datos')"
+          [class.border-blue-600]="tab === 'datos'"
+          [class.text-blue-600]="tab === 'datos'"
+          class="inline-block p-4 border-b-2 rounded-t-lg border-transparent hover:text-gray-600"
+        >
+          Datos personales
+        </button>
+      </li>
+      <li class="me-2">
+        <button type="button" (click)="setTab('pases')" [class.border-blue-600]="tab === 'pases'" [class.text-blue-600]="tab === 'pases'" class="inline-block p-4 border-b-2 rounded-t-lg border-transparent">
+          Historial de pases
+        </button>
+      </li>
+      <li class="me-2">
+        <button type="button" (click)="setTab('torneos')" [class.border-blue-600]="tab === 'torneos'" [class.text-blue-600]="tab === 'torneos'" class="inline-block p-4 border-b-2 rounded-t-lg border-transparent">
+          Torneos jugados
+        </button>
+      </li>
+      <li>
+        <button type="button" (click)="setTab('susp')" [class.border-blue-600]="tab === 'susp'" [class.text-blue-600]="tab === 'susp'" class="inline-block p-4 border-b-2 rounded-t-lg border-transparent">
+          Suspensiones
+        </button>
+      </li>
+    </ul>
+  </div>
+
+  <div *ngIf="tab === 'datos'" class="p-4 bg-white border rounded-lg dark:bg-gray-800 dark:border-gray-700 grid sm:grid-cols-2 gap-4 text-sm">
+    <div><span class="text-gray-500">DNI</span><p class="font-medium dark:text-gray-400">{{ j.dni }}</p></div>
+    <div><span class="text-gray-500">Teléfono</span><p class="font-medium dark:text-gray-400">{{ j.telefono || '—' }}</p></div>
+    <div><span class="text-gray-500">Fecha nacimiento</span><p class="font-medium dark:text-gray-400">{{ formatDate(j.fechaNacimiento) }}</p></div>
+  </div>
+
+  <div *ngIf="tab === 'pases'" class="relative overflow-x-auto shadow-md sm:rounded-lg">
+    <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+      <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+        <tr>
+          <th scope="col" class="px-6 py-3">Origen</th>
+          <th scope="col" class="px-6 py-3">Destino</th>
+          <th scope="col" class="px-6 py-3">Tipo</th>
+          <th scope="col" class="px-6 py-3">Inicio</th>
+          <th scope="col" class="px-6 py-3">Fin</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          *ngFor="let p of pases"
+          class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
+        >
+          <td class="px-6 py-4">{{ p.clubOrigen?.nombre ?? '—' }}</td>
+          <td class="px-6 py-4">{{ p.clubDestino?.nombre }}</td>
+          <td class="px-6 py-4">{{ p.tipo }}</td>
+          <td class="px-6 py-4">{{ formatDt(p.fechaInicio) }}</td>
+          <td class="px-6 py-4">{{ p.fechaFin ? formatDt(p.fechaFin) : '—' }}</td>
+        </tr>
+      </tbody>
+    </table>
+    <p *ngIf="pases.length === 0" class="p-6 text-center text-gray-500">Sin pases</p>
+  </div>
+
+  <div *ngIf="tab === 'torneos'" class="relative overflow-x-auto shadow-md sm:rounded-lg">
+    <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+      <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+        <tr>
+          <th scope="col" class="px-6 py-3">Torneo</th>
+          <th scope="col" class="px-6 py-3">Club</th>
+          <th scope="col" class="px-6 py-3">Desde</th>
+          <th scope="col" class="px-6 py-3">Hasta</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          *ngFor="let i of torneos"
+          class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
+        >
+          <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">{{ i.equipoTorneo?.torneo?.nombre }}</td>
+          <td class="px-6 py-4">{{ i.equipoTorneo?.club?.nombre }}</td>
+          <td class="px-6 py-4">{{ formatDt(i.fechaInicio) }}</td>
+          <td class="px-6 py-4">{{ i.fechaFin ? formatDt(i.fechaFin) : 'Activa' }}</td>
+        </tr>
+      </tbody>
+    </table>
+    <p *ngIf="torneos.length === 0" class="p-6 text-center text-gray-500">Sin torneos</p>
+  </div>
+
+  <div *ngIf="tab === 'susp'" class="relative overflow-x-auto shadow-md sm:rounded-lg">
+    <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+      <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+        <tr>
+          <th scope="col" class="px-6 py-3">Torneo</th>
+          <th scope="col" class="px-6 py-3">Motivo</th>
+          <th scope="col" class="px-6 py-3">Partidos restantes</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          *ngFor="let s of suspensiones"
+          class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
+        >
+          <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">{{ s.torneo?.nombre }}</td>
+          <td class="px-6 py-4">{{ s.motivo }}</td>
+          <td class="px-6 py-4">{{ s.partidosRestantes }}</td>
+        </tr>
+      </tbody>
+    </table>
+    <p *ngIf="suspensiones.length === 0" class="p-6 text-center text-gray-500">Sin suspensiones</p>
+  </div>
+</div>
+
+<p *ngIf="!loading && !jugador" class="text-red-600">Jugador no encontrado</p>
+<p *ngIf="loading" class="p-8 text-center">Cargando…</p>

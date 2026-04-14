@@ -1,0 +1,183 @@
+<div class="space-y-4">
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-400">Jugadores</h1>
+    <button
+      type="button"
+      (click)="openCreate()"
+      class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700"
+    >
+      + Crear jugador
+    </button>
+  </div>
+
+  <div
+    class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 flex flex-wrap gap-3 items-end"
+  >
+    <div>
+      <label class="block mb-1 text-sm font-medium text-gray-900 dark:text-white">DNI</label>
+      <input
+        type="text"
+        [(ngModel)]="filterDni"
+        [ngModelOptions]="{ standalone: true }"
+        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+        placeholder="Contiene…"
+      />
+    </div>
+    <div>
+      <label class="block mb-1 text-sm font-medium text-gray-900 dark:text-white">Nombre</label>
+      <input
+        type="text"
+        [(ngModel)]="filterQ"
+        [ngModelOptions]="{ standalone: true }"
+        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+        placeholder="Nombre o apellido"
+      />
+    </div>
+    <button
+      type="button"
+      (click)="applyFilters()"
+      class="text-white bg-gray-700 hover:bg-gray-800 font-medium rounded-lg text-sm px-4 py-2.5"
+    >
+      Buscar
+    </button>
+  </div>
+
+  <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+    <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+      <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+        <tr>
+          <th
+            scope="col"
+            class="px-6 py-3 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-600"
+            (click)="onSort('dni')"
+          >
+            <span class="inline-flex items-center"
+              >DNI <app-liga-sort-indicator [active]="sortBy === 'dni'" [order]="sortOrder"></app-liga-sort-indicator
+            ></span>
+          </th>
+          <th
+            scope="col"
+            class="px-6 py-3 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-600"
+            (click)="onSort('apellido')"
+          >
+            <span class="inline-flex items-center"
+              >Apellido
+              <app-liga-sort-indicator [active]="sortBy === 'apellido'" [order]="sortOrder"></app-liga-sort-indicator
+            ></span>
+          </th>
+          <th
+            scope="col"
+            class="px-6 py-3 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-600"
+            (click)="onSort('nombre')"
+          >
+            <span class="inline-flex items-center"
+              >Nombre <app-liga-sort-indicator [active]="sortBy === 'nombre'" [order]="sortOrder"></app-liga-sort-indicator
+            ></span>
+          </th>
+          <th
+            scope="col"
+            class="px-6 py-3 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-600"
+            (click)="onSort('fechaNacimiento')"
+          >
+            <span class="inline-flex items-center"
+              >Fecha nac.
+              <app-liga-sort-indicator [active]="sortBy === 'fechaNacimiento'" [order]="sortOrder"></app-liga-sort-indicator
+            ></span>
+          </th>
+          <th scope="col" class="px-6 py-3">Teléfono</th>
+          <th scope="col" class="px-6 py-3 text-right">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          *ngFor="let j of items"
+          class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer"
+          (click)="goDetail(j)"
+        >
+          <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">{{ j.dni }}</td>
+          <td class="px-6 py-4">{{ j.apellido }}</td>
+          <td class="px-6 py-4">{{ j.nombre }}</td>
+          <td class="px-6 py-4">{{ formatDate(j.fechaNacimiento) }}</td>
+          <td class="px-6 py-4">{{ j.telefono || '—' }}</td>
+          <td class="px-6 py-4 text-right space-x-2" (click)="$event.stopPropagation()">
+            <button
+              type="button"
+              (click)="openEdit(j, $event)"
+              class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
+            >
+              Editar
+            </button>
+            <button
+              type="button"
+              (click)="remove(j, $event)"
+              class="font-medium text-red-600 hover:underline"
+            >
+              Eliminar
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p *ngIf="!loading && items.length === 0" class="p-6 text-center text-gray-500">Sin resultados</p>
+    <p *ngIf="loading" class="p-6 text-center">Cargando…</p>
+  </div>
+
+  <app-liga-pagination
+    [page]="page"
+    [total]="total"
+    [limit]="limit"
+    (prev)="prevPage()"
+    (next)="nextPage()"
+  ></app-liga-pagination>
+</div>
+
+<!-- Modal -->
+<div
+  *ngIf="modalOpen"
+  [class]="lm.backdrop"
+  (click)="closeModal()"
+>
+  <div [class]="lm.panelLg" (click)="$event.stopPropagation()">
+    <h3 [class]="lm.title">
+      {{ editing ? 'Editar jugador' : 'Nuevo jugador' }}
+    </h3>
+    <form [formGroup]="form" (ngSubmit)="save()" class="space-y-4">
+      <div>
+        <label [class]="lm.label">DNI</label>
+        <input formControlName="dni" [class]="lm.field" />
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label [class]="lm.label">Nombre</label>
+          <input formControlName="nombre" [class]="lm.field" />
+        </div>
+        <div>
+          <label [class]="lm.label">Apellido</label>
+          <input formControlName="apellido" [class]="lm.field" />
+        </div>
+      </div>
+      <div>
+        <label [class]="lm.label">Teléfono</label>
+        <input formControlName="telefono" [class]="lm.field" />
+      </div>
+      <div>
+        <label [class]="lm.label">Fecha de nacimiento</label>
+        <input type="date" formControlName="fechaNacimiento" [class]="lm.field" />
+      </div>
+      <div *ngIf="!editing">
+        <label [class]="lm.label">Club de ingreso (pase inicial)</label>
+        <select formControlName="clubDestinoInicialId" [class]="lm.field">
+          <option [ngValue]="0">Seleccionar club…</option>
+          <option *ngFor="let c of clubs" [ngValue]="c.id">{{ c.nombre }}</option>
+        </select>
+        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+          Se registra un pase definitivo sin club de origen hacia el club elegido.
+        </p>
+      </div>
+      <div class="flex justify-end gap-2 pt-2">
+        <button type="button" (click)="closeModal()" [class]="lm.btnSecondary">Cancelar</button>
+        <button type="submit" [class]="lm.btnPrimary">Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>

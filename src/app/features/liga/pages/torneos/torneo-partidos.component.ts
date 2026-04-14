@@ -1,0 +1,173 @@
+import { CommonModule } from '@angular/common';
+import { Component, OnInit, inject } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { finalize } from 'rxjs/operators';
+import Swal from 'sweetalert2';
+import type { EquipoTorneo, EstadoPartido, Partido } from '../../models/api.types';
+import { EquiposApiService } from '../../services/equipos-api.service';
+import { PartidosApiService } from '../../services/partidos-api.service';
+import { LigaPaginationComponent } from '../../shared/liga-pagination.component';
+import { LigaSortIndicatorComponent } from '../../shared/liga-sort-indicator.component';
+import { applySortClick } from '../../utils/column-sort.util';
+import { formatDateTime } from '../../utils/date-format';
+import { ligaModal } from '../../shared/liga-ui';
+
+@Component({
+  selector: 'app-torneo-partidos',
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    LigaPaginationComponent,
+    LigaSortIndicatorComponent,
+  ],
+  templateUrl: './torneo-partidos.component.html',
+})
+export class TorneoPartidosComponent implements OnInit {
+  readonly lm = ligaModal;
+
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly partidosApi = inject(PartidosApiService);
+  private readonly equiposApi = inject(EquiposApiService);
+  private readonly fb = inject(FormBuilder);
+
+  torneoId!: number;
+  equipos: EquipoTorneo[] = [];
+  items: Partido[] = [];
+  total = 0;
+  page = 1;
+  readonly limit = 10;
+  loading = false;
+  estadoSavingId: number | null = null;
+  readonly estadosPartido: EstadoPartido[] = ['PENDIENTE', 'EN_JUEGO', 'FINALIZADO'];
+  sortBy: 'fecha' | 'estado' | 'id' = 'fecha';
+  sortOrder: 'asc' | 'desc' = 'asc';
+  modal = false;
+  form = this.fb.nonNullable.group({
+    equipoLocalId: [0, Validators.min(1)],
+    equipoVisitanteId: [0, Validators.min(1)],
+    fecha: ['', Validators.required],
+  });
+
+  ngOnInit(): void {
+    this.torneoId = Number(this.route.parent!.snapshot.paramMap.get('torneoId'));
+    this.equiposApi.listByTorneo(this.torneoId).subscribe((e) => (this.equipos = e));
+    this.load();
+  }
+
+  load(): void {
+    this.loading = true;
+    this.partidosApi
+      .listByTorneo(this.torneoId, {
+        page: this.page,
+        limit: this.limit,
+        sortBy: this.sortBy,
+        sortOrder: this.sortOrder,
+      })
+      .pipe(finalize(() => (this.loading = false)))
+      .subscribe({
+        next: (r) => {
+          this.items = r.items;
+          this.total = r.total;
+        },
+        error: (e) => Swal.fire('Error', String(e?.error?.message ?? e), 'error'),
+      });
+  }
+
+  openModal(): void {
+    this.form.reset({ equipoLocalId: 0, equipoVisitanteId: 0, fecha: '' });
+    this.modal = true;
+  }
+
+  crear(): void {
+    if (this.form.invalid) return;
+    const v = this.form.getRawValue();
+    if (v.equipoLocalId === v.equipoVisitanteId) {
+      void Swal.fire('Equipos distintos', 'Local y visitante no pueden ser el mismo', 'warning');
+      return;
+    }
+    this.partidosApi
+      .create(this.torneoId, {
+        equipoLocalId: v.equipoLocalId,
+        equipoVisitanteId: v.equipoVisitanteId,
+        fecha: new Date(v.fecha).toISOString(),
+      })
+      .subscribe({
+        next: () => {
+          Swal.fire({ icon: 'success', title: 'Partido creado', timer: 1200, showConfirmButton: false });
+          this.modal = false;
+          this.load();
+        },
+        error: (e) => Swal.fire('Error', String(e?.error?.message ?? e), 'error'),
+      });
+  }
+
+  planilla(p: Partido): void {
+    void this.router.navigate([
+      '/pages/torneos',
+      this.torneoId,
+      'partidos',
+      p.id,
+      'planilla',
+    ]);
+  }
+
+  marcador(p: Partido): string {
+    return `${p.golesLocal} - ${p.golesVisitante}`;
+  }
+
+  labelEstado(e: EstadoPartido): string {
+    const m: Record<EstadoPartido, string> = {
+      PENDIENTE: 'Pendiente',
+      EN_JUEGO: 'En juego',
+      FINALIZADO: 'Finalizado',
+    };
+    return m[e] ?? e;
+  }
+
+  cambiarEstado(p: Partido, nuevo: EstadoPartido): void {
+    if (nuevo === p.estado) return;
+    this.estadoSavingId = p.id;
+    this.partidosApi
+      .updateEstado(p.id, { estado: nuevo })
+      .pipe(finalize(() => (this.estadoSavingId = null)))
+      .subscribe({
+        next: (updated) => {
+          const idx = this.items.findIndex((x) => x.id === p.id);
+          if (idx >= 0) {
+            this.items[idx] = { ...this.items[idx], ...updated };
+          }
+        },
+        error: (e) => {
+          void Swal.fire('Error', String(e?.error?.message ?? e), 'error');
+          this.load();
+        },
+      });
+  }
+
+  formatDt = formatDateTime;
+
+  onSort(key: 'fecha' | 'estado' | 'id'): void {
+    const n = applySortClick(this.sortBy, this.sortOrder, key);
+    this.sortBy = n.sortBy as typeof this.sortBy;
+    this.sortOrder = n.sortOrder;
+    this.page = 1;
+    this.load();
+  }
+
+  prevPage(): void {
+    if (this.page > 1) {
+      this.page--;
+      this.load();
+    }
+  }
+  nextPage(): void {
+    if (this.page * this.limit < this.total) {
+      this.page++;
+      this.load();
+    }
+  }
+}

@@ -1,0 +1,68 @@
+<nav class="fixed top-0 z-50 w-full bg-white border-b border-gray-200 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-white">
+
+  <div class="px-4 py-3 flex justify-between items-center">
+
+    <!-- IZQUIERDA -->
+    <div class="flex items-center gap-4">
+
+      <!-- BOTÓN MOBILE -->
+      <button 
+        (click)="toggleSidebar()"
+        class="p-2 rounded-lg hover:bg-gray-200 transition sm:hidden">
+        <i class="fa-solid fa-bars text-gray-600"></i>
+      </button>
+      <!-- LOGO -->
+      <h1 class="uppercase sm:hidden text-sm font-semibold text-gray-500">
+        Menú
+      </h1>
+
+    </div>
+
+    <!-- DERECHA -->
+    <div class="flex items-center gap-3 relative">
+
+      <!-- NOTIFICACIONES -->
+      <button class="p-2 rounded-lg hover:bg-gray-200 transition">
+        <i class="fa-regular fa-bell text-gray-500"></i>
+      </button>
+
+      <!-- AVATAR -->
+      <button 
+        (click)="toggleUserMenu()"
+        class="user-button w-10 h-10 flex items-center justify-center rounded-full bg-blue-500 text-white hover:bg-blue-600 transition shadow-sm"
+      >
+        <span class="font-semibold">
+          {{ emailUsuario.charAt(0).toUpperCase() }}
+        </span>
+      </button>
+
+      <!-- DROPDOWN -->
+      <div *ngIf="isUserMenuOpen"
+           class="user-menu absolute right-0 top-12 w-56 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden">
+
+        <!-- INFO USUARIO -->
+        <div class="px-4 py-3 border-b border-gray-200">
+          <p class="text-sm font-medium text-gray-900">
+            Usuario
+          </p>
+          <p class="text-xs text-gray-500 truncate">
+            {{ emailUsuario }}
+          </p>
+        </div>
+
+        <!-- ACCIONES -->
+        <button 
+          (click)="logout()"
+          class="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition">
+          
+          <i class="fa-solid fa-right-from-bracket"></i>
+          Cerrar sesión
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</nav>
