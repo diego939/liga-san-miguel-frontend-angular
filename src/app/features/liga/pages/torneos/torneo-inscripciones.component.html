@@ -19,6 +19,7 @@
     <input
       [(ngModel)]="filterQ"
       placeholder="Buscar jugador"
+      type="search"
       class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white flex-1 min-w-[200px]"
     />
     <label class="flex items-center gap-2 text-sm text-gray-900 dark:text-white">
@@ -28,7 +29,7 @@
     <button
       type="button"
       (click)="apply()"
-      class="text-white bg-gray-700 hover:bg-gray-800 font-medium rounded-lg text-sm px-4 py-2.5"
+      class="text-white bg-gray-700 hover:bg-gray-800 font-medium rounded-lg text-sm px-4 py-2.5 cursor-pointer focus:outline-none focus:ring-4 focus:ring-gray-300 dark:bg-gray-600 dark:hover:bg-gray-700 dark:focus:ring-gray-800"
     >
       Filtrar
     </button>
@@ -134,8 +135,8 @@
           </td>
           <td class="px-6 py-4 text-gray-500">{{ ins.id }}</td>
           <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">{{ ins.jugador?.apellido }}</td>
-          <td class="px-6 py-4">{{ ins.jugador?.nombre }}</td>
-          <td class="px-6 py-4">{{ ins.jugador?.dni }}</td>
+          <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">{{ ins.jugador?.nombre }}</td>
+          <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">{{ ins.jugador?.dni }}</td>
           <td class="px-6 py-4 whitespace-nowrap">{{ formatFechaIns(ins.fechaInicio) }}</td>
           <td class="px-6 py-4">
             <span *ngIf="ins.esForaneo" class="text-amber-700 font-medium">Sí</span>
@@ -146,7 +147,7 @@
             <button
               type="button"
               (click)="previewRow(ins)"
-              class="font-medium text-blue-600 dark:text-blue-500 hover:underline text-xs"
+              class="font-medium text-blue-600 dark:text-blue-500 cursor-pointer decoration-none border border-blue-500 rounded-full px-2 text-xs"
             >
               Ver pase
             </button>
@@ -156,7 +157,7 @@
               *ngIf="!ins.fechaFin"
               type="button"
               (click)="quitar(ins)"
-              class="font-medium text-red-600 text-sm hover:underline"
+              class="font-medium text-red-600 cursor-pointer decoration-none border border-red-500 rounded-full px-2 text-sm"
             >
               Quitar
             </button>
@@ -176,7 +177,6 @@
     <p class="mb-3 text-sm text-gray-600 dark:text-gray-400">
       Solo figuran jugadores con pase vigente hacia
       <strong class="text-gray-900 dark:text-white">{{ clubNombre }}</strong>
-      (RN-03 / RN-05).
     </p>
 
     <div class="flex flex-col sm:flex-row flex-wrap gap-2 mb-3">
@@ -220,10 +220,10 @@
                 class="h-4 w-4 rounded border-gray-300"
               />
             </th>
-            <th class="px-3 py-2">DNI</th>
-            <th class="px-3 py-2">Apellido</th>
-            <th class="px-3 py-2">Nombre</th>
-            <th class="px-3 py-2 whitespace-nowrap text-center" title="Foráneo en este torneo">Foráneo</th>
+            <th class="px-3 py-2 text-gray-200">DNI</th>
+            <th class="px-3 py-2 text-gray-200">Apellido</th>
+            <th class="px-3 py-2 text-gray-200">Nombre</th>
+            <th class="px-3 py-2 whitespace-nowrap text-center text-gray-200" title="Foráneo en este torneo">Foráneo</th>
           </tr>
         </thead>
         <tbody>
@@ -236,9 +236,9 @@
                 class="h-4 w-4 rounded border-gray-300"
               />
             </td>
-            <td class="px-3 py-2">{{ j.dni }}</td>
+            <td class="px-3 py-2 text-gray-900 dark:text-white">{{ j.dni }}</td>
             <td class="px-3 py-2 font-medium text-gray-900 dark:text-white">{{ j.apellido }}</td>
-            <td class="px-3 py-2">{{ j.nombre }}</td>
+            <td class="px-3 py-2 text-gray-900 dark:text-white">{{ j.nombre }}</td>
             <td class="px-3 py-2 text-center">
               <input
                 type="checkbox"

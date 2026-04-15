@@ -27,6 +27,7 @@ type Line = {
   jugadorId: number;
   titular: boolean;
   nombre?: string;
+  dni?: string;
   numeroCamiseta?: number | null;
 };
 
@@ -172,6 +173,7 @@ export class PlanillaPartidoComponent implements OnInit {
           nombre: r.jugador
             ? `${r.jugador.apellido}, ${r.jugador.nombre}`
             : undefined,
+          dni: r.jugador?.dni,
           numeroCamiseta: r.numeroCamiseta ?? null,
         };
         if (r.equipoId === this.partido.equipoLocalId) loc.push(line);
@@ -299,6 +301,7 @@ export class PlanillaPartidoComponent implements OnInit {
         jugadorId,
         titular,
         nombre: j ? `${j.apellido}, ${j.nombre}` : undefined,
+        dni: j?.dni,
         numeroCamiseta: null,
       };
       if (side === 'local') {
@@ -377,7 +380,23 @@ export class PlanillaPartidoComponent implements OnInit {
   }
 
   registrarEvento(): void {
-    if (this.evForm.invalid) return;
+    if (!this.partido || this.partido.estado !== 'EN_JUEGO') {
+      void Swal.fire({
+        icon: 'warning',
+        title: 'No se puede registrar',
+        text: 'El partido debe estar en juego para registrar goles y tarjetas.',
+      });
+      return;
+    }
+    if (this.evForm.invalid) {
+      this.evForm.markAllAsTouched();
+      void Swal.fire({
+        icon: 'warning',
+        title: 'Datos incompletos',
+        text: 'Elegí un jugador de la planilla, el tipo de evento y el minuto.',
+      });
+      return;
+    }
     const v = this.evForm.getRawValue();
     const notas = v.notas.trim() || null;
     this.api
@@ -396,17 +415,42 @@ export class PlanillaPartidoComponent implements OnInit {
             showConfirmButton: false,
           });
           this.loadEventosCambios();
-          this.evForm.patchValue({ notas: '' });
+          this.evForm.reset({
+            jugadorId: 0,
+            tipo: 'GOL',
+            minuto: 0,
+            notas: '',
+          });
         },
         error: (e) => void Swal.fire('Error', String(e?.error?.message ?? e), 'error'),
       });
   }
 
   registrarCambio(): void {
-    if (this.cambioForm.invalid) return;
+    if (!this.partido || this.partido.estado !== 'EN_JUEGO') {
+      void Swal.fire({
+        icon: 'warning',
+        title: 'No se puede registrar',
+        text: 'El partido debe estar en juego para registrar cambios.',
+      });
+      return;
+    }
+    if (this.cambioForm.invalid) {
+      this.cambioForm.markAllAsTouched();
+      void Swal.fire({
+        icon: 'warning',
+        title: 'Datos incompletos',
+        text: 'Elegí el equipo, el jugador que sale, el que entra y el minuto.',
+      });
+      return;
+    }
     const v = this.cambioForm.getRawValue();
     if (v.saleId === v.entraId) {
-      void Swal.fire('Cambio', 'El jugador que sale y el que entra deben ser distintos', 'info');
+      void Swal.fire({
+        icon: 'warning',
+        title: 'No se puede registrar',
+        text: 'El jugador que sale y el que entra deben ser distintos.',
+      });
       return;
     }
     this.api
@@ -424,6 +468,11 @@ export class PlanillaPartidoComponent implements OnInit {
             showConfirmButton: false,
           });
           this.loadEventosCambios();
+          this.cambioForm.patchValue({
+            saleId: 0,
+            entraId: 0,
+            minuto: 0,
+          });
         },
         error: (e) => void Swal.fire('Error', String(e?.error?.message ?? e), 'error'),
       });
@@ -444,9 +493,12 @@ export class PlanillaPartidoComponent implements OnInit {
           this.partido = p;
           this.syncActaFromPartido(p);
           this.loadEventosCambios();
+          Swal.fire({ icon: 'success', toast: true, position: 'top', title: 'Estado del partido cambiado correctamente', timer: 1200, showConfirmButton: false });
+          this.reload();
         },
         error: (e) => {
           void Swal.fire('Error', String(e?.error?.message ?? e), 'error');
+          this.estadoSaving = false;
           this.reload();
         },
       });

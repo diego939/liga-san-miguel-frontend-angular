@@ -142,9 +142,12 @@ export class TorneoPartidosComponent implements OnInit {
           if (idx >= 0) {
             this.items[idx] = { ...this.items[idx], ...updated };
           }
+          Swal.fire({ icon: 'success', toast: true, position: 'top', title: 'Estado del partido cambiado correctamente', timer: 1200, showConfirmButton: false });
+          this.load();
         },
         error: (e) => {
           void Swal.fire('Error', String(e?.error?.message ?? e), 'error');
+          this.estadoSavingId = null;
           this.load();
         },
       });
