@@ -94,14 +94,14 @@
         <label [class]="lm.label">Local</label>
         <select formControlName="equipoLocalId" [class]="lm.field">
           <option [ngValue]="0">—</option>
-          <option *ngFor="let e of equipos" [ngValue]="e.id">{{ e.club?.nombre }}</option>
+          <option *ngFor="let e of equipos" [ngValue]="e.id">{{ e.club.nombre }}</option>
         </select>
       </div>
       <div>
         <label [class]="lm.label">Visitante</label>
         <select formControlName="equipoVisitanteId" [class]="lm.field">
           <option [ngValue]="0">—</option>
-          <option *ngFor="let e of equipos" [ngValue]="e.id">{{ e.club?.nombre }}</option>
+          <option *ngFor="let e of equipos" [ngValue]="e.id">{{ e.club.nombre }}</option>
         </select>
       </div>
       <div>
