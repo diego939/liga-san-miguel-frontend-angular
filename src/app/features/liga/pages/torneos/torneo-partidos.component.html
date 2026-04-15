@@ -86,7 +86,7 @@
   <app-liga-pagination [page]="page" [total]="total" [limit]="limit" (prev)="prevPage()" (next)="nextPage()"></app-liga-pagination>
 </div>
 
-<div *ngIf="modal" [class]="lm.backdrop" (click)="modal = false">
+<div *ngIf="modal" [class]="lm.backdrop">
   <div [class]="lm.panelMd" (click)="$event.stopPropagation()">
     <h3 [class]="lm.titleSm">Nuevo partido</h3>
     <form [formGroup]="form" (ngSubmit)="crear()" class="space-y-3">

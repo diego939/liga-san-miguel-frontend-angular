@@ -122,7 +122,7 @@
   <app-liga-pagination [page]="page" [total]="total" [limit]="limit" (prev)="prevPage()" (next)="nextPage()"></app-liga-pagination>
 </div>
 
-<div *ngIf="modalOpen && !renewModal" [class]="lm.backdrop" (click)="closeModal()">
+<div *ngIf="modalOpen && !renewModal" [class]="lm.backdrop">
   <div [class]="lm.panelLg" (click)="$event.stopPropagation()">
     <h3 [class]="lm.titleSm">Nuevo pase</h3>
     <div class="space-y-3 mb-4">

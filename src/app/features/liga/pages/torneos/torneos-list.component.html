@@ -106,7 +106,7 @@
   <app-liga-pagination [page]="page" [total]="total" [limit]="limit" (prev)="prevPage()" (next)="nextPage()"></app-liga-pagination>
 </div>
 
-<div *ngIf="modalOpen" [class]="lm.backdropScroll" (click)="close()">
+<div *ngIf="modalOpen" [class]="lm.backdropScroll">
   <div [class]="lm.panelLgScroll" (click)="$event.stopPropagation()">
     <h3 [class]="lm.titleSm">{{ editing ? 'Editar torneo' : 'Nuevo torneo' }}</h3>
     <form [formGroup]="form" (ngSubmit)="save()" class="space-y-3">

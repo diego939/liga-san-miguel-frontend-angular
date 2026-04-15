@@ -53,7 +53,7 @@
   <app-liga-pagination [page]="page" [total]="total" [limit]="limit" (prev)="prev()" (next)="next()"></app-liga-pagination>
 </div>
 
-<div *ngIf="modal" [class]="lm.backdrop" (click)="modal = false">
+<div *ngIf="modal" [class]="lm.backdrop">
   <div [class]="lm.panelSm" (click)="$event.stopPropagation()">
     <h3 [class]="lm.titleSm">Nuevo rol</h3>
     <form [formGroup]="form" (ngSubmit)="save()" class="space-y-3">

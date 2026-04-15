@@ -43,7 +43,7 @@
   </div>
 </div>
 
-<div *ngIf="modal" [class]="lm.backdrop" (click)="modal = false">
+<div *ngIf="modal" [class]="lm.backdrop">
   <div [class]="lm.panelSm" (click)="$event.stopPropagation()">
     <h3 [class]="lm.titleSm">Asociar club</h3>
     <form [formGroup]="form" (ngSubmit)="asociar()" class="space-y-4">

@@ -49,7 +49,7 @@
 </div>
 <p *ngIf="loading" class="p-8 text-center">Cargando…</p>
 
-<div *ngIf="modalPer" [class]="lm.backdrop" (click)="closePerModal()">
+<div *ngIf="modalPer" [class]="lm.backdrop">
   <div [class]="lm.panelSm" (click)="$event.stopPropagation()">
     <h3 [class]="lm.titleSm">{{ editingPer ? 'Editar personal' : 'Nuevo personal' }}</h3>
     <form [formGroup]="perForm" (ngSubmit)="savePer()" class="space-y-3">
