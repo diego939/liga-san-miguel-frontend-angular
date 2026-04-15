@@ -15,8 +15,8 @@
           formControlName="email"
           type="email"
           id="email"
-          class="w-full px-3 py-2.5 text-sm border rounded-lg bg-neutral-secondary-medium focus:ring-2 focus:ring-brand focus:border-brand"
-          placeholder="name@flowbite.com"
+          class="w-full px-3 py-2.5 text-sm border rounded-lg bg-neutral-secondary-medium focus:ring-2 focus:ring-black focus:border-black"
+          placeholder="name@mail.com"
         />
       </div>
 
@@ -28,7 +28,7 @@
           formControlName="password"
           type="password"
           id="password"
-          class="w-full px-3 py-2.5 text-sm border rounded-lg bg-neutral-secondary-medium focus:ring-2 focus:ring-brand focus:border-brand"
+          class="w-full px-3 py-2.5 text-sm border rounded-lg bg-neutral-secondary-medium focus:ring-2 focus:ring-black focus:border-black"
           placeholder="••••••••"
         />
       </div>
@@ -42,7 +42,7 @@
       <button
         type="submit"
         [disabled]="loading"
-        class="w-full text-white bg-brand hover:bg-brand-strong focus:ring-4 focus:ring-brand-medium font-medium rounded-lg text-sm px-4 py-2.5 transition disabled:opacity-50"
+        class="w-full text-white bg-black hover:bg-black-strong focus:ring-4 focus:ring-black-medium font-medium rounded-lg text-sm px-4 py-2.5 transition disabled:opacity-50"
       >
         <span *ngIf="!loading">Ingresar</span>
         <span *ngIf="loading">Ingresando...</span>

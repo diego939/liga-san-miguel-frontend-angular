@@ -70,8 +70,16 @@ export class LoginComponent implements OnInit {
     error: (err) => {
       this.loading = false;
 
-      // mensaje del backend
-      this.errorMessage = err.error?.message || err.error || 'Error al iniciar sesión';
+      const backendMessage = err?.error?.message;
+      if (Array.isArray(backendMessage)) {
+        this.errorMessage = backendMessage.join('. ');
+        return;
+      }
+
+      this.errorMessage =
+        (typeof backendMessage === 'string' ? backendMessage : '') ||
+        (typeof err?.error === 'string' ? err.error : '') ||
+        'Error al iniciar sesión';
     },
   });
   }
