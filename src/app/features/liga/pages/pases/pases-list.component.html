@@ -15,27 +15,23 @@
   >
     <div>
       <label class="block mb-1 text-sm font-medium text-gray-900 dark:text-white">Club</label>
-      <select [(ngModel)]="filterClubId" class="rounded-lg border p-2.5 dark:bg-gray-700 min-w-[10rem]">
+      <select [(ngModel)]="filterClubId" class="rounded-lg border p-2.5 dark:bg-gray-700 min-w-[10rem] text-gray-200">
         <option [ngValue]="null">Todos</option>
         <option *ngFor="let c of clubs" [ngValue]="c.id">{{ c.nombre }}</option>
       </select>
     </div>
     <div>
       <label class="block mb-1 text-sm font-medium text-gray-900 dark:text-white">Estado</label>
-      <select [(ngModel)]="filterEstado" class="rounded-lg border p-2.5 dark:bg-gray-700">
+      <select [(ngModel)]="filterEstado" class="rounded-lg border p-2.5 dark:bg-gray-700 text-gray-200">
         <option value="todos">Todos</option>
         <option value="activo">Activo</option>
         <option value="vencido">Vencido</option>
       </select>
     </div>
-    <div>
-      <label class="block mb-1 text-sm font-medium text-gray-900 dark:text-white">Jugador (ID)</label>
-      <input type="number" [(ngModel)]="filterJugadorId" placeholder="opcional" class="rounded-lg border p-2.5 w-28 dark:bg-gray-700" />
-    </div>
     <button
       type="button"
       (click)="applyFilters()"
-      class="text-white bg-gray-700 hover:bg-gray-800 font-medium rounded-lg text-sm px-4 py-2.5"
+      class="text-white bg-gray-700 hover:bg-gray-800 font-medium rounded-lg text-sm px-4 py-2.5 cursor-pointer focus:outline-none focus:ring-4 focus:ring-gray-300 dark:bg-gray-600 dark:hover:bg-gray-700 dark:focus:ring-gray-800"
     >
       Filtrar
     </button>
@@ -107,7 +103,7 @@
             <button
               type="button"
               (click)="openRenew(p)"
-              class="font-medium text-blue-600 dark:text-blue-500 hover:underline text-sm"
+              class="font-medium text-blue-600 dark:text-blue-500 cursor-pointer decoration-none border border-blue-500 rounded-full px-2"
             >
               Renovar
             </button>
