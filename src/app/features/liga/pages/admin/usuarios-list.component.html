@@ -46,13 +46,14 @@
             <button
               type="button"
               (click)="openEdit(u)"
-              class="font-medium text-blue-600 dark:text-blue-500 hover:underline text-sm"
+              class="font-medium text-blue-600 dark:text-blue-500 cursor-pointer decoration-none border border-blue-500 rounded-full px-2"
             >
               Editar
             </button>
-            <button type="button" (click)="remove(u)" class="font-medium text-red-600 hover:underline text-sm">
+            <!--
+            <button type="button" (click)="remove(u)" class="font-medium text-red-600 cursor-pointer decoration-none border border-red-500 rounded-full px-2">
               Eliminar
-            </button>
+            </button>-->
           </td>
         </tr>
       </tbody>
@@ -62,7 +63,7 @@
   <app-liga-pagination [page]="page" [total]="total" [limit]="limit" (prev)="prev()" (next)="next()"></app-liga-pagination>
 </div>
 
-<div *ngIf="modal" [class]="lm.backdrop" (click)="modal = false">
+<div *ngIf="modal" [class]="lm.backdrop">
   <div [class]="lm.panelMd" (click)="$event.stopPropagation()">
     <h3 [class]="lm.titleSm">{{ editing ? 'Editar usuario' : 'Nuevo usuario' }}</h3>
     <form [formGroup]="form" (ngSubmit)="save()" class="space-y-3">
