@@ -5,15 +5,23 @@
 
   <section>
     <h3 class="text-lg font-semibold mb-3 text-gray-900 dark:text-gray-400">Tabla de posiciones</h3>
+    <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">
+      Solo se consideran partidos finalizados. El marcador en la lista se sincroniza con los goles registrados en la
+      planilla (eventos Gol / Gol en contra) al guardar la planilla o al pasar el partido a finalizado.
+    </p>
     <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
       <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
         <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
           <tr>
             <th scope="col" class="px-6 py-3">Equipo</th>
+            <th scope="col" class="px-6 py-3" title="Partidos jugados">PJ</th>
+            <th scope="col" class="px-6 py-3" title="Ganados">PG</th>
+            <th scope="col" class="px-6 py-3" title="Empates">PE</th>
+            <th scope="col" class="px-6 py-3" title="Perdidos">PP</th>
             <th scope="col" class="px-6 py-3">Pts</th>
-            <th scope="col" class="px-6 py-3">GF</th>
-            <th scope="col" class="px-6 py-3">GC</th>
-            <th scope="col" class="px-6 py-3">DIF</th>
+            <th scope="col" class="px-6 py-3" title="Goles a favor">GF</th>
+            <th scope="col" class="px-6 py-3" title="Goles en contra">GC</th>
+            <th scope="col" class="px-6 py-3" title="Diferencia de gol">DIF</th>
           </tr>
         </thead>
         <tbody>
@@ -22,7 +30,11 @@
             class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
           >
             <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">{{ r.clubNombre }}</td>
-            <td class="px-6 py-4">{{ r.puntos }}</td>
+            <td class="px-6 py-4">{{ r.pj }}</td>
+            <td class="px-6 py-4">{{ r.pg }}</td>
+            <td class="px-6 py-4">{{ r.pe }}</td>
+            <td class="px-6 py-4">{{ r.pp }}</td>
+            <td class="px-6 py-4 font-medium">{{ r.puntos }}</td>
             <td class="px-6 py-4">{{ r.gf }}</td>
             <td class="px-6 py-4">{{ r.gc }}</td>
             <td class="px-6 py-4">{{ r.dif }}</td>

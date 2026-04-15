@@ -87,8 +87,22 @@ export class PartidosApiService {
   putPlanilla(
     id: number,
     body: {
-      local: { jugadorId: number; titular: boolean }[];
-      visitante: { jugadorId: number; titular: boolean }[];
+      local: {
+        jugadorId: number;
+        titular: boolean;
+        numeroCamiseta?: number | null;
+      }[];
+      visitante: {
+        jugadorId: number;
+        titular: boolean;
+        numeroCamiseta?: number | null;
+      }[];
+      capitanLocalJugadorId?: number | null;
+      capitanVisitanteJugadorId?: number | null;
+      arbitroPrincipal?: string | null;
+      juezLinea1?: string | null;
+      juezLinea2?: string | null;
+      observaciones?: string | null;
     },
   ): Observable<PartidoJugadorLinea[]> {
     return this.http.put<PartidoJugadorLinea[]>(
@@ -117,7 +131,7 @@ export class PartidosApiService {
 
   addEvento(
     id: number,
-    body: { jugadorId: number; tipo: TipoEvento; minuto: number },
+    body: { jugadorId: number; tipo: TipoEvento; minuto: number; notas?: string | null },
   ): Observable<EventoPartido> {
     return this.http.post<EventoPartido>(
       `${this.base}/partidos/${id}/eventos`,

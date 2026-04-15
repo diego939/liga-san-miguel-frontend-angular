@@ -116,7 +116,9 @@ export class TorneoPartidosComponent implements OnInit {
   }
 
   marcador(p: Partido): string {
-    return `${p.golesLocal} - ${p.golesVisitante}`;
+    const gl = p.golesLocal ?? 0;
+    const gv = p.golesVisitante ?? 0;
+    return `${gl} - ${gv}`;
   }
 
   labelEstado(e: EstadoPartido): string {

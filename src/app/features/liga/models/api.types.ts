@@ -7,7 +7,7 @@ export interface Paginated<T> {
 }
 
 export type TipoPase = 'TEMPORAL' | 'DEFINITIVO';
-export type TipoEvento = 'GOL' | 'AMARILLA' | 'ROJA';
+export type TipoEvento = 'GOL' | 'GOL_EN_CONTRA' | 'AMARILLA' | 'ROJA';
 export type EstadoPartido = 'PENDIENTE' | 'EN_JUEGO' | 'FINALIZADO';
 
 export interface Rol {
@@ -115,6 +115,14 @@ export interface Partido {
   golesLocal: number;
   golesVisitante: number;
   estado: EstadoPartido;
+  capitanLocalJugadorId?: number | null;
+  capitanVisitanteJugadorId?: number | null;
+  capitanLocalJugador?: Jugador | null;
+  capitanVisitanteJugador?: Jugador | null;
+  arbitroPrincipal?: string | null;
+  juezLinea1?: string | null;
+  juezLinea2?: string | null;
+  observaciones?: string | null;
   torneo?: Torneo;
   equipoLocal?: EquipoTorneo & { club: Club };
   equipoVisitante?: EquipoTorneo & { club: Club };
@@ -126,6 +134,7 @@ export interface PartidoJugadorLinea {
   jugadorId: number;
   equipoId: number;
   titular: boolean;
+  numeroCamiseta?: number | null;
   jugador?: Jugador;
   equipo?: EquipoTorneo & { club: Club };
 }
@@ -136,6 +145,7 @@ export interface EventoPartido {
   jugadorId: number;
   tipo: TipoEvento;
   minuto: number;
+  notas?: string | null;
   jugador?: Jugador;
 }
 
@@ -145,6 +155,8 @@ export interface CambioPartido {
   jugadorSaleId: number;
   jugadorEntraId: number;
   minuto: number;
+  jugadorSale?: Jugador;
+  jugadorEntra?: Jugador;
 }
 
 export interface Suspension {

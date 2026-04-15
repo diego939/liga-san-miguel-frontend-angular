@@ -1,10 +1,15 @@
-<div class="space-y-6" *ngIf="partido as p">
+<div class="space-y-8" *ngIf="partido as p">
   <nav class="text-sm">
     <a [routerLink]="['/pages/torneos', torneoId, 'partidos']" class="text-blue-600 hover:underline">← Partidos del torneo</a>
   </nav>
 
   <div class="flex flex-wrap justify-between items-center gap-3">
-    <h2 class="text-xl font-bold dark:text-gray-400">Planilla del partido</h2>
+    <div>
+      <h2 class="text-xl font-bold dark:text-gray-400">Planilla del partido</h2>
+      <p class="text-sm text-gray-600 dark:text-gray-500 mt-1" *ngIf="p.torneo">
+        {{ p.torneo.nombre }} · {{ p.torneo.categoria }} · {{ p.fecha | date : 'short' }}
+      </p>
+    </div>
     <div class="flex flex-wrap items-center gap-2">
       <label for="estado-planilla" class="text-sm text-gray-600 dark:text-gray-400">Estado</label>
       <select
@@ -19,47 +24,168 @@
     </div>
   </div>
 
-  <div class="grid md:grid-cols-2 gap-4 text-sm">
-    <div class="p-4 border rounded-lg dark:border-gray-700">
-      <h3 class="font-semibold mb-2">Local — {{ p.equipoLocal?.club?.nombre }}</h3>
-      <ul class="space-y-1">
-        <li *ngFor="let l of local; let i = index" class="flex justify-between items-center gap-2">
-          <span>{{ l.nombre || ('#' + l.jugadorId) }}</span>
-          <span class="text-xs">{{ l.titular ? 'Titular' : 'Suplente' }}</span>
-          <button type="button" (click)="toggleTitular('local', i)" class="text-blue-600 text-xs">Cambiar rol</button>
-          <button type="button" (click)="removeLine('local', i)" class="text-red-600 text-xs">Quitar</button>
-        </li>
-      </ul>
+  <div class="grid lg:grid-cols-2 gap-6">
+    <!-- Local -->
+    <div class="space-y-4">
+      <div class="p-4 border rounded-lg dark:border-gray-700 bg-white/50 dark:bg-gray-900/30">
+        <h3 class="font-semibold mb-1">Local — {{ p.equipoLocal?.club?.nombre }}</h3>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">Titulares y suplentes que jugarán (desde la lista de buena fe del torneo).</p>
+        <ul class="space-y-2 text-sm">
+          <li *ngFor="let l of local; let i = index" class="flex flex-wrap items-center gap-2 border-b border-gray-100 dark:border-gray-800 pb-2">
+            <span class="flex-1 min-w-[8rem]">{{ l.nombre || ('#' + l.jugadorId) }}</span>
+            <label class="text-xs text-gray-500 flex items-center gap-1">
+              Nº
+              <input
+                type="number"
+                min="0"
+                class="w-14 rounded border px-1 py-0.5 dark:bg-gray-800"
+                [value]="l.numeroCamiseta ?? ''"
+                (input)="patchCamiseta('local', i, $any($event.target).value)"
+              />
+            </label>
+            <span
+              class="text-xs rounded px-1.5 py-0.5"
+              [ngClass]="
+                l.titular
+                  ? 'bg-emerald-100 text-emerald-900 dark:bg-emerald-950 dark:text-emerald-100'
+                  : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'
+              "
+            >
+              {{ l.titular ? 'Titular' : 'Suplente' }}
+            </span>
+            <button type="button" (click)="toggleTitular('local', i)" class="text-blue-600 text-xs hover:underline">Cambiar rol</button>
+            <button type="button" (click)="removeLine('local', i)" class="text-red-600 text-xs hover:underline">Quitar</button>
+          </li>
+        </ul>
+        <div *ngIf="local.length === 0" class="text-sm text-gray-500 italic py-2">Sin jugadores cargados aún.</div>
+      </div>
+
+      <div class="p-4 border border-dashed rounded-lg dark:border-gray-600 bg-slate-50 dark:bg-slate-900/20">
+        <h4 class="text-sm font-medium text-gray-800 dark:text-gray-300 mb-2">Agregar desde inscriptos (local)</h4>
+        <div class="flex flex-wrap gap-2 items-end">
+          <div class="flex flex-col gap-1 min-w-[12rem] flex-1">
+            <label class="text-xs text-gray-500">Jugador inscripto</label>
+            <select
+              class="rounded border px-2 py-1.5 text-sm dark:bg-gray-800 w-full"
+              [(ngModel)]="addLocalJugadorId"
+              [ngModelOptions]="{ standalone: true }"
+            >
+              <option [ngValue]="null">Elegir…</option>
+              <option *ngFor="let ins of candidatosLocal()" [ngValue]="ins.jugadorId">
+                {{ nombreInscripcion(ins) }}{{ ins.esForaneo ? ' (F)' : '' }}
+              </option>
+            </select>
+          </div>
+          <label class="flex items-center gap-1.5 text-sm">
+            <input type="checkbox" [(ngModel)]="addLocalTitular" [ngModelOptions]="{ standalone: true }" />
+            Titular
+          </label>
+          <button type="button" (click)="previewAddInscripto('local', addLocalJugadorId)" class="px-2 py-1.5 bg-gray-600 text-white rounded text-xs">Validar</button>
+          <button type="button" (click)="agregarDesdeInscripcion('local', addLocalJugadorId, addLocalTitular)" class="px-3 py-1.5 bg-blue-700 text-white rounded text-sm">Agregar</button>
+        </div>
+        <p *ngIf="previewMsgLocal" class="mt-2 text-xs text-gray-600 dark:text-gray-400">{{ previewMsgLocal }}</p>
+      </div>
     </div>
-    <div class="p-4 border rounded-lg dark:border-gray-700">
-      <h3 class="font-semibold mb-2">Visitante — {{ p.equipoVisitante?.club?.nombre }}</h3>
-      <ul class="space-y-1">
-        <li *ngFor="let l of visit; let i = index" class="flex justify-between items-center gap-2 flex-wrap">
-          <span>{{ l.nombre || ('#' + l.jugadorId) }}</span>
-          <span class="text-xs">{{ l.titular ? 'Titular' : 'Suplente' }}</span>
-          <button type="button" (click)="toggleTitular('vis', i)" class="text-blue-600 text-xs">Cambiar rol</button>
-          <button type="button" (click)="removeLine('vis', i)" class="text-red-600 text-xs">Quitar</button>
-        </li>
-      </ul>
+
+    <!-- Visitante -->
+    <div class="space-y-4">
+      <div class="p-4 border rounded-lg dark:border-gray-700 bg-white/50 dark:bg-gray-900/30">
+        <h3 class="font-semibold mb-1">Visitante — {{ p.equipoVisitante?.club?.nombre }}</h3>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">Titulares y suplentes que jugarán (desde la lista de buena fe del torneo).</p>
+        <ul class="space-y-2 text-sm">
+          <li *ngFor="let l of visit; let i = index" class="flex flex-wrap items-center gap-2 border-b border-gray-100 dark:border-gray-800 pb-2">
+            <span class="flex-1 min-w-[8rem]">{{ l.nombre || ('#' + l.jugadorId) }}</span>
+            <label class="text-xs text-gray-500 flex items-center gap-1">
+              Nº
+              <input
+                type="number"
+                min="0"
+                class="w-14 rounded border px-1 py-0.5 dark:bg-gray-800"
+                [value]="l.numeroCamiseta ?? ''"
+                (input)="patchCamiseta('vis', i, $any($event.target).value)"
+              />
+            </label>
+            <span
+              class="text-xs rounded px-1.5 py-0.5"
+              [ngClass]="
+                l.titular
+                  ? 'bg-emerald-100 text-emerald-900 dark:bg-emerald-950 dark:text-emerald-100'
+                  : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'
+              "
+            >
+              {{ l.titular ? 'Titular' : 'Suplente' }}
+            </span>
+            <button type="button" (click)="toggleTitular('vis', i)" class="text-blue-600 text-xs hover:underline">Cambiar rol</button>
+            <button type="button" (click)="removeLine('vis', i)" class="text-red-600 text-xs hover:underline">Quitar</button>
+          </li>
+        </ul>
+        <div *ngIf="visit.length === 0" class="text-sm text-gray-500 italic py-2">Sin jugadores cargados aún.</div>
+      </div>
+
+      <div class="p-4 border border-dashed rounded-lg dark:border-gray-600 bg-slate-50 dark:bg-slate-900/20">
+        <h4 class="text-sm font-medium text-gray-800 dark:text-gray-300 mb-2">Agregar desde inscriptos (visitante)</h4>
+        <div class="flex flex-wrap gap-2 items-end">
+          <div class="flex flex-col gap-1 min-w-[12rem] flex-1">
+            <label class="text-xs text-gray-500">Jugador inscripto</label>
+            <select
+              class="rounded border px-2 py-1.5 text-sm dark:bg-gray-800 w-full"
+              [(ngModel)]="addVisJugadorId"
+              [ngModelOptions]="{ standalone: true }"
+            >
+              <option [ngValue]="null">Elegir…</option>
+              <option *ngFor="let ins of candidatosVis()" [ngValue]="ins.jugadorId">
+                {{ nombreInscripcion(ins) }}{{ ins.esForaneo ? ' (F)' : '' }}
+              </option>
+            </select>
+          </div>
+          <label class="flex items-center gap-1.5 text-sm">
+            <input type="checkbox" [(ngModel)]="addVisTitular" [ngModelOptions]="{ standalone: true }" />
+            Titular
+          </label>
+          <button type="button" (click)="previewAddInscripto('vis', addVisJugadorId)" class="px-2 py-1.5 bg-gray-600 text-white rounded text-xs">Validar</button>
+          <button type="button" (click)="agregarDesdeInscripcion('vis', addVisJugadorId, addVisTitular)" class="px-3 py-1.5 bg-blue-700 text-white rounded text-sm">Agregar</button>
+        </div>
+        <p *ngIf="previewMsgVis" class="mt-2 text-xs text-gray-600 dark:text-gray-400">{{ previewMsgVis }}</p>
+      </div>
     </div>
   </div>
 
-  <div class="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 rounded-lg text-sm">
-    <p class="font-medium text-amber-900 dark:text-amber-200">Agregar jugador (validación en tiempo real)</p>
-    <div class="flex flex-wrap gap-2 mt-2 items-end">
-      <input type="number" [(ngModel)]="addJugadorId" [ngModelOptions]="{standalone: true}" placeholder="ID jugador" class="rounded border p-2 w-28 dark:bg-gray-800" />
-      <select [(ngModel)]="addEquipo" [ngModelOptions]="{standalone: true}" class="rounded border p-2 dark:bg-gray-800">
-        <option value="local">Local</option>
-        <option value="vis">Visitante</option>
-      </select>
-      <label class="flex items-center gap-1 text-sm">
-        <input type="checkbox" [(ngModel)]="addTitular" [ngModelOptions]="{standalone: true}" /> Titular
-      </label>
-      <button type="button" (click)="previewAdd()" class="px-3 py-2 bg-gray-600 text-white rounded text-sm">Preview</button>
-      <button type="button" (click)="addLine()" class="px-3 py-2 bg-blue-700 text-white rounded text-sm">Agregar</button>
+  <section class="p-4 border rounded-lg dark:border-gray-700 space-y-3">
+    <h3 class="font-semibold dark:text-gray-400">Acta del partido (árbitros, capitanes, observaciones)</h3>
+    <p class="text-xs text-gray-500">Se guarda junto con la planilla al pulsar «Guardar planilla completa».</p>
+    <div class="grid sm:grid-cols-2 gap-3 text-sm">
+      <div>
+        <label class="block text-xs text-gray-500 mb-1">Capitán local</label>
+        <select class="w-full rounded border p-2 dark:bg-gray-800" [(ngModel)]="capitanLocalJugadorId" [ngModelOptions]="{ standalone: true }">
+          <option [ngValue]="null">Sin designar</option>
+          <option *ngFor="let l of local" [ngValue]="l.jugadorId">{{ l.nombre || ('#' + l.jugadorId) }}</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs text-gray-500 mb-1">Capitán visitante</label>
+        <select class="w-full rounded border p-2 dark:bg-gray-800" [(ngModel)]="capitanVisitanteJugadorId" [ngModelOptions]="{ standalone: true }">
+          <option [ngValue]="null">Sin designar</option>
+          <option *ngFor="let l of visit" [ngValue]="l.jugadorId">{{ l.nombre || ('#' + l.jugadorId) }}</option>
+        </select>
+      </div>
+      <div class="sm:col-span-2">
+        <label class="block text-xs text-gray-500 mb-1">Árbitro principal</label>
+        <input [(ngModel)]="arbitroPrincipal" [ngModelOptions]="{ standalone: true }" class="w-full rounded border p-2 dark:bg-gray-800" placeholder="Nombre del árbitro" />
+      </div>
+      <div>
+        <label class="block text-xs text-gray-500 mb-1">Juez de línea / asistente 1</label>
+        <input [(ngModel)]="juezLinea1" [ngModelOptions]="{ standalone: true }" class="w-full rounded border p-2 dark:bg-gray-800" placeholder="Juez 1" />
+      </div>
+      <div>
+        <label class="block text-xs text-gray-500 mb-1">Juez de línea / asistente 2</label>
+        <input [(ngModel)]="juezLinea2" [ngModelOptions]="{ standalone: true }" class="w-full rounded border p-2 dark:bg-gray-800" placeholder="Juez 2" />
+      </div>
     </div>
-    <p *ngIf="previewMsg" class="mt-2 text-sm">{{ previewMsg }}</p>
-  </div>
+    <div>
+      <label class="block text-xs text-gray-500 mb-1">Observaciones del partido</label>
+      <textarea [(ngModel)]="observaciones" [ngModelOptions]="{ standalone: true }" rows="3" class="w-full rounded border p-2 dark:bg-gray-800" placeholder="Incidencias, acuerdos, mesa, etc."></textarea>
+    </div>
+  </section>
 
   <button
     type="button"
@@ -70,45 +196,86 @@
     {{ saving ? 'Guardando…' : 'Guardar planilla completa' }}
   </button>
 
-  <section class="border-t border-gray-200 dark:border-gray-700 pt-6">
-    <h3 class="font-semibold mb-2 dark:text-white">Eventos (requiere partido EN_JUEGO)</h3>
-    <form [formGroup]="evForm" (ngSubmit)="registrarEvento()" class="flex flex-wrap gap-2 items-end">
-      <input type="number" formControlName="jugadorId" placeholder="Jugador ID" class="rounded border p-2 w-28 dark:bg-gray-800" />
-      <select formControlName="tipo" class="rounded border p-2 dark:bg-gray-800">
-        <option value="GOL">Gol</option>
-        <option value="AMARILLA">Amarilla</option>
-        <option value="ROJA">Roja</option>
-      </select>
-      <input type="number" formControlName="minuto" placeholder="Min" class="rounded border p-2 w-20 dark:bg-gray-800" />
-      <button type="submit" class="px-4 py-2 bg-blue-700 text-white rounded text-sm">Registrar evento</button>
+  <section class="border-t border-gray-200 dark:border-gray-700 pt-6 space-y-3">
+    <h3 class="font-semibold dark:text-gray-400">Eventos</h3>
+    <p class="text-xs text-gray-500" *ngIf="p.estado !== 'EN_JUEGO'">El partido debe estar <strong>en juego</strong> para registrar goles y tarjetas.</p>
+    <p class="text-xs text-gray-600 dark:text-gray-400">Solo pueden anotarse jugadores que ya figuren en la planilla guardada arriba.</p>
+    <form [formGroup]="evForm" (ngSubmit)="registrarEvento()" class="flex flex-col gap-3">
+      <div class="flex flex-wrap gap-2 items-end">
+        <div class="flex flex-col gap-1 min-w-[14rem]">
+          <label class="text-xs text-gray-500">Jugador</label>
+          <select formControlName="jugadorId" class="rounded border p-2 dark:bg-gray-800 min-w-[12rem]">
+            <option [ngValue]="0">Elegir…</option>
+            <option *ngFor="let o of opcionesEventoJugador()" [ngValue]="o.id">{{ o.label }}</option>
+          </select>
+        </div>
+        <div class="flex flex-col gap-1">
+          <label class="text-xs text-gray-500">Tipo</label>
+          <select formControlName="tipo" class="rounded border p-2 dark:bg-gray-800">
+            <option *ngFor="let t of tiposEvento" [ngValue]="t">{{ labelTipoEvento(t) }}</option>
+          </select>
+        </div>
+        <div class="flex flex-col gap-1">
+          <label class="text-xs text-gray-500">Minuto</label>
+          <input type="number" formControlName="minuto" class="rounded border p-2 w-20 dark:bg-gray-800" min="0" />
+        </div>
+        <button type="submit" class="px-4 py-2 bg-blue-700 text-white rounded text-sm" [disabled]="p.estado !== 'EN_JUEGO'">Registrar evento</button>
+      </div>
+      <div class="flex flex-col gap-1 max-w-xl">
+        <label class="text-xs text-gray-500">Detalle / aclaración (opcional)</label>
+        <input type="text" formControlName="notas" class="rounded border p-2 dark:bg-gray-800" placeholder="Ej. tiro libre, mano, etc." />
+      </div>
     </form>
-    <ul class="mt-3 text-sm space-y-1">
-      <li *ngFor="let e of eventos">{{ e.minuto }}' — {{ e.tipo }} — jug. {{ e.jugadorId }}</li>
+    <ul class="mt-3 text-sm space-y-1.5 border rounded-md p-3 dark:border-gray-700 max-h-56 overflow-y-auto">
+      <li *ngFor="let e of eventos" class="flex flex-wrap gap-x-2 border-b border-gray-100 dark:border-gray-800 pb-1 last:border-0">
+        <span class="font-medium">{{ e.minuto }}'</span>
+        <span>{{ labelTipoEvento(e.tipo) }}</span>
+        <span class="text-gray-600 dark:text-gray-400">— {{ jugadorNombre(e.jugador) || 'Jug. ' + e.jugadorId }}</span>
+        <span *ngIf="e.notas" class="text-xs text-gray-500 w-full italic">{{ e.notas }}</span>
+      </li>
+      <li *ngIf="eventos.length === 0" class="text-gray-500 text-sm">Sin eventos registrados.</li>
     </ul>
   </section>
 
-  <section class="border-t pt-6">
-    <h3 class="font-semibold mb-2 dark:text-white">Cambios</h3>
+  <section class="border-t border-gray-200 dark:border-gray-700 pt-6 space-y-3">
+    <h3 class="font-semibold dark:text-gray-400">Cambios (sustituciones)</h3>
+    <p class="text-xs text-gray-500" *ngIf="p.estado !== 'EN_JUEGO'">El partido debe estar <strong>en juego</strong> para registrar cambios.</p>
+    <p class="text-xs text-gray-600 dark:text-gray-400">Elegí el equipo y dos jugadores distintos de la planilla de ese mismo equipo.</p>
     <form [formGroup]="cambioForm" (ngSubmit)="registrarCambio()" class="flex flex-wrap gap-2 items-end">
-      <input type="number" formControlName="saleId" placeholder="Sale ID" class="rounded border p-2 w-28 dark:bg-gray-800" />
-      <input type="number" formControlName="entraId" placeholder="Entra ID" class="rounded border p-2 w-28 dark:bg-gray-800" />
-      <input type="number" formControlName="minuto" placeholder="Min" class="rounded border p-2 w-20 dark:bg-gray-800" />
-      <button type="submit" class="px-4 py-2 bg-blue-700 text-white rounded text-sm">Registrar cambio</button>
+      <div class="flex flex-col gap-1">
+        <label class="text-xs text-gray-500">Equipo</label>
+        <select formControlName="equipo" class="rounded border p-2 dark:bg-gray-800">
+          <option value="local">Local — {{ p.equipoLocal?.club?.nombre }}</option>
+          <option value="vis">Visitante — {{ p.equipoVisitante?.club?.nombre }}</option>
+        </select>
+      </div>
+      <div class="flex flex-col gap-1 min-w-[11rem]">
+        <label class="text-xs text-gray-500">Sale</label>
+        <select formControlName="saleId" class="rounded border p-2 dark:bg-gray-800 w-full">
+          <option [ngValue]="0">Elegir…</option>
+          <option *ngFor="let l of lineasParaCambio()" [ngValue]="l.jugadorId">{{ l.nombre || ('#' + l.jugadorId) }}</option>
+        </select>
+      </div>
+      <div class="flex flex-col gap-1 min-w-[11rem]">
+        <label class="text-xs text-gray-500">Entra</label>
+        <select formControlName="entraId" class="rounded border p-2 dark:bg-gray-800 w-full">
+          <option [ngValue]="0">Elegir…</option>
+          <option *ngFor="let l of lineasParaCambio()" [ngValue]="l.jugadorId">{{ l.nombre || ('#' + l.jugadorId) }}</option>
+        </select>
+      </div>
+      <div class="flex flex-col gap-1">
+        <label class="text-xs text-gray-500">Minuto</label>
+        <input type="number" formControlName="minuto" class="rounded border p-2 w-20 dark:bg-gray-800" min="0" />
+      </div>
+      <button type="submit" class="px-4 py-2 bg-blue-700 text-white rounded text-sm" [disabled]="p.estado !== 'EN_JUEGO'">Registrar cambio</button>
     </form>
-    <ul class="mt-3 text-sm space-y-1">
-      <li *ngFor="let c of cambios">{{ c.minuto }}' — sale {{ c.jugadorSaleId }} / entra {{ c.jugadorEntraId }}</li>
+    <ul class="mt-3 text-sm space-y-1.5 border rounded-md p-3 dark:border-gray-700 max-h-48 overflow-y-auto">
+      <li *ngFor="let c of cambios">
+        {{ c.minuto }}' — sale {{ jugadorNombre(c.jugadorSale) || c.jugadorSaleId }} → entra
+        {{ jugadorNombre(c.jugadorEntra) || c.jugadorEntraId }}
+      </li>
+      <li *ngIf="cambios.length === 0" class="text-gray-500 text-sm">Sin cambios registrados.</li>
     </ul>
-  </section>
-
-  <section class="border-t pt-6">
-    <h3 class="font-semibold mb-2 dark:text-white">Datos adicionales (solo en pantalla; el API aún no persiste estos campos)</h3>
-    <div class="grid sm:grid-cols-2 gap-3 text-sm">
-      <input [(ngModel)]="capitanLocal" [ngModelOptions]="{standalone: true}" placeholder="Capitán local" class="rounded border p-2 dark:bg-gray-800" />
-      <input [(ngModel)]="capitanVis" [ngModelOptions]="{standalone: true}" placeholder="Capitán visitante" class="rounded border p-2 dark:bg-gray-800" />
-      <input [(ngModel)]="arbitro" [ngModelOptions]="{standalone: true}" placeholder="Árbitro" class="rounded border p-2 dark:bg-gray-800" />
-      <input [(ngModel)]="jueces" [ngModelOptions]="{standalone: true}" placeholder="Jueces" class="rounded border p-2 dark:bg-gray-800" />
-    </div>
-    <textarea [(ngModel)]="observaciones" [ngModelOptions]="{standalone: true}" rows="2" placeholder="Observaciones" class="mt-3 w-full rounded border p-2 dark:bg-gray-800"></textarea>
   </section>
 </div>
 <p *ngIf="loading" class="p-8 text-center">Cargando…</p>
