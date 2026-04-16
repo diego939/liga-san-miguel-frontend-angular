@@ -105,7 +105,7 @@ export class PasesListComponent implements OnInit {
 
   onDniBusquedaChange(): void {
     this.jugadorEncontrado = null;
-    this.form.patchValue({ jugadorId: 0 });
+    this.form.patchValue({ jugadorId: 0, clubOrigenId: 0 });
   }
 
   buscarJugadorPorDni(): void {
@@ -138,6 +138,7 @@ export class PasesListComponent implements OnInit {
           }
           this.jugadorEncontrado = match;
           this.form.patchValue({ jugadorId: match.id });
+          this.autoselectClubOrigenFromPases(match.id);
         },
         error: (e) => this.err(e),
       });
@@ -199,7 +200,7 @@ export class PasesListComponent implements OnInit {
         clubDestinoId: v.clubDestinoId,
         tipo: v.tipo,
         fechaInicio: new Date(v.fechaInicio).toISOString(),
-        fechaFin: v.fechaFin
+        fechaFin: v.tipo === 'TEMPORAL' && v.fechaFin
           ? new Date(v.fechaFin).toISOString()
           : undefined,
       })
@@ -216,7 +217,7 @@ export class PasesListComponent implements OnInit {
   openRenew(p: Pase): void {
     this.renewModal = p;
     this.renewForm.patchValue({
-      fechaInicio: new Date().toISOString().slice(0, 16),
+      fechaInicio: this.toDateTimeLocalValue(new Date()),
       fechaFin: '',
       tipo: p.tipo,
     });
@@ -262,5 +263,52 @@ export class PasesListComponent implements OnInit {
   private err(e: { error?: { message?: string } }): void {
     const msg = e?.error?.message ?? 'Error';
     void Swal.fire({ icon: 'error', title: String(msg) });
+  }
+
+  private autoselectClubOrigenFromPases(jugadorId: number): void {
+    this.pasesApi
+      .list({
+        jugadorId,
+        estado: 'activo',
+        sortBy: 'fechaInicio',
+        sortOrder: 'desc',
+        page: 1,
+        limit: 100,
+      })
+      .subscribe({
+        next: (activos) => {
+          const temporalActivo = activos.items.find((p) => p.tipo === 'TEMPORAL');
+          if (temporalActivo?.clubDestinoId) {
+            this.form.patchValue({ clubOrigenId: temporalActivo.clubDestinoId });
+            return;
+          }
+          this.autoselectClubOrigenFromUltimoDefinitivo(jugadorId);
+        },
+        error: () => this.autoselectClubOrigenFromUltimoDefinitivo(jugadorId),
+      });
+  }
+
+  private autoselectClubOrigenFromUltimoDefinitivo(jugadorId: number): void {
+    this.pasesApi
+      .list({
+        jugadorId,
+        estado: 'todos',
+        sortBy: 'fechaInicio',
+        sortOrder: 'desc',
+        page: 1,
+        limit: 100,
+      })
+      .subscribe({
+        next: (todos) => {
+          const ultimoDefinitivo = todos.items.find((p) => p.tipo === 'DEFINITIVO');
+          this.form.patchValue({ clubOrigenId: ultimoDefinitivo?.clubDestinoId ?? 0 });
+        },
+        error: () => this.form.patchValue({ clubOrigenId: 0 }),
+      });
+  }
+
+  private toDateTimeLocalValue(date: Date): string {
+    const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+    return localDate.toISOString().slice(0, 16);
   }
 }
