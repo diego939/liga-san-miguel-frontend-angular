@@ -1,4 +1,5 @@
 import { CommonModule } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, inject } from '@angular/core';
 import {
   FormBuilder,
@@ -43,7 +44,10 @@ export class PasesListComponent implements OnInit {
   total = 0;
   page = 1;
   readonly limit = 10;
+  /** Grilla de pases. */
   loading = false;
+  /** Envío de modales (alta o renovación). */
+  saving = false;
   clubs: Club[] = [];
 
   filterJugadorId: number | null = null;
@@ -77,7 +81,10 @@ export class PasesListComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    this.clubesApi.listAllForSelect().subscribe((r) => (this.clubs = r.items));
+    this.clubesApi.listAllForSelect().subscribe({
+      next: (r) => (this.clubs = r.items),
+      error: (e) => this.apiErrorAlert(e),
+    });
     this.load();
   }
 
@@ -99,7 +106,7 @@ export class PasesListComponent implements OnInit {
           this.items = res.items;
           this.total = res.total;
         },
-        error: (e) => this.err(e),
+        error: (e) => this.apiErrorAlert(e),
       });
   }
 
@@ -140,7 +147,7 @@ export class PasesListComponent implements OnInit {
           this.form.patchValue({ jugadorId: match.id });
           this.autoselectClubOrigenFromPases(match.id);
         },
-        error: (e) => this.err(e),
+        error: (e) => this.apiErrorAlert(e),
       });
   }
 
@@ -159,6 +166,7 @@ export class PasesListComponent implements OnInit {
 
   openCreate(): void {
     this.renewModal = null;
+    this.saving = false;
     this.dniBusqueda = '';
     this.jugadorEncontrado = null;
     this.form.reset({
@@ -175,10 +183,19 @@ export class PasesListComponent implements OnInit {
   closeModal(): void {
     this.modalOpen = false;
     this.renewModal = null;
+    this.saving = false;
   }
 
   save(): void {
-    if (this.form.invalid) return;
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      void Swal.fire({
+        icon: 'warning',
+        title: 'Datos incompletos',
+        text: 'Completá club destino, fechas y tipo de pase. Buscá un jugador por DNI.',
+      });
+      return;
+    }
     const v = this.form.getRawValue();
     if (!v.jugadorId || v.jugadorId <= 0) {
       void Swal.fire({
@@ -189,9 +206,14 @@ export class PasesListComponent implements OnInit {
       return;
     }
     if (v.tipo === 'TEMPORAL' && !v.fechaFin) {
-      void Swal.fire('Atención', 'El pase temporal requiere fecha fin', 'warning');
+      void Swal.fire({
+        icon: 'warning',
+        title: 'Fecha fin requerida',
+        text: 'El pase temporal requiere fecha fin.',
+      });
       return;
     }
+    this.saving = true;
     this.pasesApi
       .create({
         jugadorId: v.jugadorId,
@@ -204,17 +226,19 @@ export class PasesListComponent implements OnInit {
           ? new Date(v.fechaFin).toISOString()
           : undefined,
       })
+      .pipe(finalize(() => (this.saving = false)))
       .subscribe({
         next: () => {
           Swal.fire({ icon: 'success', title: 'Pase registrado', timer: 1200, showConfirmButton: false });
           this.closeModal();
           this.load();
         },
-        error: (e) => this.err(e),
+        error: (e) => this.apiErrorAlert(e),
       });
   }
 
   openRenew(p: Pase): void {
+    this.saving = false;
     this.renewModal = p;
     this.renewForm.patchValue({
       fechaInicio: this.toDateTimeLocalValue(new Date()),
@@ -225,21 +249,40 @@ export class PasesListComponent implements OnInit {
   }
 
   saveRenew(): void {
-    if (!this.renewModal || this.renewForm.invalid) return;
+    if (!this.renewModal) return;
+    if (this.renewForm.invalid) {
+      this.renewForm.markAllAsTouched();
+      void Swal.fire({
+        icon: 'warning',
+        title: 'Datos incompletos',
+        text: 'Completá fecha de inicio y el resto de los datos del pase.',
+      });
+      return;
+    }
     const v = this.renewForm.getRawValue();
+    if (v.tipo === 'TEMPORAL' && !v.fechaFin) {
+      void Swal.fire({
+        icon: 'warning',
+        title: 'Fecha fin requerida',
+        text: 'El pase temporal requiere fecha fin.',
+      });
+      return;
+    }
+    this.saving = true;
     this.pasesApi
       .renovar(this.renewModal.id, {
         fechaInicio: new Date(v.fechaInicio).toISOString(),
         fechaFin: v.fechaFin ? new Date(v.fechaFin).toISOString() : undefined,
         tipo: v.tipo,
       })
+      .pipe(finalize(() => (this.saving = false)))
       .subscribe({
         next: () => {
           Swal.fire({ icon: 'success', title: 'Pase renovado', timer: 1200, showConfirmButton: false });
           this.closeModal();
           this.load();
         },
-        error: (e) => this.err(e),
+        error: (e) => this.apiErrorAlert(e),
       });
   }
 
@@ -260,9 +303,42 @@ export class PasesListComponent implements OnInit {
     }
   }
 
-  private err(e: { error?: { message?: string } }): void {
-    const msg = e?.error?.message ?? 'Error';
-    void Swal.fire({ icon: 'error', title: String(msg) });
+  private apiErrorMessage(err: unknown): string {
+    if (!(err instanceof HttpErrorResponse)) {
+      return typeof err === 'object' && err !== null ? JSON.stringify(err) : String(err);
+    }
+    const body = err.error;
+    if (typeof body === 'string') {
+      return body;
+    }
+    if (body && typeof body === 'object') {
+      const o = body as Record<string, unknown>;
+      if ('message' in o && o['message'] != null) {
+        const m = o['message'];
+        if (Array.isArray(m)) {
+          return m.map(String).filter(Boolean).join('\n');
+        }
+        if (typeof m === 'string') {
+          return m;
+        }
+      }
+      try {
+        return JSON.stringify(body);
+      } catch {
+        return String(body);
+      }
+    }
+    if (body == null || body === '') {
+      return '';
+    }
+    return String(body);
+  }
+
+  private apiErrorAlert(err: unknown): void {
+    void Swal.fire({
+      icon: 'error',
+      text: this.apiErrorMessage(err),
+    });
   }
 
   private autoselectClubOrigenFromPases(jugadorId: number): void {

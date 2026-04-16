@@ -163,40 +163,58 @@
     </div>
     <form [formGroup]="form" (ngSubmit)="save()" class="space-y-3">
       <input type="hidden" formControlName="jugadorId" />
-      <div class="grid grid-cols-2 gap-2">
+      <fieldset class="space-y-3 border-0 p-0 m-0 min-w-0" [disabled]="saving">
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label [class]="lm.label">Club origen</label>
+            <select formControlName="clubOrigenId" [class]="lm.field">
+              <option [ngValue]="0">—</option>
+              <option *ngFor="let c of clubs" [ngValue]="c.id">{{ c.nombre }}</option>
+            </select>
+          </div>
+          <div>
+            <label [class]="lm.label">Club destino</label>
+            <select formControlName="clubDestinoId" [class]="lm.field">
+              <option [ngValue]="0">—</option>
+              <option *ngFor="let c of clubs" [ngValue]="c.id">{{ c.nombre }}</option>
+            </select>
+          </div>
+        </div>
         <div>
-          <label [class]="lm.label">Club origen</label>
-          <select formControlName="clubOrigenId" [class]="lm.field">
-            <option [ngValue]="0">—</option>
-            <option *ngFor="let c of clubs" [ngValue]="c.id">{{ c.nombre }}</option>
+          <label [class]="lm.label">Tipo</label>
+          <select formControlName="tipo" [class]="lm.field">
+            <option value="DEFINITIVO">Definitivo</option>
+            <option value="TEMPORAL">Temporal</option>
           </select>
         </div>
         <div>
-          <label [class]="lm.label">Club destino</label>
-          <select formControlName="clubDestinoId" [class]="lm.field">
-            <option [ngValue]="0">—</option>
-            <option *ngFor="let c of clubs" [ngValue]="c.id">{{ c.nombre }}</option>
-          </select>
+          <label [class]="lm.label">Fecha inicio</label>
+          <input type="datetime-local" formControlName="fechaInicio" [class]="lm.field" />
         </div>
-      </div>
-      <div>
-        <label [class]="lm.label">Tipo</label>
-        <select formControlName="tipo" [class]="lm.field">
-          <option value="DEFINITIVO">Definitivo</option>
-          <option value="TEMPORAL">Temporal</option>
-        </select>
-      </div>
-      <div>
-        <label [class]="lm.label">Fecha inicio</label>
-        <input type="datetime-local" formControlName="fechaInicio" [class]="lm.field" />
-      </div>
-      <div *ngIf="form.get('tipo')?.value === 'TEMPORAL'">
-        <label [class]="lm.label">Fecha fin (temporal)</label>
-        <input type="datetime-local" formControlName="fechaFin" [class]="lm.field" />
-      </div>
-      <div class="flex justify-end gap-2">
-        <button type="button" (click)="closeModal()" [class]="lm.btnSecondary">Cancelar</button>
-        <button type="submit" [class]="lm.btnPrimary">Guardar</button>
+        <div *ngIf="form.get('tipo')?.value === 'TEMPORAL'">
+          <label [class]="lm.label">Fecha fin (temporal)</label>
+          <input type="datetime-local" formControlName="fechaFin" [class]="lm.field" />
+        </div>
+      </fieldset>
+      <div class="flex justify-end mt-4">
+        <button
+          class="mx-1 cursor-pointer text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700"
+          type="button"
+          (click)="closeModal()"
+          [class]="lm.btnSecondary"
+          [disabled]="saving"
+        >
+          Cancelar
+        </button>
+        <button
+          class="mx-1 cursor-pointer text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700"
+          type="submit"
+          [class]="lm.btnPrimary"
+          [disabled]="saving"
+        >
+          <span *ngIf="!saving">Guardar</span>
+          <span *ngIf="saving">Guardando…</span>
+        </button>
       </div>
     </form>
   </div>
@@ -233,24 +251,42 @@
       </div>
     </div>
     <form [formGroup]="renewForm" (ngSubmit)="saveRenew()" class="space-y-3">
-      <div>
-        <label [class]="lm.label">Fecha inicio</label>
-        <input type="datetime-local" formControlName="fechaInicio" [class]="lm.field" />
-      </div>
-      <div *ngIf="renewForm.get('tipo')?.value === 'TEMPORAL'">
-        <label [class]="lm.label">Fecha fin</label>
-        <input type="datetime-local" formControlName="fechaFin" [class]="lm.field" />
-      </div>
-      <div>
-        <label [class]="lm.label">Tipo</label>
-        <select formControlName="tipo" [class]="lm.field">
-          <option value="DEFINITIVO">Definitivo</option>
-          <option value="TEMPORAL">Temporal</option>
-        </select>
-      </div>
-      <div class="flex justify-end gap-2">
-        <button type="button" (click)="closeModal()" [class]="lm.btnSecondary">Cancelar</button>
-        <button type="submit" [class]="lm.btnPrimary">Renovar</button>
+      <fieldset class="space-y-3 border-0 p-0 m-0 min-w-0" [disabled]="saving">
+        <div>
+          <label [class]="lm.label">Fecha inicio</label>
+          <input type="datetime-local" formControlName="fechaInicio" [class]="lm.field" />
+        </div>
+        <div *ngIf="renewForm.get('tipo')?.value === 'TEMPORAL'">
+          <label [class]="lm.label">Fecha fin</label>
+          <input type="datetime-local" formControlName="fechaFin" [class]="lm.field" />
+        </div>
+        <div>
+          <label [class]="lm.label">Tipo</label>
+          <select formControlName="tipo" [class]="lm.field">
+            <option value="DEFINITIVO">Definitivo</option>
+            <option value="TEMPORAL">Temporal</option>
+          </select>
+        </div>
+      </fieldset>
+      <div class="flex justify-end mt-4">
+        <button
+          class="mx-1 cursor-pointer text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700"
+          type="button"
+          (click)="closeModal()"
+          [class]="lm.btnSecondary"
+          [disabled]="saving"
+        >
+          Cancelar
+        </button>
+        <button
+          class="mx-1 cursor-pointer text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700"
+          type="submit"
+          [class]="lm.btnPrimary"
+          [disabled]="saving"
+        >
+          <span *ngIf="!saving">Renovar</span>
+          <span *ngIf="saving">Guardando…</span>
+        </button>
       </div>
     </form>
   </div>
