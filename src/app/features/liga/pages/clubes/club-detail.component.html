@@ -53,25 +53,43 @@
   <div [class]="lm.panelSm" (click)="$event.stopPropagation()">
     <h3 [class]="lm.titleSm">{{ editingPer ? 'Editar personal' : 'Nuevo personal' }}</h3>
     <form [formGroup]="perForm" (ngSubmit)="savePer()" class="space-y-3">
-      <div>
-        <label [class]="lm.label">Tipo</label>
-        <input formControlName="tipo" placeholder="Ej. DELEGADO" [class]="lm.field" />
-      </div>
-      <div>
-        <label [class]="lm.label">Nombre</label>
-        <input formControlName="nombre" [class]="lm.field" />
-      </div>
-      <div>
-        <label [class]="lm.label">DNI <span class="font-normal text-gray-500">(opcional)</span></label>
-        <input formControlName="dni" [class]="lm.field" inputmode="numeric" autocomplete="off" />
-      </div>
-      <div>
-        <label [class]="lm.label">Teléfono <span class="font-normal text-gray-500">(opcional)</span></label>
-        <input formControlName="telefono" type="tel" [class]="lm.field" autocomplete="off" />
-      </div>
-      <div class="flex justify-end gap-2">
-        <button type="button" (click)="closePerModal()" [class]="lm.btnSecondary">Cancelar</button>
-        <button type="submit" [class]="lm.btnPrimary">Guardar</button>
+      <fieldset class="space-y-3 border-0 p-0 m-0 min-w-0" [disabled]="savingPer">
+        <div>
+          <label [class]="lm.label">Tipo</label>
+          <input formControlName="tipo" placeholder="Ej. DELEGADO" [class]="lm.field" />
+        </div>
+        <div>
+          <label [class]="lm.label">Nombre</label>
+          <input formControlName="nombre" [class]="lm.field" />
+        </div>
+        <div>
+          <label [class]="lm.label">DNI <span class="font-normal text-gray-500">(opcional)</span></label>
+          <input formControlName="dni" [class]="lm.field" inputmode="numeric" autocomplete="off" />
+        </div>
+        <div>
+          <label [class]="lm.label">Teléfono <span class="font-normal text-gray-500">(opcional)</span></label>
+          <input formControlName="telefono" type="tel" [class]="lm.field" autocomplete="off" />
+        </div>
+      </fieldset>
+      <div class="flex justify-end mt-4">
+        <button
+          class="mx-1 cursor-pointer text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700"
+          type="button"
+          (click)="closePerModal()"
+          [class]="lm.btnSecondary"
+          [disabled]="savingPer"
+        >
+          Cancelar
+        </button>
+        <button
+          class="mx-1 cursor-pointer text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700"
+          type="submit"
+          [class]="lm.btnPrimary"
+          [disabled]="savingPer"
+        >
+          <span *ngIf="!savingPer">Guardar</span>
+          <span *ngIf="savingPer">Guardando…</span>
+        </button>
       </div>
     </form>
   </div>

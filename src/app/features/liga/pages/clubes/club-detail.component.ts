@@ -1,4 +1,5 @@
 import { CommonModule } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -25,6 +26,7 @@ export class ClubDetailComponent implements OnInit {
   club: Club | null = null;
   personal: ClubPersonal[] = [];
   loading = true;
+  savingPer = false;
   modalPer = false;
   /** Si está definido, el modal guarda con PATCH (editar). */
   editingPer: ClubPersonal | null = null;
@@ -46,20 +48,34 @@ export class ClubDetailComponent implements OnInit {
       .get(this.id)
       .pipe(finalize(() => (this.loading = false)))
       .subscribe({
-        next: (c) => (this.club = c),
-        error: () => (this.club = null),
+        next: (c) => {
+          this.club = c;
+          this.api.listPersonal(this.id).subscribe({
+            next: (p) => (this.personal = p),
+            error: (e) => {
+              this.personal = [];
+              this.apiErrorAlert(e);
+            },
+          });
+        },
+        error: (e) => {
+          this.club = null;
+          this.personal = [];
+          this.apiErrorAlert(e);
+        },
       });
-    this.api.listPersonal(this.id).subscribe((p) => (this.personal = p));
   }
 
   openAddPer(): void {
     this.editingPer = null;
+    this.savingPer = false;
     this.perForm.reset({ tipo: '', nombre: '', dni: '', telefono: '' });
     this.modalPer = true;
   }
 
   openEditPer(p: ClubPersonal): void {
     this.editingPer = p;
+    this.savingPer = false;
     this.perForm.patchValue({
       tipo: p.tipo,
       nombre: p.nombre,
@@ -72,10 +88,19 @@ export class ClubDetailComponent implements OnInit {
   closePerModal(): void {
     this.modalPer = false;
     this.editingPer = null;
+    this.savingPer = false;
   }
 
   savePer(): void {
-    if (this.perForm.invalid) return;
+    if (this.perForm.invalid) {
+      this.perForm.markAllAsTouched();
+      void Swal.fire({
+        icon: 'warning',
+        title: 'Datos incompletos',
+        text: 'Completá tipo y nombre del personal.',
+      });
+      return;
+    }
     const v = this.perForm.getRawValue();
     const dni = v.dni?.trim() ? v.dni.trim() : null;
     const telefono = v.telefono?.trim() ? v.telefono.trim() : null;
@@ -92,7 +117,8 @@ export class ClubDetailComponent implements OnInit {
           ...(dni ? { dni } : {}),
           ...(telefono ? { telefono } : {}),
         });
-    req.subscribe({
+    this.savingPer = true;
+    req.pipe(finalize(() => (this.savingPer = false))).subscribe({
       next: () => {
         Swal.fire({
           icon: 'success',
@@ -103,7 +129,7 @@ export class ClubDetailComponent implements OnInit {
         this.closePerModal();
         this.load();
       },
-      error: (e) => Swal.fire('Error', String(e?.error?.message ?? e), 'error'),
+      error: (e) => this.apiErrorAlert(e),
     });
   }
 
@@ -112,8 +138,46 @@ export class ClubDetailComponent implements OnInit {
       if (!r.isConfirmed) return;
       this.api.deletePersonal(this.id, p.id).subscribe({
         next: () => this.load(),
-        error: (e) => Swal.fire('Error', String(e?.error?.message ?? e), 'error'),
+        error: (e) => this.apiErrorAlert(e),
       });
+    });
+  }
+
+  private apiErrorMessage(err: unknown): string {
+    if (!(err instanceof HttpErrorResponse)) {
+      return typeof err === 'object' && err !== null ? JSON.stringify(err) : String(err);
+    }
+    const body = err.error;
+    if (typeof body === 'string') {
+      return body;
+    }
+    if (body && typeof body === 'object') {
+      const o = body as Record<string, unknown>;
+      if ('message' in o && o['message'] != null) {
+        const m = o['message'];
+        if (Array.isArray(m)) {
+          return m.map(String).filter(Boolean).join('\n');
+        }
+        if (typeof m === 'string') {
+          return m;
+        }
+      }
+      try {
+        return JSON.stringify(body);
+      } catch {
+        return String(body);
+      }
+    }
+    if (body == null || body === '') {
+      return '';
+    }
+    return String(body);
+  }
+
+  private apiErrorAlert(err: unknown): void {
+    void Swal.fire({
+      icon: 'error',
+      text: this.apiErrorMessage(err),
     });
   }
 }

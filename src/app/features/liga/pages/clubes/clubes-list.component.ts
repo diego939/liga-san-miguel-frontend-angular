@@ -1,4 +1,5 @@
 import { CommonModule } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -35,6 +36,7 @@ export class ClubesListComponent implements OnInit {
   page = 1;
   readonly limit = 10;
   loading = false;
+  saving = false;
   filterQ = '';
   sortBy: 'nombre' | 'id' = 'nombre';
   sortOrder: 'asc' | 'desc' = 'asc';
@@ -66,7 +68,7 @@ export class ClubesListComponent implements OnInit {
           this.items = r.items;
           this.total = r.total;
         },
-        error: (e) => Swal.fire('Error', String(e?.error?.message ?? e), 'error'),
+        error: (e) => this.apiErrorAlert(e),
       });
   }
 
@@ -85,6 +87,7 @@ export class ClubesListComponent implements OnInit {
 
   openCreate(): void {
     this.editing = null;
+    this.saving = false;
     this.form.reset({ nombre: '', logo: '' });
     this.modalOpen = true;
   }
@@ -92,27 +95,38 @@ export class ClubesListComponent implements OnInit {
   openEdit(c: Club, ev: Event): void {
     ev.stopPropagation();
     this.editing = c;
+    this.saving = false;
     this.form.patchValue({ nombre: c.nombre, logo: c.logo ?? '' });
     this.modalOpen = true;
   }
 
   close(): void {
     this.modalOpen = false;
+    this.saving = false;
   }
 
   save(): void {
-    if (this.form.invalid) return;
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      void Swal.fire({
+        icon: 'warning',
+        title: 'Datos incompletos',
+        text: 'Ingresá el nombre del club.',
+      });
+      return;
+    }
     const v = this.form.getRawValue();
     const req = this.editing
       ? this.api.update(this.editing.id, { nombre: v.nombre, logo: v.logo || undefined })
       : this.api.create({ nombre: v.nombre, logo: v.logo || undefined });
-    req.subscribe({
+    this.saving = true;
+    req.pipe(finalize(() => (this.saving = false))).subscribe({
       next: () => {
         Swal.fire({ icon: 'success', title: 'Guardado', timer: 1200, showConfirmButton: false });
         this.close();
         this.load();
       },
-      error: (e) => Swal.fire('Error', String(e?.error?.message ?? e), 'error'),
+      error: (e) => this.apiErrorAlert(e),
     });
   }
 
@@ -126,7 +140,7 @@ export class ClubesListComponent implements OnInit {
       if (!r.isConfirmed) return;
       this.api.delete(c.id).subscribe({
         next: () => this.load(),
-        error: (e) => Swal.fire('Error', String(e?.error?.message ?? e), 'error'),
+        error: (e) => this.apiErrorAlert(e),
       });
     });
   }
@@ -142,5 +156,43 @@ export class ClubesListComponent implements OnInit {
       this.page++;
       this.load();
     }
+  }
+
+  private apiErrorMessage(err: unknown): string {
+    if (!(err instanceof HttpErrorResponse)) {
+      return typeof err === 'object' && err !== null ? JSON.stringify(err) : String(err);
+    }
+    const body = err.error;
+    if (typeof body === 'string') {
+      return body;
+    }
+    if (body && typeof body === 'object') {
+      const o = body as Record<string, unknown>;
+      if ('message' in o && o['message'] != null) {
+        const m = o['message'];
+        if (Array.isArray(m)) {
+          return m.map(String).filter(Boolean).join('\n');
+        }
+        if (typeof m === 'string') {
+          return m;
+        }
+      }
+      try {
+        return JSON.stringify(body);
+      } catch {
+        return String(body);
+      }
+    }
+    if (body == null || body === '') {
+      return '';
+    }
+    return String(body);
+  }
+
+  private apiErrorAlert(err: unknown): void {
+    void Swal.fire({
+      icon: 'error',
+      text: this.apiErrorMessage(err),
+    });
   }
 }
