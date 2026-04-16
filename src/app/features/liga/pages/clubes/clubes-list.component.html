@@ -34,7 +34,7 @@
               <app-liga-sort-indicator [active]="sortBy === 'nombre'" [order]="sortOrder"></app-liga-sort-indicator
             ></span>
           </th>
-          <th scope="col" class="px-6 py-3">Logo</th>
+          <!--<th scope="col" class="px-6 py-3">Logo</th>-->
           <th scope="col" class="px-6 py-3 text-right">Acciones</th>
         </tr>
       </thead>
@@ -46,7 +46,7 @@
           (click)="goDetail(c)"
         >
           <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">{{ c.nombre }}</td>
-          <td class="px-6 py-4">{{ c.logo || '—' }}</td>
+          <!--<td class="px-6 py-4">{{ c.logo || '—' }}</td>-->
           <td class="px-6 py-4 text-right space-x-2" (click)="$event.stopPropagation()">
             <button
               type="button"
@@ -83,10 +83,10 @@
           <label [class]="lm.label">Nombre</label>
           <input formControlName="nombre" [class]="lm.field" />
         </div>
-        <div>
+        <!--<div>
           <label [class]="lm.label">Logo (URL)</label>
           <input formControlName="logo" [class]="lm.field" />
-        </div>
+        </div>-->
       </fieldset>
       <div class="flex justify-end mt-4">
         <button
