@@ -90,27 +90,45 @@
   <div [class]="lm.panelMd" (click)="$event.stopPropagation()">
     <h3 [class]="lm.titleSm">Nuevo partido</h3>
     <form [formGroup]="form" (ngSubmit)="crear()" class="space-y-3">
-      <div>
-        <label [class]="lm.label">Local</label>
-        <select formControlName="equipoLocalId" [class]="lm.field">
-          <option [ngValue]="0">—</option>
-          <option *ngFor="let e of equipos" [ngValue]="e.id">{{ e.club.nombre }}</option>
-        </select>
-      </div>
-      <div>
-        <label [class]="lm.label">Visitante</label>
-        <select formControlName="equipoVisitanteId" [class]="lm.field">
-          <option [ngValue]="0">—</option>
-          <option *ngFor="let e of equipos" [ngValue]="e.id">{{ e.club.nombre }}</option>
-        </select>
-      </div>
-      <div>
-        <label [class]="lm.label">Fecha y hora</label>
-        <input type="datetime-local" formControlName="fecha" [class]="lm.field" />
-      </div>
-      <div class="flex justify-end gap-2">
-        <button type="button" (click)="modal = false" [class]="lm.btnSecondary">Cancelar</button>
-        <button type="submit" [class]="lm.btnPrimary">Crear</button>
+      <fieldset class="space-y-3 border-0 p-0 m-0 min-w-0" [disabled]="saving">
+        <div>
+          <label [class]="lm.label">Local</label>
+          <select formControlName="equipoLocalId" [class]="lm.field">
+            <option [ngValue]="0">—</option>
+            <option *ngFor="let e of equipos" [ngValue]="e.id">{{ e.club.nombre }}</option>
+          </select>
+        </div>
+        <div>
+          <label [class]="lm.label">Visitante</label>
+          <select formControlName="equipoVisitanteId" [class]="lm.field">
+            <option [ngValue]="0">—</option>
+            <option *ngFor="let e of equipos" [ngValue]="e.id">{{ e.club.nombre }}</option>
+          </select>
+        </div>
+        <div>
+          <label [class]="lm.label">Fecha y hora</label>
+          <input type="datetime-local" formControlName="fecha" [class]="lm.field" />
+        </div>
+      </fieldset>
+      <div class="flex justify-end mt-4">
+        <button
+          class="mx-1 cursor-pointer text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700"
+          type="button"
+          (click)="closeModal()"
+          [class]="lm.btnSecondary"
+          [disabled]="saving"
+        >
+          Cancelar
+        </button>
+        <button
+          class="mx-1 cursor-pointer text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700"
+          type="submit"
+          [class]="lm.btnPrimary"
+          [disabled]="saving"
+        >
+          <span *ngIf="!saving">Crear</span>
+          <span *ngIf="saving">Guardando…</span>
+        </button>
       </div>
     </form>
   </div>

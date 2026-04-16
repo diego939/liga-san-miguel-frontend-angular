@@ -23,6 +23,7 @@ import type {
 import { environment } from '../../../../../environments/environment';
 import { InscripcionesApiService } from '../../services/inscripciones-api.service';
 import { PartidosApiService } from '../../services/partidos-api.service';
+import { apiErrorAlert } from '../../utils/api-error';
 import { inscripcionSolapaDiaCivil } from '../../utils/liga-day-bounds';
 
 type Line = {
@@ -123,7 +124,10 @@ export class PlanillaPartidoComponent implements OnInit {
           this.loadEventosCambios();
           this.loadInscriptos();
         },
-        error: () => (this.partido = null),
+        error: (e) => {
+          this.partido = null;
+          apiErrorAlert(e);
+        },
       });
   }
 
@@ -156,9 +160,10 @@ export class PlanillaPartidoComponent implements OnInit {
         this.inscriptosLocal = loc.items;
         this.inscriptosVis = vis.items;
       },
-      error: () => {
+      error: (e) => {
         this.inscriptosLocal = [];
         this.inscriptosVis = [];
+        apiErrorAlert(e);
       },
     });
   }
@@ -285,7 +290,7 @@ export class PlanillaPartidoComponent implements OnInit {
       if (side === 'local') this.previewMsgLocal = msg;
       else this.previewMsgVis = msg;
       if (!p.puede) {
-        void Swal.fire('No puede jugar', p.motivo ?? '', 'error');
+        void Swal.fire({ icon: 'error', text: p.motivo ?? 'No puede jugar' });
       }
     });
   }
@@ -296,7 +301,7 @@ export class PlanillaPartidoComponent implements OnInit {
       side === 'local' ? this.partido.equipoLocalId : this.partido.equipoVisitanteId;
     this.api.previewJugador(this.partidoId, jugadorId, eqId).subscribe((p) => {
       if (!p.puede) {
-        void Swal.fire('Validación', p.motivo ?? '', 'error');
+        void Swal.fire({ icon: 'error', text: p.motivo ?? 'No puede jugar' });
         return;
       }
       const ins =
@@ -382,7 +387,7 @@ export class PlanillaPartidoComponent implements OnInit {
           });
           this.loadPlanilla();
         },
-        error: (e) => void Swal.fire('Error', String(e?.error?.message ?? e), 'error'),
+        error: (e) => apiErrorAlert(e),
       });
   }
 
@@ -429,7 +434,7 @@ export class PlanillaPartidoComponent implements OnInit {
             notas: '',
           });
         },
-        error: (e) => void Swal.fire('Error', String(e?.error?.message ?? e), 'error'),
+        error: (e) => apiErrorAlert(e),
       });
   }
 
@@ -481,7 +486,7 @@ export class PlanillaPartidoComponent implements OnInit {
             minuto: 0,
           });
         },
-        error: (e) => void Swal.fire('Error', String(e?.error?.message ?? e), 'error'),
+        error: (e) => apiErrorAlert(e),
       });
   }
 
@@ -521,8 +526,7 @@ export class PlanillaPartidoComponent implements OnInit {
             },
           });
         },
-        error: (err) =>
-          void Swal.fire('Error', String(err?.error?.message ?? err), 'error'),
+        error: (err) => apiErrorAlert(err),
       });
     });
   }
@@ -556,8 +560,7 @@ export class PlanillaPartidoComponent implements OnInit {
           });
           this.loadEventosCambios();
         },
-        error: (err) =>
-          void Swal.fire('Error', String(err?.error?.message ?? err), 'error'),
+        error: (err) => apiErrorAlert(err),
       });
     });
   }
@@ -581,8 +584,7 @@ export class PlanillaPartidoComponent implements OnInit {
           this.reload();
         },
         error: (e) => {
-          void Swal.fire('Error', String(e?.error?.message ?? e), 'error');
-          this.estadoSaving = false;
+          void apiErrorAlert(e);
           this.reload();
         },
       });

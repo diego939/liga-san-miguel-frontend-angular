@@ -1,10 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { forkJoin } from 'rxjs';
 import { finalize } from 'rxjs/operators';
-import Swal from 'sweetalert2';
 import type { GoleadorRow, TablaPosicionRow } from '../../models/api.types';
 import { EstadisticasApiService } from '../../services/estadisticas-api.service';
+import { apiErrorAlert } from '../../utils/api-error';
 
 @Component({
   selector: 'app-torneo-estadisticas',
@@ -28,16 +29,21 @@ export class TorneoEstadisticasComponent implements OnInit {
 
   load(): void {
     this.loading = true;
-    this.api
-      .tablaPosiciones(this.torneoId)
+    forkJoin({
+      tabla: this.api.tablaPosiciones(this.torneoId),
+      goleadores: this.api.goleadores(this.torneoId),
+    })
       .pipe(finalize(() => (this.loading = false)))
       .subscribe({
-        next: (t) => (this.tabla = t),
-        error: (e) => Swal.fire('Error', String(e?.error?.message ?? e), 'error'),
+        next: ({ tabla, goleadores }) => {
+          this.tabla = tabla;
+          this.goleadores = goleadores;
+        },
+        error: (e) => {
+          this.tabla = [];
+          this.goleadores = [];
+          apiErrorAlert(e);
+        },
       });
-    this.api.goleadores(this.torneoId).subscribe({
-      next: (g) => (this.goleadores = g),
-      error: () => {},
-    });
   }
 }

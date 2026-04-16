@@ -6,6 +6,7 @@ import { finalize } from 'rxjs/operators';
 import Swal from 'sweetalert2';
 import type { Inscripcion, Jugador } from '../../models/api.types';
 import { InscripcionesApiService } from '../../services/inscripciones-api.service';
+import { apiErrorAlert } from '../../utils/api-error';
 import { LigaPaginationComponent } from '../../shared/liga-pagination.component';
 import { LigaSortIndicatorComponent } from '../../shared/liga-sort-indicator.component';
 import { applySortClick } from '../../utils/column-sort.util';
@@ -40,6 +41,12 @@ export class TorneoInscripcionesComponent implements OnInit {
   page = 1;
   readonly limit = 10;
   loading = false;
+  /** Guardado masivo en modal "Inscribir jugadores" */
+  saving = false;
+  /** Dar de baja masiva */
+  bulkSaving = false;
+  /** Baja individual en curso */
+  cerrandoInsId: number | null = null;
   filterQ = '';
   soloActivas = true;
 
@@ -88,7 +95,7 @@ export class TorneoInscripcionesComponent implements OnInit {
           this.clubNombre = r.clubNombre;
           this.torneoNombre = r.torneoNombre;
         },
-        error: (e) => Swal.fire('Error', String(e?.error?.message ?? e), 'error'),
+        error: (e) => apiErrorAlert(e),
       });
   }
 
@@ -159,28 +166,36 @@ export class TorneoInscripcionesComponent implements OnInit {
       showCancelButton: true,
     }).then((r) => {
       if (!r.isConfirmed) return;
-      this.api.cerrarBatch({ ids: soloActivas }).subscribe({
-        next: (res) => {
-          this.selectedInsIds = new Set();
-          void Swal.fire({ icon: 'success', title: `${res.cerradas} baja(s)`, timer: 1200, showConfirmButton: false });
-          this.load();
-        },
-        error: (e) => Swal.fire('Error', String(e?.error?.message ?? e), 'error'),
-      });
+      this.bulkSaving = true;
+      this.api
+        .cerrarBatch({ ids: soloActivas })
+        .pipe(finalize(() => (this.bulkSaving = false)))
+        .subscribe({
+          next: (res) => {
+            this.selectedInsIds = new Set();
+            void Swal.fire({ icon: 'success', title: `${res.cerradas} baja(s)`, timer: 1200, showConfirmButton: false });
+            this.load();
+          },
+          error: (e) => apiErrorAlert(e),
+        });
     });
   }
 
   previewRow(ins: Inscripcion): void {
-    this.api.preview(this.equipoTorneoId, ins.jugadorId).subscribe((p) => {
-      void Swal.fire(
-        p.puede ? 'Pase válido' : 'Pase inválido',
-        p.motivo ?? (p.puede ? 'OK para inscripción' : ''),
-        p.puede ? 'success' : 'error',
-      );
+    this.api.preview(this.equipoTorneoId, ins.jugadorId).subscribe({
+      next: (p) => {
+        void Swal.fire(
+          p.puede ? 'Pase válido' : 'Pase inválido',
+          p.motivo ?? (p.puede ? 'OK para inscripción' : ''),
+          p.puede ? 'success' : 'error',
+        );
+      },
+      error: (e) => apiErrorAlert(e),
     });
   }
 
   openAdd(): void {
+    this.saving = false;
     this.selectedCandIds = new Set();
     this.candForaneo = new Map();
     this.modalFiltroDni = '';
@@ -192,6 +207,7 @@ export class TorneoInscripcionesComponent implements OnInit {
 
   closeModal(): void {
     this.modal = false;
+    this.saving = false;
   }
 
   loadCandidatos(): void {
@@ -211,7 +227,7 @@ export class TorneoInscripcionesComponent implements OnInit {
           this.clubNombre = r.clubNombre;
           this.torneoNombre = r.torneoNombre;
         },
-        error: (e) => Swal.fire('Error', String(e?.error?.message ?? e), 'error'),
+        error: (e) => apiErrorAlert(e),
       });
   }
 
@@ -275,8 +291,10 @@ export class TorneoInscripcionesComponent implements OnInit {
       jugadorId,
       esForaneo: this.candForaneo.get(jugadorId) ?? false,
     }));
+    this.saving = true;
     this.api
       .createBatch(this.equipoTorneoId, { items })
+      .pipe(finalize(() => (this.saving = false)))
       .subscribe({
         next: () => {
           Swal.fire({
@@ -290,7 +308,7 @@ export class TorneoInscripcionesComponent implements OnInit {
           this.candForaneo = new Map();
           this.load();
         },
-        error: (e) => Swal.fire('Error', String(e?.error?.message ?? e), 'error'),
+        error: (e) => apiErrorAlert(e),
       });
   }
 
@@ -298,10 +316,14 @@ export class TorneoInscripcionesComponent implements OnInit {
     if (ins.fechaFin) return;
     void Swal.fire({ title: '¿Dar de baja?', showCancelButton: true }).then((r) => {
       if (!r.isConfirmed) return;
-      this.api.cerrar(ins.id).subscribe({
-        next: () => this.load(),
-        error: (e) => Swal.fire('Error', String(e?.error?.message ?? e), 'error'),
-      });
+      this.cerrandoInsId = ins.id;
+      this.api
+        .cerrar(ins.id)
+        .pipe(finalize(() => (this.cerrandoInsId = null)))
+        .subscribe({
+          next: () => this.load(),
+          error: (e) => apiErrorAlert(e),
+        });
     });
   }
 

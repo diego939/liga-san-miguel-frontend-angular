@@ -8,6 +8,7 @@ import type { Torneo } from '../../models/api.types';
 import { TorneosApiService } from '../../services/torneos-api.service';
 import { LigaPaginationComponent } from '../../shared/liga-pagination.component';
 import { LigaSortIndicatorComponent } from '../../shared/liga-sort-indicator.component';
+import { apiErrorAlert } from '../../utils/api-error';
 import { applySortClick } from '../../utils/column-sort.util';
 import { formatDateOnly } from '../../utils/date-format';
 import { ligaModal } from '../../shared/liga-ui';
@@ -36,6 +37,7 @@ export class TorneosListComponent implements OnInit {
   page = 1;
   readonly limit = 10;
   loading = false;
+  saving = false;
   filterQ = '';
   sortBy: 'nombre' | 'categoria' | 'formato' | 'fechaInicio' | 'fechaFin' | 'id' = 'fechaInicio';
   sortOrder: 'asc' | 'desc' = 'desc';
@@ -72,7 +74,7 @@ export class TorneosListComponent implements OnInit {
           this.items = r.items;
           this.total = r.total;
         },
-        error: (e) => Swal.fire('Error', String(e?.error?.message ?? e), 'error'),
+        error: (e) => apiErrorAlert(e),
       });
   }
 
@@ -91,6 +93,7 @@ export class TorneosListComponent implements OnInit {
 
   openCreate(): void {
     this.editing = null;
+    this.saving = false;
     this.form.reset({
       nombre: '',
       categoria: '',
@@ -106,6 +109,7 @@ export class TorneosListComponent implements OnInit {
   openEdit(t: Torneo, ev: Event): void {
     ev.stopPropagation();
     this.editing = t;
+    this.saving = false;
     this.form.patchValue({
       nombre: t.nombre,
       categoria: t.categoria,
@@ -120,10 +124,19 @@ export class TorneosListComponent implements OnInit {
 
   close(): void {
     this.modalOpen = false;
+    this.saving = false;
   }
 
   save(): void {
-    if (this.form.invalid) return;
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      void Swal.fire({
+        icon: 'warning',
+        title: 'Datos incompletos',
+        text: 'Completá nombre, categoría, formato, fechas y máximo de jugadores.',
+      });
+      return;
+    }
     const v = this.form.getRawValue();
     const body = {
       nombre: v.nombre,
@@ -135,13 +148,14 @@ export class TorneosListComponent implements OnInit {
       maxJugadores: v.maxJugadores,
     };
     const req = this.editing ? this.api.update(this.editing.id, body) : this.api.create(body);
-    req.subscribe({
+    this.saving = true;
+    req.pipe(finalize(() => (this.saving = false))).subscribe({
       next: () => {
         Swal.fire({ icon: 'success', title: 'Guardado', timer: 1200, showConfirmButton: false });
         this.close();
         this.load();
       },
-      error: (e) => Swal.fire('Error', String(e?.error?.message ?? e), 'error'),
+      error: (e) => apiErrorAlert(e),
     });
   }
 

@@ -44,9 +44,11 @@
       *ngIf="countSeleccionBaja() > 0"
       type="button"
       (click)="bulkQuitar()"
-      class="text-white bg-red-700 hover:bg-red-800 font-medium rounded-lg text-sm px-4 py-2.5"
+      [disabled]="bulkSaving"
+      class="text-white bg-red-700 hover:bg-red-800 font-medium rounded-lg text-sm px-4 py-2.5 disabled:opacity-50"
     >
-      Dar de baja ({{ countSeleccionBaja() }})
+      <span *ngIf="!bulkSaving">Dar de baja ({{ countSeleccionBaja() }})</span>
+      <span *ngIf="bulkSaving">Procesando…</span>
     </button>
   </div>
 
@@ -157,9 +159,10 @@
               *ngIf="!ins.fechaFin"
               type="button"
               (click)="quitar(ins)"
-              class="font-medium text-red-600 cursor-pointer decoration-none border border-red-500 rounded-full px-2 text-sm"
+              [disabled]="cerrandoInsId === ins.id"
+              class="font-medium text-red-600 cursor-pointer decoration-none border border-red-500 rounded-full px-2 text-sm disabled:opacity-50"
             >
-              Quitar
+              {{ cerrandoInsId === ins.id ? '…' : 'Quitar' }}
             </button>
           </td>
         </tr>
@@ -179,35 +182,36 @@
       <strong class="text-gray-900 dark:text-white">{{ clubNombre }}</strong>
     </p>
 
-    <div class="flex flex-col sm:flex-row flex-wrap gap-2 mb-3">
-      <div class="min-w-[8rem] flex-1">
-        <label [class]="lm.labelMuted">DNI (filtro)</label>
-        <input
-          [(ngModel)]="modalFiltroDni"
-          (keyup.enter)="aplicarFiltroCandidatos()"
-          placeholder="Contiene…"
-          [class]="lm.field"
-          autocomplete="off"
-        />
+    <fieldset class="border-0 p-0 m-0 min-w-0" [disabled]="saving">
+      <div class="flex flex-col sm:flex-row flex-wrap gap-2 mb-3">
+        <div class="min-w-[8rem] flex-1">
+          <label [class]="lm.labelMuted">DNI (filtro)</label>
+          <input
+            [(ngModel)]="modalFiltroDni"
+            (keyup.enter)="aplicarFiltroCandidatos()"
+            placeholder="Contiene…"
+            [class]="lm.field"
+            autocomplete="off"
+          />
+        </div>
+        <div class="min-w-[8rem] flex-1">
+          <label [class]="lm.labelMuted">Nombre / apellido</label>
+          <input
+            [(ngModel)]="modalFiltroQ"
+            (keyup.enter)="aplicarFiltroCandidatos()"
+            placeholder="Opcional"
+            [class]="lm.field"
+            autocomplete="off"
+          />
+        </div>
+        <div class="flex items-end">
+          <button type="button" (click)="aplicarFiltroCandidatos()" [class]="lm.btnPrimary">
+            Filtrar
+          </button>
+        </div>
       </div>
-      <div class="min-w-[8rem] flex-1">
-        <label [class]="lm.labelMuted">Nombre / apellido</label>
-        <input
-          [(ngModel)]="modalFiltroQ"
-          (keyup.enter)="aplicarFiltroCandidatos()"
-          placeholder="Opcional"
-          [class]="lm.field"
-          autocomplete="off"
-        />
-      </div>
-      <div class="flex items-end">
-        <button type="button" (click)="aplicarFiltroCandidatos()" [class]="lm.btnPrimary">
-          Filtrar
-        </button>
-      </div>
-    </div>
 
-    <div class="relative overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-600 max-h-[min(50vh,22rem)] overflow-y-auto mb-3">
+      <div class="relative overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-600 max-h-[min(50vh,22rem)] overflow-y-auto mb-3">
       <table class="w-full text-sm text-left">
         <thead class="text-xs uppercase bg-gray-50 dark:bg-gray-700 sticky top-0 z-10">
           <tr>
@@ -257,35 +261,51 @@
       <p *ngIf="loadingCandidatos" class="p-4 text-center text-sm">Cargando…</p>
     </div>
 
-    <div class="flex flex-wrap items-center justify-between gap-2 mb-4 text-sm text-gray-600 dark:text-gray-400">
-      <span
-        >{{ candidatosTotal }} elegible(s) · Página {{ candidPage }} · Seleccionados:
-        {{ countSeleccionInscribir() }}</span
-      >
-      <div class="flex gap-2">
-        <button
-          type="button"
-          [disabled]="candidPage <= 1"
-          (click)="prevCandidPage()"
-          class="rounded border border-gray-300 px-3 py-1.5 text-sm disabled:opacity-40 dark:border-gray-600"
+      <div class="flex flex-wrap items-center justify-between gap-2 mb-4 text-sm text-gray-600 dark:text-gray-400">
+        <span
+          >{{ candidatosTotal }} elegible(s) · Página {{ candidPage }} · Seleccionados:
+          {{ countSeleccionInscribir() }}</span
         >
-          Anterior
-        </button>
-        <button
-          type="button"
-          [disabled]="candidPage * candidLimit >= candidatosTotal"
-          (click)="nextCandidPage()"
-          class="rounded border border-gray-300 px-3 py-1.5 text-sm disabled:opacity-40 dark:border-gray-600"
-        >
-          Siguiente
-        </button>
+        <div class="flex gap-2">
+          <button
+            type="button"
+            [disabled]="candidPage <= 1"
+            (click)="prevCandidPage()"
+            class="rounded border border-gray-300 px-3 py-1.5 text-sm disabled:opacity-40 dark:border-gray-600"
+          >
+            Anterior
+          </button>
+          <button
+            type="button"
+            [disabled]="candidPage * candidLimit >= candidatosTotal"
+            (click)="nextCandidPage()"
+            class="rounded border border-gray-300 px-3 py-1.5 text-sm disabled:opacity-40 dark:border-gray-600"
+          >
+            Siguiente
+          </button>
+        </div>
       </div>
-    </div>
+    </fieldset>
 
-    <div class="flex justify-end gap-2 pt-1 border-t border-gray-200 dark:border-gray-600 mt-2">
-      <button type="button" (click)="closeModal()" [class]="lm.btnSecondary">Cancelar</button>
-      <button type="button" (click)="guardarLote()" [class]="lm.btnPrimary">
-        Inscribir seleccionados ({{ countSeleccionInscribir() }})
+    <div class="flex justify-end mt-4 pt-1 border-t border-gray-200 dark:border-gray-600">
+      <button
+        class="mx-1 cursor-pointer text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700"
+        type="button"
+        (click)="closeModal()"
+        [class]="lm.btnSecondary"
+        [disabled]="saving"
+      >
+        Cancelar
+      </button>
+      <button
+        class="mx-1 cursor-pointer text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700"
+        type="button"
+        (click)="guardarLote()"
+        [class]="lm.btnPrimary"
+        [disabled]="saving"
+      >
+        <span *ngIf="!saving">Inscribir seleccionados ({{ countSeleccionInscribir() }})</span>
+        <span *ngIf="saving">Guardando…</span>
       </button>
     </div>
   </div>

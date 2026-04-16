@@ -12,6 +12,7 @@ import { LigaSortIndicatorComponent } from '../../shared/liga-sort-indicator.com
 import { applySortClick } from '../../utils/column-sort.util';
 import { formatDateTime } from '../../utils/date-format';
 import { ligaModal } from '../../shared/liga-ui';
+import { apiErrorAlert } from '../../utils/api-error';
 
 @Component({
   selector: 'app-torneo-partidos',
@@ -41,6 +42,7 @@ export class TorneoPartidosComponent implements OnInit {
   page = 1;
   readonly limit = 10;
   loading = false;
+  saving = false;
   estadoSavingId: number | null = null;
   readonly estadosPartido: EstadoPartido[] = ['PENDIENTE', 'EN_JUEGO', 'FINALIZADO'];
   sortBy: 'fecha' | 'estado' | 'id' = 'id';
@@ -54,7 +56,10 @@ export class TorneoPartidosComponent implements OnInit {
 
   ngOnInit(): void {
     this.torneoId = Number(this.route.parent!.snapshot.paramMap.get('torneoId'));
-    this.equiposApi.listByTorneo(this.torneoId).subscribe((e) => (this.equipos = e));
+    this.equiposApi.listByTorneo(this.torneoId).subscribe({
+      next: (e) => (this.equipos = e),
+      error: (err) => apiErrorAlert(err),
+    });
     this.load();
   }
 
@@ -73,35 +78,51 @@ export class TorneoPartidosComponent implements OnInit {
           this.items = r.items;
           this.total = r.total;
         },
-        error: (e) => Swal.fire('Error', String(e?.error?.message ?? e), 'error'),
+        error: (e) => apiErrorAlert(e),
       });
   }
 
   openModal(): void {
+    this.saving = false;
     this.form.reset({ equipoLocalId: 0, equipoVisitanteId: 0, fecha: '' });
     this.modal = true;
   }
 
+  closeModal(): void {
+    this.modal = false;
+    this.saving = false;
+  }
+
   crear(): void {
-    if (this.form.invalid) return;
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      void Swal.fire({
+        icon: 'warning',
+        title: 'Datos incompletos',
+        text: 'Elegí equipos local y visitante y la fecha del partido.',
+      });
+      return;
+    }
     const v = this.form.getRawValue();
     if (v.equipoLocalId === v.equipoVisitanteId) {
       void Swal.fire('Equipos distintos', 'Local y visitante no pueden ser el mismo', 'warning');
       return;
     }
+    this.saving = true;
     this.partidosApi
       .create(this.torneoId, {
         equipoLocalId: v.equipoLocalId,
         equipoVisitanteId: v.equipoVisitanteId,
         fecha: new Date(v.fecha).toISOString(),
       })
+      .pipe(finalize(() => (this.saving = false)))
       .subscribe({
         next: () => {
           Swal.fire({ icon: 'success', title: 'Partido creado', timer: 1200, showConfirmButton: false });
-          this.modal = false;
+          this.closeModal();
           this.load();
         },
-        error: (e) => Swal.fire('Error', String(e?.error?.message ?? e), 'error'),
+        error: (e) => apiErrorAlert(e),
       });
   }
 
@@ -146,8 +167,7 @@ export class TorneoPartidosComponent implements OnInit {
           this.load();
         },
         error: (e) => {
-          void Swal.fire('Error', String(e?.error?.message ?? e), 'error');
-          this.estadoSavingId = null;
+          void apiErrorAlert(e);
           this.load();
         },
       });

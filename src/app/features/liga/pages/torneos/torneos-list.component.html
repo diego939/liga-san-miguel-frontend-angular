@@ -111,32 +111,50 @@
   <div [class]="lm.panelLgScroll" (click)="$event.stopPropagation()">
     <h3 [class]="lm.titleSm">{{ editing ? 'Editar torneo' : 'Nuevo torneo' }}</h3>
     <form [formGroup]="form" (ngSubmit)="save()" class="space-y-3">
-      <input formControlName="nombre" placeholder="Nombre" [class]="lm.field" />
-      <input formControlName="categoria" placeholder="Categoría" [class]="lm.field" />
-      <input formControlName="formato" placeholder="Formato" [class]="lm.field" />
-      <div class="grid grid-cols-2 gap-2">
-        <div>
-          <label [class]="lm.labelMuted">Inicio</label>
-          <input type="date" formControlName="fechaInicio" [class]="lm.field" />
+      <fieldset class="space-y-3 border-0 p-0 m-0 min-w-0" [disabled]="saving">
+        <input formControlName="nombre" placeholder="Nombre" [class]="lm.field" />
+        <input formControlName="categoria" placeholder="Categoría" [class]="lm.field" />
+        <input formControlName="formato" placeholder="Formato" [class]="lm.field" />
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label [class]="lm.labelMuted">Inicio</label>
+            <input type="date" formControlName="fechaInicio" [class]="lm.field" />
+          </div>
+          <div>
+            <label [class]="lm.labelMuted">Fin</label>
+            <input type="date" formControlName="fechaFin" [class]="lm.field" />
+          </div>
         </div>
-        <div>
-          <label [class]="lm.labelMuted">Fin</label>
-          <input type="date" formControlName="fechaFin" [class]="lm.field" />
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label [class]="lm.labelMuted">Límite foráneos</label>
+            <input type="number" formControlName="limiteForaneos" [class]="lm.field" />
+          </div>
+          <div>
+            <label [class]="lm.labelMuted">Máx. jugadores por equipo</label>
+            <input type="number" formControlName="maxJugadores" [class]="lm.field" />
+          </div>
         </div>
-      </div>
-      <div class="grid grid-cols-2 gap-2">
-        <div>
-          <label [class]="lm.labelMuted">Límite foráneos</label>
-          <input type="number" formControlName="limiteForaneos" [class]="lm.field" />
-        </div>
-        <div>
-          <label [class]="lm.labelMuted">Máx. jugadores por equipo</label>
-          <input type="number" formControlName="maxJugadores" [class]="lm.field" />
-        </div>
-      </div>
-      <div class="flex justify-end gap-2 pt-2">
-        <button type="button" (click)="close()" [class]="lm.btnSecondary">Cancelar</button>
-        <button type="submit" [class]="lm.btnPrimary">Guardar</button>
+      </fieldset>
+      <div class="flex justify-end mt-4">
+        <button
+          class="mx-1 cursor-pointer text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700"
+          type="button"
+          (click)="close()"
+          [class]="lm.btnSecondary"
+          [disabled]="saving"
+        >
+          Cancelar
+        </button>
+        <button
+          class="mx-1 cursor-pointer text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700"
+          type="submit"
+          [class]="lm.btnPrimary"
+          [disabled]="saving"
+        >
+          <span *ngIf="!saving">Guardar</span>
+          <span *ngIf="saving">Guardando…</span>
+        </button>
       </div>
     </form>
   </div>
