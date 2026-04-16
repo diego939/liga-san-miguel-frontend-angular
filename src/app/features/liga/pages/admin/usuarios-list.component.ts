@@ -1,4 +1,5 @@
 import { CommonModule } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { finalize } from 'rxjs/operators';
@@ -25,6 +26,8 @@ import { ligaModal } from '../../shared/liga-ui';
 export class UsuariosListComponent implements OnInit {
   readonly lm = ligaModal;
 
+  loading = false;
+
   private readonly api = inject(UsuariosApiService);
   private readonly rolesApi = inject(RolesApiService);
   private readonly fb = inject(FormBuilder);
@@ -46,7 +49,12 @@ export class UsuariosListComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    this.rolesApi.list({ limit: 100, page: 1 }).subscribe((r) => (this.roles = r.items));
+    this.rolesApi
+      .list({ limit: 100, page: 1 })
+      .subscribe({
+        next: (r) => (this.roles = r.items),
+        error: (e) => this.apiErrorAlert(e),
+      });
     this.load();
   }
 
@@ -58,27 +66,41 @@ export class UsuariosListComponent implements OnInit {
         this.items = r.items;
         this.total = r.total;
       },
-      error: (e) => Swal.fire('Error', String(e?.error?.message ?? e), 'error'),
+      error: (e) => this.apiErrorAlert(e),
     });
   }
 
   openCreate(): void {
     this.editing = null;
+    this.loading = false;
     this.form.reset({ email: '', password: '', rolId: 0 });
     this.modal = true;
   }
 
   openEdit(u: Usuario): void {
     this.editing = u;
+    this.loading = false;
     this.form.patchValue({ email: u.email, password: '', rolId: u.rolId });
     this.modal = true;
   }
 
   save(): void {
-    if (this.form.invalid) return;
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      void Swal.fire({
+        icon: 'warning',
+        title: 'Datos incompletos',
+        text: 'Todos los campos son requeridos.',
+      });
+      return;
+    }
     const v = this.form.getRawValue();
     if (!this.editing && (!v.password || v.password.length < 6)) {
-      void Swal.fire('La contraseña debe tener al menos 6 caracteres', '', 'warning');
+      void Swal.fire({
+        icon: 'warning',
+        title: 'Contraseña requerida',
+        text: 'La contraseña debe tener al menos 6 caracteres.',
+      });
       return;
     }
     const req = this.editing
@@ -88,14 +110,17 @@ export class UsuariosListComponent implements OnInit {
           ...(v.password ? { password: v.password } : {}),
         })
       : this.api.create({ email: v.email, password: v.password, rolId: v.rolId });
-    req.subscribe({
-      next: () => {
-        Swal.fire({ icon: 'success', title: 'Guardado', timer: 1200, showConfirmButton: false });
-        this.modal = false;
-        this.load();
-      },
-      error: (e) => Swal.fire('Error', String(e?.error?.message ?? e), 'error'),
-    });
+    this.loading = true;
+    req
+      .pipe(finalize(() => (this.loading = false)))
+      .subscribe({
+        next: () => {
+          Swal.fire({ icon: 'success', title: 'Guardado', timer: 1200, showConfirmButton: false });
+          this.modal = false;
+          this.load();
+        },
+        error: (e) => this.apiErrorAlert(e),
+      });
   }
 
   onSort(key: 'email' | 'id' | 'rolId'): void {
@@ -111,7 +136,7 @@ export class UsuariosListComponent implements OnInit {
       if (!r.isConfirmed) return;
       this.api.delete(u.id).subscribe({
         next: () => this.load(),
-        error: (e) => Swal.fire('Error', String(e?.error?.message ?? e), 'error'),
+        error: (e) => this.apiErrorAlert(e),
       });
     });
   }
@@ -127,5 +152,49 @@ export class UsuariosListComponent implements OnInit {
       this.page++;
       this.load();
     }
+  }
+
+  /**
+   * Mensaje tal como viene en el cuerpo de error HTTP (Nest: `message` string | string[],
+   * cuerpo string, u objeto sin `message` → se serializa el cuerpo completo).
+   * No usa el mensaje genérico de Angular (`Http failure response for…`).
+   */
+  private apiErrorMessage(err: unknown): string {
+    if (!(err instanceof HttpErrorResponse)) {
+      return typeof err === 'object' && err !== null ? JSON.stringify(err) : String(err);
+    }
+    const body = err.error;
+    if (typeof body === 'string') {
+      return body;
+    }
+    if (body && typeof body === 'object') {
+      const o = body as Record<string, unknown>;
+      if ('message' in o && o['message'] != null) {
+        const m = o['message'];
+        if (Array.isArray(m)) {
+          return m.map(String).filter(Boolean).join('\n');
+        }
+        if (typeof m === 'string') {
+          return m;
+        }
+      }
+      try {
+        return JSON.stringify(body);
+      } catch {
+        return String(body);
+      }
+    }
+    if (body == null || body === '') {
+      return '';
+    }
+    return String(body);
+  }
+
+  /** Swal solo con el contenido emitido por el API (sin título fijo del front). */
+  private apiErrorAlert(err: unknown): void {
+    void Swal.fire({
+      icon: 'error',
+      text: this.apiErrorMessage(err),
+    });
   }
 }

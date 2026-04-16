@@ -60,10 +60,28 @@
   <div [class]="lm.panelSm" (click)="$event.stopPropagation()">
     <h3 [class]="lm.titleSm">Nuevo rol</h3>
     <form [formGroup]="form" (ngSubmit)="save()" class="space-y-3">
-      <input formControlName="descripcion" placeholder="Descripción" [class]="lm.field" />
-      <div class="flex justify-end gap-2">
-        <button type="button" (click)="modal = false" [class]="lm.btnSecondary">Cancelar</button>
-        <button type="submit" [class]="lm.btnPrimary">Crear</button>
+      <fieldset class="border-0 p-0 m-0 min-w-0" [disabled]="loading">
+        <input formControlName="descripcion" placeholder="Descripción" [class]="lm.field" />
+      </fieldset>
+      <div class="flex justify-end mt-4">
+        <button
+          class="mx-1 cursor-pointer text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700"
+          type="button"
+          (click)="modal = false"
+          [class]="lm.btnSecondary"
+          [disabled]="loading"
+        >
+          Cancelar
+        </button>
+        <button
+          class="mx-1 cursor-pointer text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700"
+          type="submit"
+          [class]="lm.btnPrimary"
+          [disabled]="loading"
+        >
+          <span *ngIf="!loading">Crear</span>
+          <span *ngIf="loading">Guardando…</span>
+        </button>
       </div>
     </form>
   </div>

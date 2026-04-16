@@ -1,6 +1,8 @@
 import { CommonModule } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { finalize } from 'rxjs/operators';
 import Swal from 'sweetalert2';
 import type { Rol } from '../../models/api.types';
 import { RolesApiService } from '../../services/roles-api.service';
@@ -22,6 +24,8 @@ import { ligaModal } from '../../shared/liga-ui';
 })
 export class RolesListComponent implements OnInit {
   readonly lm = ligaModal;
+
+  loading = false;
 
   private readonly api = inject(RolesApiService);
   private readonly fb = inject(FormBuilder);
@@ -47,7 +51,7 @@ export class RolesListComponent implements OnInit {
         this.items = r.items;
         this.total = r.total;
       },
-      error: (e) => Swal.fire('Error', String(e?.error?.message ?? e), 'error'),
+      error: (e) => this.apiErrorAlert(e),
     });
   }
 
@@ -60,20 +64,33 @@ export class RolesListComponent implements OnInit {
   }
 
   openCreate(): void {
+    this.loading = false;
     this.form.reset({ descripcion: '' });
     this.modal = true;
   }
 
   save(): void {
-    if (this.form.invalid) return;
-    this.api.create(this.form.getRawValue()).subscribe({
-      next: () => {
-        Swal.fire({ icon: 'success', title: 'Rol creado', timer: 1200, showConfirmButton: false });
-        this.modal = false;
-        this.load();
-      },
-      error: (e) => Swal.fire('Error', String(e?.error?.message ?? e), 'error'),
-    });
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      void Swal.fire({
+        icon: 'warning',
+        title: 'Datos incompletos',
+        text: 'Ingresá una descripción para el rol.',
+      });
+      return;
+    }
+    this.loading = true;
+    this.api
+      .create(this.form.getRawValue())
+      .pipe(finalize(() => (this.loading = false)))
+      .subscribe({
+        next: () => {
+          Swal.fire({ icon: 'success', title: 'Rol creado', timer: 1200, showConfirmButton: false });
+          this.modal = false;
+          this.load();
+        },
+        error: (e) => this.apiErrorAlert(e),
+      });
   }
 
   remove(r: Rol): void {
@@ -81,7 +98,7 @@ export class RolesListComponent implements OnInit {
       if (!x.isConfirmed) return;
       this.api.delete(r.id).subscribe({
         next: () => this.load(),
-        error: (e) => Swal.fire('Error', String(e?.error?.message ?? e), 'error'),
+        error: (e) => this.apiErrorAlert(e),
       });
     });
   }
@@ -97,5 +114,43 @@ export class RolesListComponent implements OnInit {
       this.page++;
       this.load();
     }
+  }
+
+  private apiErrorMessage(err: unknown): string {
+    if (!(err instanceof HttpErrorResponse)) {
+      return typeof err === 'object' && err !== null ? JSON.stringify(err) : String(err);
+    }
+    const body = err.error;
+    if (typeof body === 'string') {
+      return body;
+    }
+    if (body && typeof body === 'object') {
+      const o = body as Record<string, unknown>;
+      if ('message' in o && o['message'] != null) {
+        const m = o['message'];
+        if (Array.isArray(m)) {
+          return m.map(String).filter(Boolean).join('\n');
+        }
+        if (typeof m === 'string') {
+          return m;
+        }
+      }
+      try {
+        return JSON.stringify(body);
+      } catch {
+        return String(body);
+      }
+    }
+    if (body == null || body === '') {
+      return '';
+    }
+    return String(body);
+  }
+
+  private apiErrorAlert(err: unknown): void {
+    void Swal.fire({
+      icon: 'error',
+      text: this.apiErrorMessage(err),
+    });
   }
 }
