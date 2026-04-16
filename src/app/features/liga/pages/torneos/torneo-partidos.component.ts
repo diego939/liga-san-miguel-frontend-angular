@@ -43,8 +43,8 @@ export class TorneoPartidosComponent implements OnInit {
   loading = false;
   estadoSavingId: number | null = null;
   readonly estadosPartido: EstadoPartido[] = ['PENDIENTE', 'EN_JUEGO', 'FINALIZADO'];
-  sortBy: 'fecha' | 'estado' | 'id' = 'fecha';
-  sortOrder: 'asc' | 'desc' = 'asc';
+  sortBy: 'fecha' | 'estado' | 'id' = 'id';
+  sortOrder: 'asc' | 'desc' = 'desc';
   modal = false;
   form = this.fb.nonNullable.group({
     equipoLocalId: [0, Validators.min(1)],

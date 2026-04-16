@@ -139,6 +139,12 @@ export class PartidosApiService {
     );
   }
 
+  deleteEvento(partidoId: number, eventoId: number): Observable<void> {
+    return this.http.delete<void>(
+      `${this.base}/partidos/${partidoId}/eventos/${eventoId}`,
+    );
+  }
+
   listCambios(id: number): Observable<CambioPartido[]> {
     return this.http.get<CambioPartido[]>(`${this.base}/partidos/${id}/cambios`);
   }
@@ -150,6 +156,12 @@ export class PartidosApiService {
     return this.http.post<CambioPartido>(
       `${this.base}/partidos/${id}/cambios`,
       body,
+    );
+  }
+
+  deleteCambio(partidoId: number, cambioId: number): Observable<void> {
+    return this.http.delete<void>(
+      `${this.base}/partidos/${partidoId}/cambios/${cambioId}`,
     );
   }
 }

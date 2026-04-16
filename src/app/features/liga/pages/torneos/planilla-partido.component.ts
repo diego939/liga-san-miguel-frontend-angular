@@ -20,8 +20,10 @@ import type {
   Partido,
   TipoEvento,
 } from '../../models/api.types';
+import { environment } from '../../../../../environments/environment';
 import { InscripcionesApiService } from '../../services/inscripciones-api.service';
 import { PartidosApiService } from '../../services/partidos-api.service';
+import { inscripcionSolapaDiaCivil } from '../../utils/liga-day-bounds';
 
 type Line = {
   jugadorId: number;
@@ -189,20 +191,11 @@ export class PlanillaPartidoComponent implements OnInit {
     this.api.listCambios(this.partidoId).subscribe((c) => (this.cambios = c));
   }
 
-  /** Alineado con el backend: vigencia que solapa el día UTC de la fecha del partido. */
+  /** Alineado con el backend: vigencia que solapa el día civil (APP_TIMEZONE) de la fecha del partido. */
   private inscripcionVigenteEnFechaPartido(ins: Inscripcion): boolean {
     if (!this.partido?.fecha) return false;
-    const ref = new Date(this.partido.fecha);
-    const y = ref.getUTCFullYear();
-    const m = ref.getUTCMonth();
-    const d = ref.getUTCDate();
-    const inicio = new Date(Date.UTC(y, m, d, 0, 0, 0, 0));
-    const fin = new Date(Date.UTC(y, m, d, 23, 59, 59, 999));
-    const fi = new Date(ins.fechaInicio);
-    if (fi > fin) return false;
-    const ff = ins.fechaFin ? new Date(ins.fechaFin) : null;
-    if (ff !== null && ff <= inicio) return false;
-    return true;
+    const tz = environment.appTimeZone ?? 'America/Argentina/Buenos_Aires';
+    return inscripcionSolapaDiaCivil(ins, new Date(this.partido.fecha), tz);
   }
 
   candidatosLocal(): Inscripcion[] {
@@ -227,6 +220,20 @@ export class PlanillaPartidoComponent implements OnInit {
   jugadorNombre(j?: Jugador | null): string {
     if (!j) return '';
     return `${j.apellido}, ${j.nombre}`;
+  }
+
+  /** Etiqueta de equipo (mismo criterio que el selector de cambios: Local/Visitante + club). */
+  equipoLabelPorJugadorId(jugadorId: number): string {
+    if (!this.partido) return '';
+    const locClub = this.partido.equipoLocal?.club?.nombre;
+    const visClub = this.partido.equipoVisitante?.club?.nombre;
+    if (this.local.some((l) => l.jugadorId === jugadorId)) {
+      return locClub != null && locClub !== '' ? `Local — ${locClub}` : 'Local';
+    }
+    if (this.visit.some((l) => l.jugadorId === jugadorId)) {
+      return visClub != null && visClub !== '' ? `Visitante — ${visClub}` : 'Visitante';
+    }
+    return '';
   }
 
   labelTipoEvento(t: TipoEvento): string {
@@ -476,6 +483,83 @@ export class PlanillaPartidoComponent implements OnInit {
         },
         error: (e) => void Swal.fire('Error', String(e?.error?.message ?? e), 'error'),
       });
+  }
+
+  eliminarEvento(e: EventoPartido): void {
+    if (!this.partido || this.partido.estado !== 'EN_JUEGO') {
+      void Swal.fire({
+        icon: 'warning',
+        title: 'No se puede eliminar',
+        text: 'Solo se pueden eliminar eventos con el partido en juego.',
+      });
+      return;
+    }
+    const desc = `${this.labelTipoEvento(e.tipo)} — ${this.jugadorNombre(e.jugador) || 'Jug. ' + e.jugadorId}`;
+    void Swal.fire({
+      title: '¿Eliminar este evento?',
+      text: desc,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#b91c1c',
+      confirmButtonText: 'Eliminar',
+      cancelButtonText: 'Cancelar',
+    }).then((r) => {
+      if (!r.isConfirmed) return;
+      this.api.deleteEvento(this.partidoId, e.id).subscribe({
+        next: () => {
+          void Swal.fire({
+            icon: 'success',
+            title: 'Evento eliminado',
+            timer: 1000,
+            showConfirmButton: false,
+          });
+          this.loadEventosCambios();
+          this.api.get(this.partidoId).subscribe({
+            next: (p) => {
+              this.partido = p;
+              this.syncActaFromPartido(p);
+            },
+          });
+        },
+        error: (err) =>
+          void Swal.fire('Error', String(err?.error?.message ?? err), 'error'),
+      });
+    });
+  }
+
+  eliminarCambio(c: CambioPartido): void {
+    if (!this.partido || this.partido.estado !== 'EN_JUEGO') {
+      void Swal.fire({
+        icon: 'warning',
+        title: 'No se puede eliminar',
+        text: 'Solo se pueden eliminar cambios con el partido en juego.',
+      });
+      return;
+    }
+    void Swal.fire({
+      title: '¿Eliminar esta sustitución?',
+      text: `${c.minuto}' — ${this.jugadorNombre(c.jugadorSale) || c.jugadorSaleId} → ${this.jugadorNombre(c.jugadorEntra) || c.jugadorEntraId}`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#b91c1c',
+      confirmButtonText: 'Eliminar',
+      cancelButtonText: 'Cancelar',
+    }).then((r) => {
+      if (!r.isConfirmed) return;
+      this.api.deleteCambio(this.partidoId, c.id).subscribe({
+        next: () => {
+          void Swal.fire({
+            icon: 'success',
+            title: 'Cambio eliminado',
+            timer: 1000,
+            showConfirmButton: false,
+          });
+          this.loadEventosCambios();
+        },
+        error: (err) =>
+          void Swal.fire('Error', String(err?.error?.message ?? err), 'error'),
+      });
+    });
   }
 
   labelEstado(e: EstadoPartido): string {

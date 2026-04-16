@@ -5,4 +5,6 @@
 export const environment = {
   production: false,
   apiUrl: 'http://localhost:3000',
+  /** Día civil para vigencias (inscripción, pase, planilla); debe coincidir con `APP_TIMEZONE` del API. */
+  appTimeZone: 'America/Argentina/Buenos_Aires',
 };

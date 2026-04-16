@@ -244,11 +244,30 @@
       </div>
     </form>
     <ul class="mt-3 text-sm space-y-1.5 border rounded-md p-3 dark:border-gray-700 max-h-56 overflow-y-auto">
-      <li *ngFor="let e of eventos" class="flex flex-wrap gap-x-2 border-b border-gray-100 dark:border-gray-800 pb-1 last:border-0">
-        <span class="font-medium">{{ e.minuto }}'</span>
-        <span>{{ labelTipoEvento(e.tipo) }}</span>
-        <span class="text-gray-600 dark:text-gray-400">— {{ jugadorNombre(e.jugador) || 'Jug. ' + e.jugadorId }}</span>
-        <span *ngIf="e.notas" class="text-xs text-gray-500 w-full italic">{{ e.notas }}</span>
+      <li
+        *ngFor="let e of eventos"
+        class="flex flex-wrap gap-x-2 gap-y-1 border-b border-gray-100 dark:border-gray-800 pb-1 last:border-0 justify-between items-start"
+      >
+        <div class="flex flex-wrap gap-x-2 min-w-0 flex-1">
+          <span class="font-medium">{{ e.minuto }}'</span>
+          <span>{{ labelTipoEvento(e.tipo) }}</span>
+          <span class="text-gray-600 dark:text-gray-400">
+            —
+            {{ jugadorNombre(e.jugador) || 'Jug. ' + e.jugadorId }}
+            <ng-container *ngIf="equipoLabelPorJugadorId(e.jugadorId) as eq">
+              <span class="text-gray-500">({{ eq }})</span>
+            </ng-container>
+          </span>
+          <span *ngIf="e.notas" class="text-xs text-gray-500 w-full italic">{{ e.notas }}</span>
+        </div>
+        <button
+          *ngIf="p.estado === 'EN_JUEGO'"
+          type="button"
+          (click)="eliminarEvento(e)"
+          class="shrink-0 text-xs font-medium text-red-600 dark:text-red-400 border border-red-500 rounded-full px-2 py-0.5 hover:bg-red-50 dark:hover:bg-red-950/30"
+        >
+          Eliminar
+        </button>
       </li>
       <li *ngIf="eventos.length === 0" class="text-gray-500 text-sm">Sin eventos registrados.</li>
     </ul>
@@ -294,9 +313,34 @@
       </button>
     </form>
     <ul class="mt-3 text-sm space-y-1.5 border rounded-md p-3 dark:border-gray-700 max-h-48 overflow-y-auto">
-      <li *ngFor="let c of cambios">
-        {{ c.minuto }}' — sale {{ jugadorNombre(c.jugadorSale) || c.jugadorSaleId }} → entra
-        {{ jugadorNombre(c.jugadorEntra) || c.jugadorEntraId }}
+      <li
+        *ngFor="let c of cambios"
+        class="flex flex-wrap gap-x-2 gap-y-1 justify-between items-start border-b border-gray-100 dark:border-gray-800 pb-1.5 last:border-0"
+      >
+        <div class="flex flex-wrap gap-x-1 min-w-0 flex-1">
+          {{ c.minuto }}' — sale
+          <span class="text-gray-600 dark:text-gray-400">
+            {{ jugadorNombre(c.jugadorSale) || c.jugadorSaleId }}
+            <ng-container *ngIf="equipoLabelPorJugadorId(c.jugadorSaleId) as eqSale">
+              <span class="text-gray-500">({{ eqSale }})</span>
+            </ng-container>
+          </span>
+          → entra
+          <span class="text-gray-600 dark:text-gray-400">
+            {{ jugadorNombre(c.jugadorEntra) || c.jugadorEntraId }}
+            <ng-container *ngIf="equipoLabelPorJugadorId(c.jugadorEntraId) as eqEntra">
+              <span class="text-gray-500">({{ eqEntra }})</span>
+            </ng-container>
+          </span>
+        </div>
+        <button
+          *ngIf="p.estado === 'EN_JUEGO'"
+          type="button"
+          (click)="eliminarCambio(c)"
+          class="shrink-0 text-xs font-medium text-red-600 dark:text-red-400 border border-red-500 rounded-full px-2 py-0.5 hover:bg-red-50 dark:hover:bg-red-950/30"
+        >
+          Eliminar
+        </button>
       </li>
       <li *ngIf="cambios.length === 0" class="text-gray-500 text-sm">Sin cambios registrados.</li>
     </ul>
