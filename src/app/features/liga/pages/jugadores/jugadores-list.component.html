@@ -91,6 +91,7 @@
       <tbody>
         <tr
           *ngFor="let j of items"
+          title="Ver detalles"
           class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer"
           (click)="goDetail(j)"
         >
@@ -102,6 +103,7 @@
           <td class="px-6 py-4 text-right space-x-2" (click)="$event.stopPropagation()">
             <button
               type="button"
+              title="Editar"
               (click)="openEdit(j, $event)"
               class="font-medium text-blue-600 dark:text-blue-500 cursor-pointer decoration-none border border-blue-500 rounded-full px-2"
             >
@@ -109,6 +111,7 @@
             </button>
             <button
               type="button"
+              title="Eliminar"
               (click)="remove(j, $event)"
               class="font-medium text-red-600 cursor-pointer decoration-none border border-red-500 rounded-full px-2"
             >
