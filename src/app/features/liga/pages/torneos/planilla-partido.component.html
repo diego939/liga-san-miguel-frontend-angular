@@ -48,18 +48,36 @@
                 {{ l.titular ? 'Titular' : 'Suplente' }}
               </span>
             </span>
-            <label class="text-xs text-gray-500 flex items-center gap-1">
-              Nº
-              <input
-                type="number"
-                min="0"
-                class="w-14 text-sm rounded border border-gray-300 dark:border-gray-600 px-2 py-1.5 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                [value]="l.numeroCamiseta ?? ''"
-                (input)="patchCamiseta('local', i, $any($event.target).value)"
-              />
-            </label>
-            <button type="button" (click)="toggleTitular('local', i)" class="text-blue-600 text-xs cursor-pointer decoration-none border border-blue-500 rounded-full px-2">Cambiar rol</button>
-            <button type="button" (click)="removeLine('local', i)" class="text-red-600 text-xs cursor-pointer decoration-none border border-red-500 rounded-full px-2">Quitar</button>
+            <div class="flex items-center gap-1.5 shrink-0">
+              <span class="text-xs text-gray-500 dark:text-gray-400">Nº</span>
+              <div
+                class="inline-flex items-stretch rounded-full border border-gray-300 dark:border-gray-600 overflow-hidden bg-white dark:bg-gray-800 shadow-sm"
+                role="group"
+                [attr.aria-label]="'Camiseta ' + (l.nombre || l.jugadorId)"
+              >
+                <button
+                  type="button"
+                  (click)="ajustarCamiseta('local', i, -1)"
+                  [disabled]="saving || !puedeDecrementarCamiseta(l)"
+                  class="cursor-pointer px-2.5 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  −
+                </button>
+                <span
+                  class="min-w-[2.25rem] px-2 py-1.5 text-center text-sm tabular-nums text-gray-900 dark:text-white border-x border-gray-300 dark:border-gray-600"
+                  >{{ labelCamiseta(l) }}</span>
+                <button
+                  type="button"
+                  (click)="ajustarCamiseta('local', i, 1)"
+                  [disabled]="saving || !puedeIncrementarCamiseta(l)"
+                  class="cursor-pointer px-2.5 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+            <button type="button" (click)="toggleTitular('local', i)" [disabled]="saving" class="text-blue-600 text-xs cursor-pointer decoration-none border border-blue-500 rounded-full px-2 disabled:opacity-50">Cambiar rol</button>
+            <button type="button" (click)="removeLine('local', i)" [disabled]="saving" class="text-red-600 text-xs cursor-pointer decoration-none border border-red-500 rounded-full px-2 disabled:opacity-50">Quitar</button>
           </li>
         </ul>
         <div *ngIf="local.length === 0" class="text-sm text-gray-500 italic py-2">Sin jugadores cargados aún.</div>
@@ -81,14 +99,41 @@
               </option>
             </select>
           </div>
+          <button type="button" (click)="previewAddInscripto('local', addLocalJugadorId)" class="cursor-pointer px-2 py-1.5 bg-gray-600 text-white rounded text-xs">Validar</button>
+          <div class="flex flex-col gap-1 shrink-0">
+            <span class="text-xs text-gray-500 dark:text-gray-400">Nº</span>
+            <div
+              class="inline-flex items-stretch rounded-full border border-gray-300 dark:border-gray-600 overflow-hidden bg-white dark:bg-gray-800 shadow-sm"
+              role="group"
+              aria-label="Camiseta al agregar jugador"
+            >
+              <button
+                type="button"
+                (click)="ajustarCamisetaAlta('local', -1)"
+                [disabled]="saving || !puedeDecrementarCamisetaAlta('local')"
+                class="cursor-pointer px-2.5 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                −
+              </button>
+              <span
+                class="min-w-[2.25rem] px-2 py-1.5 text-center text-sm tabular-nums text-gray-900 dark:text-white border-x border-gray-300 dark:border-gray-600"
+                >{{ labelCamisetaValor(addLocalNumeroCamiseta) }}</span>
+              <button
+                type="button"
+                (click)="ajustarCamisetaAlta('local', 1)"
+                [disabled]="saving || !puedeIncrementarCamisetaAlta('local')"
+                class="cursor-pointer px-2.5 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                +
+              </button>
+            </div>
+          </div>
           <label class="flex items-center gap-1.5 text-sm">
             <input type="checkbox" [(ngModel)]="addLocalTitular" [ngModelOptions]="{ standalone: true }" />
             Titular
           </label>
-          <button type="button" (click)="previewAddInscripto('local', addLocalJugadorId)" class="px-2 py-1.5 bg-gray-600 text-white rounded text-xs">Validar</button>
-          <button type="button" (click)="agregarDesdeInscripcion('local', addLocalJugadorId, addLocalTitular)" class="px-3 py-1.5 bg-blue-700 text-white rounded text-sm">Agregar</button>
+          <button type="button" (click)="agregarDesdeInscripcion('local', addLocalJugadorId, addLocalTitular)" [disabled]="saving" class="cursor-pointer px-3 py-1.5 bg-blue-700 text-white rounded text-sm disabled:opacity-50">Agregar</button>
         </div>
-        <p *ngIf="previewMsgLocal" class="mt-2 text-xs text-gray-600 dark:text-gray-400">{{ previewMsgLocal }}</p>
       </div>
     </div>
 
@@ -115,18 +160,36 @@
                 {{ l.titular ? 'Titular' : 'Suplente' }}
               </span>
             </span>
-            <label class="text-xs text-gray-500 flex items-center gap-1">
-              Nº
-              <input
-                type="number"
-                min="0"
-                class="w-14 text-sm rounded border border-gray-300 dark:border-gray-600 px-2 py-1.5 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                [value]="l.numeroCamiseta ?? ''"
-                (input)="patchCamiseta('vis', i, $any($event.target).value)"
-              />
-            </label>
-            <button type="button" (click)="toggleTitular('vis', i)" class="text-blue-600 text-xs cursor-pointer decoration-none border border-blue-500 rounded-full px-2">Cambiar rol</button>
-            <button type="button" (click)="removeLine('vis', i)" class="text-red-600 text-xs cursor-pointer decoration-none border border-red-500 rounded-full px-2">Quitar</button>
+            <div class="flex items-center gap-1.5 shrink-0">
+              <span class="text-xs text-gray-500 dark:text-gray-400">Nº</span>
+              <div
+                class="inline-flex items-stretch rounded-full border border-gray-300 dark:border-gray-600 overflow-hidden bg-white dark:bg-gray-800 shadow-sm"
+                role="group"
+                [attr.aria-label]="'Camiseta ' + (l.nombre || l.jugadorId)"
+              >
+                <button
+                  type="button"
+                  (click)="ajustarCamiseta('vis', i, -1)"
+                  [disabled]="saving || !puedeDecrementarCamiseta(l)"
+                  class="cursor-pointer px-2.5 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  −
+                </button>
+                <span
+                  class="min-w-[2.25rem] px-2 py-1.5 text-center text-sm tabular-nums text-gray-900 dark:text-white border-x border-gray-300 dark:border-gray-600"
+                  >{{ labelCamiseta(l) }}</span>
+                <button
+                  type="button"
+                  (click)="ajustarCamiseta('vis', i, 1)"
+                  [disabled]="saving || !puedeIncrementarCamiseta(l)"
+                  class="cursor-pointer px-2.5 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+            <button type="button" (click)="toggleTitular('vis', i)" [disabled]="saving" class="text-blue-600 text-xs cursor-pointer decoration-none border border-blue-500 rounded-full px-2 disabled:opacity-50">Cambiar rol</button>
+            <button type="button" (click)="removeLine('vis', i)" [disabled]="saving" class="text-red-600 text-xs cursor-pointer decoration-none border border-red-500 rounded-full px-2 disabled:opacity-50">Quitar</button>
           </li>
         </ul>
         <div *ngIf="visit.length === 0" class="text-sm text-gray-500 italic py-2">Sin jugadores cargados aún.</div>
@@ -148,21 +211,48 @@
               </option>
             </select>
           </div>
+          <button type="button" (click)="previewAddInscripto('vis', addVisJugadorId)" class="cursor-pointer px-2 py-1.5 bg-gray-600 text-white rounded text-xs">Validar</button>
+          <div class="flex flex-col gap-1 shrink-0">
+            <span class="text-xs text-gray-500 dark:text-gray-400">Nº</span>
+            <div
+              class="inline-flex items-stretch rounded-full border border-gray-300 dark:border-gray-600 overflow-hidden bg-white dark:bg-gray-800 shadow-sm"
+              role="group"
+              aria-label="Camiseta al agregar jugador"
+            >
+              <button
+                type="button"
+                (click)="ajustarCamisetaAlta('vis', -1)"
+                [disabled]="saving || !puedeDecrementarCamisetaAlta('vis')"
+                class="cursor-pointer px-2.5 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                −
+              </button>
+              <span
+                class="min-w-[2.25rem] px-2 py-1.5 text-center text-sm tabular-nums text-gray-900 dark:text-white border-x border-gray-300 dark:border-gray-600"
+                >{{ labelCamisetaValor(addVisNumeroCamiseta) }}</span>
+              <button
+                type="button"
+                (click)="ajustarCamisetaAlta('vis', 1)"
+                [disabled]="saving || !puedeIncrementarCamisetaAlta('vis')"
+                class="cursor-pointer px-2.5 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                +
+              </button>
+            </div>
+          </div>
           <label class="flex items-center gap-1.5 text-sm">
             <input type="checkbox" [(ngModel)]="addVisTitular" [ngModelOptions]="{ standalone: true }" />
             Titular
           </label>
-          <button type="button" (click)="previewAddInscripto('vis', addVisJugadorId)" class="px-2 py-1.5 bg-gray-600 text-white rounded text-xs">Validar</button>
-          <button type="button" (click)="agregarDesdeInscripcion('vis', addVisJugadorId, addVisTitular)" class="px-3 py-1.5 bg-blue-700 text-white rounded text-sm">Agregar</button>
+          <button type="button" (click)="agregarDesdeInscripcion('vis', addVisJugadorId, addVisTitular)" [disabled]="saving" class="cursor-pointer px-3 py-1.5 bg-blue-700 text-white rounded text-sm disabled:opacity-50">Agregar</button>
         </div>
-        <p *ngIf="previewMsgVis" class="mt-2 text-xs text-gray-600 dark:text-gray-400">{{ previewMsgVis }}</p>
       </div>
     </div>
   </div>
 
   <section class="p-4 border rounded-lg dark:border-gray-700 space-y-3">
     <h3 class="font-semibold dark:text-gray-400">Acta del partido (árbitros, capitanes, observaciones)</h3>
-    <p class="text-xs text-gray-500">Se guarda junto con la planilla al pulsar «Guardar planilla completa».</p>
+    <p class="text-xs text-gray-500">Agregar o quitar jugadores guarda la planilla al instante (incluye estos datos). También podés usar «Guardar planilla completa».</p>
     <div class="grid sm:grid-cols-2 gap-3 text-sm">
       <div>
         <label class="block text-xs text-gray-500 mb-1">Capitán local</label>
@@ -201,7 +291,7 @@
     type="button"
     (click)="guardarPlanilla()"
     [disabled]="saving"
-    class="px-5 py-2.5 bg-green-700 text-white rounded-lg disabled:opacity-50"
+    class="cursor-pointer px-5 py-2.5 bg-green-700 text-white rounded-lg disabled:opacity-50"
   >
     {{ saving ? 'Guardando…' : 'Guardar planilla completa' }}
   </button>
@@ -227,11 +317,35 @@
         </div>
         <div class="flex flex-col gap-1">
           <label class="text-xs text-gray-500">Minuto</label>
-          <input type="number" formControlName="minuto" class="w-20 text-sm rounded border border-gray-300 dark:border-gray-600 px-2 py-1.5 bg-white dark:bg-gray-800 text-gray-900 dark:text-white" min="0" />
+          <div
+            class="inline-flex items-stretch rounded-full border border-gray-300 dark:border-gray-600 overflow-hidden bg-white dark:bg-gray-800 shadow-sm"
+            role="group"
+            aria-label="Minuto del evento"
+          >
+            <button
+              type="button"
+              (click)="ajustarMinutoEv(-1)"
+              [disabled]="p.estado !== 'EN_JUEGO' || !puedeDecrementarMinutoEv()"
+              class="cursor-pointer px-2.5 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              −
+            </button>
+            <span
+              class="min-w-[2.25rem] px-2 py-1.5 text-center text-sm tabular-nums text-gray-900 dark:text-white border-x border-gray-300 dark:border-gray-600"
+              >{{ evForm.controls.minuto.value }}</span>
+            <button
+              type="button"
+              (click)="ajustarMinutoEv(1)"
+              [disabled]="p.estado !== 'EN_JUEGO' || !puedeIncrementarMinutoEv()"
+              class="cursor-pointer px-2.5 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              +
+            </button>
+          </div>
         </div>
         <button
           type="submit"
-          class="px-4 py-2 bg-blue-700 text-white rounded text-sm disabled:opacity-50"
+          class="cursor-pointer px-4 py-2 bg-blue-700 text-white rounded text-sm disabled:opacity-50"
           [class.opacity-75]="p.estado !== 'EN_JUEGO'"
           [attr.title]="p.estado !== 'EN_JUEGO' ? 'Solo con el partido en juego (se mostrará un aviso si no aplica)' : null"
         >
@@ -264,7 +378,7 @@
           *ngIf="p.estado === 'EN_JUEGO'"
           type="button"
           (click)="eliminarEvento(e)"
-          class="shrink-0 text-xs font-medium text-red-600 dark:text-red-400 border border-red-500 rounded-full px-2 py-0.5 hover:bg-red-50 dark:hover:bg-red-950/30"
+          class="cursor-pointer shrink-0 text-xs font-medium text-red-600 dark:text-red-400 border border-red-500 rounded-full px-2 py-0.5 hover:bg-red-50 dark:hover:bg-red-950/30"
         >
           Eliminar
         </button>
@@ -301,11 +415,35 @@
       </div>
       <div class="flex flex-col gap-1">
         <label class="text-xs text-gray-500">Minuto</label>
-        <input type="number" formControlName="minuto" class="w-20 text-sm rounded border border-gray-300 dark:border-gray-600 px-2 py-1.5 bg-white dark:bg-gray-800 text-gray-900 dark:text-white" min="0" />
+        <div
+          class="inline-flex items-stretch rounded-full border border-gray-300 dark:border-gray-600 overflow-hidden bg-white dark:bg-gray-800 shadow-sm"
+          role="group"
+          aria-label="Minuto del cambio"
+        >
+          <button
+            type="button"
+            (click)="ajustarMinutoCambio(-1)"
+            [disabled]="p.estado !== 'EN_JUEGO' || !puedeDecrementarMinutoCambio()"
+            class="cursor-pointer px-2.5 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            −
+          </button>
+          <span
+            class="min-w-[2.25rem] px-2 py-1.5 text-center text-sm tabular-nums text-gray-900 dark:text-white border-x border-gray-300 dark:border-gray-600"
+            >{{ cambioForm.controls.minuto.value }}</span>
+          <button
+            type="button"
+            (click)="ajustarMinutoCambio(1)"
+            [disabled]="p.estado !== 'EN_JUEGO' || !puedeIncrementarMinutoCambio()"
+            class="cursor-pointer px-2.5 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            +
+          </button>
+        </div>
       </div>
       <button
         type="submit"
-        class="px-4 py-2 bg-blue-700 text-white rounded text-sm disabled:opacity-50"
+        class="cursor-pointer px-4 py-2 bg-blue-700 text-white rounded text-sm disabled:opacity-50"
         [class.opacity-75]="p.estado !== 'EN_JUEGO'"
         [attr.title]="p.estado !== 'EN_JUEGO' ? 'Solo con el partido en juego (se mostrará un aviso si no aplica)' : null"
       >
@@ -337,7 +475,7 @@
           *ngIf="p.estado === 'EN_JUEGO'"
           type="button"
           (click)="eliminarCambio(c)"
-          class="shrink-0 text-xs font-medium text-red-600 dark:text-red-400 border border-red-500 rounded-full px-2 py-0.5 hover:bg-red-50 dark:hover:bg-red-950/30"
+          class="cursor-pointer shrink-0 text-xs font-medium text-red-600 dark:text-red-400 border border-red-500 rounded-full px-2 py-0.5 hover:bg-red-50 dark:hover:bg-red-950/30"
         >
           Eliminar
         </button>

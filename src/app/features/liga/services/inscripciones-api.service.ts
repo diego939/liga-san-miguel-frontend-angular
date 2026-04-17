@@ -8,6 +8,7 @@ import type {
   Inscripcion,
   PreviewInscripcion,
 } from '../models/api.types';
+import { fechaReferenciaIsoUtc } from '../utils/liga-day-bounds';
 
 @Injectable({ providedIn: 'root' })
 export class InscripcionesApiService {
@@ -58,10 +59,22 @@ export class InscripcionesApiService {
     );
   }
 
-  preview(equipoTorneoId: number, jugadorId: number): Observable<PreviewInscripcion> {
+  preview(
+    equipoTorneoId: number,
+    jugadorId: number,
+    opts?: { fechaReferencia?: string | Date },
+  ): Observable<PreviewInscripcion> {
+    let params = new HttpParams().set('jugadorId', String(jugadorId));
+    if (opts?.fechaReferencia != null) {
+      const v =
+        opts.fechaReferencia instanceof Date
+          ? opts.fechaReferencia.toISOString()
+          : fechaReferenciaIsoUtc(opts.fechaReferencia);
+      params = params.set('fechaReferencia', v);
+    }
     return this.http.get<PreviewInscripcion>(
       `${this.base}/equipos-torneo/${equipoTorneoId}/inscripciones/preview`,
-      { params: { jugadorId: String(jugadorId) } },
+      { params },
     );
   }
 

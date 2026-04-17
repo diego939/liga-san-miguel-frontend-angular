@@ -27,3 +27,16 @@ export function inscripcionSolapaDiaCivil(
   if (ff !== null && ff <= inicio) return false;
   return true;
 }
+
+/**
+ * Mismo instante que `new Date(fecha)` del JSON (p. ej. `partido.fecha`),
+ * en ISO UTC para query params. Evita variantes de string que rompen `IsDateString`
+ * o codificación de `+`/espacios en la URL.
+ */
+export function fechaReferenciaIsoUtc(fecha: string | Date): string {
+  const d = typeof fecha === 'string' ? new Date(fecha) : fecha;
+  if (Number.isNaN(d.getTime())) {
+    return new Date().toISOString();
+  }
+  return d.toISOString();
+}

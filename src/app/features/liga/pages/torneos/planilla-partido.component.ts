@@ -69,10 +69,11 @@ export class PlanillaPartidoComponent implements OnInit {
 
   addLocalJugadorId: number | null = null;
   addVisJugadorId: number | null = null;
+  /** Nº de camiseta elegido antes de pulsar Agregar (null = sin asignar). */
+  addLocalNumeroCamiseta: number | null = null;
+  addVisNumeroCamiseta: number | null = null;
   addLocalTitular = true;
   addVisTitular = true;
-  previewMsgLocal = '';
-  previewMsgVis = '';
 
   readonly tiposEvento: TipoEvento[] = ['GOL', 'GOL_EN_CONTRA', 'AMARILLA', 'ROJA'];
 
@@ -90,6 +91,8 @@ export class PlanillaPartidoComponent implements OnInit {
     minuto: [0, Validators.required],
   });
 
+  private readonly minutoMax = 130;
+
   constructor() {
     this.cambioForm
       .get('equipo')
@@ -97,6 +100,36 @@ export class PlanillaPartidoComponent implements OnInit {
       .subscribe(() => {
         this.cambioForm.patchValue({ saleId: 0, entraId: 0 }, { emitEvent: false });
       });
+  }
+
+  ajustarMinutoEv(delta: number): void {
+    const c = this.evForm.get('minuto');
+    if (!c) return;
+    const cur = Number(c.value) || 0;
+    c.setValue(Math.max(0, Math.min(this.minutoMax, cur + delta)));
+  }
+
+  puedeDecrementarMinutoEv(): boolean {
+    return (Number(this.evForm.get('minuto')?.value) || 0) > 0;
+  }
+
+  puedeIncrementarMinutoEv(): boolean {
+    return (Number(this.evForm.get('minuto')?.value) || 0) < this.minutoMax;
+  }
+
+  ajustarMinutoCambio(delta: number): void {
+    const c = this.cambioForm.get('minuto');
+    if (!c) return;
+    const cur = Number(c.value) || 0;
+    c.setValue(Math.max(0, Math.min(this.minutoMax, cur + delta)));
+  }
+
+  puedeDecrementarMinutoCambio(): boolean {
+    return (Number(this.cambioForm.get('minuto')?.value) || 0) > 0;
+  }
+
+  puedeIncrementarMinutoCambio(): boolean {
+    return (Number(this.cambioForm.get('minuto')?.value) || 0) < this.minutoMax;
   }
 
   ngOnInit(): void {
@@ -196,24 +229,23 @@ export class PlanillaPartidoComponent implements OnInit {
     this.api.listCambios(this.partidoId).subscribe((c) => (this.cambios = c));
   }
 
-  /** Alineado con el backend: vigencia que solapa el día civil (APP_TIMEZONE) de la fecha del partido. */
-  private inscripcionVigenteEnFechaPartido(ins: Inscripcion): boolean {
-    if (!this.partido?.fecha) return false;
+  /** Misma regla que el API: inscripción solapa el día civil (APP_TIMEZONE) **actual**. */
+  private inscripcionVigenteAhora(ins: Inscripcion): boolean {
     const tz = environment.appTimeZone ?? 'America/Argentina/Buenos_Aires';
-    return inscripcionSolapaDiaCivil(ins, new Date(this.partido.fecha), tz);
+    return inscripcionSolapaDiaCivil(ins, new Date(), tz);
   }
 
   candidatosLocal(): Inscripcion[] {
     const ids = new Set(this.local.map((l) => l.jugadorId));
     return this.inscriptosLocal.filter(
-      (i) => !ids.has(i.jugadorId) && this.inscripcionVigenteEnFechaPartido(i),
+      (i) => !ids.has(i.jugadorId) && this.inscripcionVigenteAhora(i),
     );
   }
 
   candidatosVis(): Inscripcion[] {
     const ids = new Set(this.visit.map((l) => l.jugadorId));
     return this.inscriptosVis.filter(
-      (i) => !ids.has(i.jugadorId) && this.inscripcionVigenteEnFechaPartido(i),
+      (i) => !ids.has(i.jugadorId) && this.inscripcionVigenteAhora(i),
     );
   }
 
@@ -279,58 +311,70 @@ export class PlanillaPartidoComponent implements OnInit {
     return equipo === 'local' ? this.local : this.visit;
   }
 
+  /** Misma validación que «Ver pase» en LBF: instante actual (sin fecha del partido). */
   previewAddInscripto(side: 'local' | 'vis', jugadorId: number | null): void {
     if (!this.partido || !jugadorId) return;
     const eqId =
       side === 'local' ? this.partido.equipoLocalId : this.partido.equipoVisitanteId;
-    this.api.previewJugador(this.partidoId, jugadorId, eqId).subscribe((p) => {
-      const msg = p.puede
-        ? `OK${p.esForaneo ? ' (foráneo)' : ''}`
-        : (p.motivo ?? 'No puede');
-      if (side === 'local') this.previewMsgLocal = msg;
-      else this.previewMsgVis = msg;
-      if (!p.puede) {
-        void Swal.fire({ icon: 'error', text: p.motivo ?? 'No puede jugar' });
-      }
-    });
+    this.inscripcionesApi
+      .preview(eqId, jugadorId)
+      .subscribe({
+        next: (p) => {
+          void Swal.fire(
+            p.puede ? 'Pase válido' : 'Pase inválido',
+            p.motivo ?? (p.puede ? 'OK para inscripción' : ''),
+            p.puede ? 'success' : 'error',
+          );
+        },
+        error: (e) => apiErrorAlert(e),
+      });
   }
 
   agregarDesdeInscripcion(side: 'local' | 'vis', jugadorId: number | null, titular: boolean): void {
     if (!this.partido || !jugadorId) return;
     const eqId =
       side === 'local' ? this.partido.equipoLocalId : this.partido.equipoVisitanteId;
-    this.api.previewJugador(this.partidoId, jugadorId, eqId).subscribe((p) => {
-      if (!p.puede) {
-        void Swal.fire({ icon: 'error', text: p.motivo ?? 'No puede jugar' });
-        return;
-      }
-      const ins =
-        side === 'local'
-          ? this.inscriptosLocal.find((i) => i.jugadorId === jugadorId)
-          : this.inscriptosVis.find((i) => i.jugadorId === jugadorId);
-      const j = ins?.jugador;
-      const line: Line = {
-        jugadorId,
-        titular,
-        nombre: j ? `${j.apellido}, ${j.nombre}` : undefined,
-        dni: j?.dni,
-        numeroCamiseta: null,
-      };
-      if (side === 'local') {
-        this.local = [...this.local, line];
-        this.addLocalJugadorId = null;
-        this.previewMsgLocal = '';
-      } else {
-        this.visit = [...this.visit, line];
-        this.addVisJugadorId = null;
-        this.previewMsgVis = '';
-      }
-    });
+    this.inscripcionesApi
+      .preview(eqId, jugadorId)
+      .subscribe({
+        next: (p) => {
+          if (!p.puede) {
+            void Swal.fire({ icon: 'error', text: p.motivo ?? 'No puede jugar' });
+            return;
+          }
+          const ins =
+            side === 'local'
+              ? this.inscriptosLocal.find((i) => i.jugadorId === jugadorId)
+              : this.inscriptosVis.find((i) => i.jugadorId === jugadorId);
+          const j = ins?.jugador;
+          const numCam =
+            side === 'local' ? this.addLocalNumeroCamiseta : this.addVisNumeroCamiseta;
+          const line: Line = {
+            jugadorId,
+            titular,
+            nombre: j ? `${j.apellido}, ${j.nombre}` : undefined,
+            dni: j?.dni,
+            numeroCamiseta: numCam ?? null,
+          };
+          if (side === 'local') {
+            this.local = [...this.local, line];
+            this.addLocalJugadorId = null;
+            this.addLocalNumeroCamiseta = null;
+          } else {
+            this.visit = [...this.visit, line];
+            this.addVisJugadorId = null;
+            this.addVisNumeroCamiseta = null;
+          }
+          this.persistPlanilla();
+        },
+        error: (e) => apiErrorAlert(e),
+      });
   }
 
   removeLine(side: 'local' | 'vis', idx: number): void {
     if (side === 'local') this.local = this.local.filter((_, i) => i !== idx);
     else this.visit = this.visit.filter((_, i) => i !== idx);
+    this.persistPlanilla();
   }
 
   toggleTitular(side: 'local' | 'vis', idx: number): void {
@@ -339,55 +383,136 @@ export class PlanillaPartidoComponent implements OnInit {
     copy[idx] = { ...copy[idx], titular: !copy[idx].titular };
     if (side === 'local') this.local = copy;
     else this.visit = copy;
+    this.persistPlanilla();
   }
 
-  patchCamiseta(side: 'local' | 'vis', idx: number, raw: string): void {
-    const n = raw === '' ? null : Number(raw);
-    const val = raw === '' || Number.isNaN(n) ? null : n;
-    const arr = side === 'local' ? [...this.local] : [...this.visit];
-    arr[idx] = { ...arr[idx], numeroCamiseta: val };
-    if (side === 'local') this.local = arr;
-    else this.visit = arr;
+  /** Texto centrado en el stepper de camiseta (fila o alta). */
+  labelCamisetaValor(n: number | null | undefined): string {
+    if (n == null) return '—';
+    return String(n);
+  }
+
+  labelCamiseta(l: Line): string {
+    return this.labelCamisetaValor(l.numeroCamiseta);
+  }
+
+  /** Stepper Nº en el bloque «Agregar desde inscriptos». */
+  ajustarCamisetaAlta(side: 'local' | 'vis', delta: number): void {
+    const prev = side === 'local' ? this.addLocalNumeroCamiseta : this.addVisNumeroCamiseta;
+    const cur = prev ?? 0;
+    const next = Math.max(0, Math.min(99, cur + delta));
+    if (prev === null && next === 0) return;
+    if (side === 'local') this.addLocalNumeroCamiseta = next;
+    else this.addVisNumeroCamiseta = next;
+  }
+
+  puedeDecrementarCamisetaAlta(side: 'local' | 'vis'): boolean {
+    const n = side === 'local' ? this.addLocalNumeroCamiseta : this.addVisNumeroCamiseta;
+    return (n ?? 0) > 0;
+  }
+
+  puedeIncrementarCamisetaAlta(side: 'local' | 'vis'): boolean {
+    const n = side === 'local' ? this.addLocalNumeroCamiseta : this.addVisNumeroCamiseta;
+    return (n ?? 0) < 99;
+  }
+
+  /** Incrementa/decrementa Nº (0–99) y persiste al instante. */
+  ajustarCamiseta(side: 'local' | 'vis', idx: number, delta: number): void {
+    const arr = side === 'local' ? this.local : this.visit;
+    const line = arr[idx];
+    if (!line) return;
+    const cur = line.numeroCamiseta ?? 0;
+    const next = Math.max(0, Math.min(99, cur + delta));
+    const copy = [...arr];
+    copy[idx] = { ...line, numeroCamiseta: next };
+    if (side === 'local') this.local = copy;
+    else this.visit = copy;
+    this.persistPlanilla();
+  }
+
+  puedeDecrementarCamiseta(l: Line): boolean {
+    return (l.numeroCamiseta ?? 0) > 0;
+  }
+
+  puedeIncrementarCamiseta(l: Line): boolean {
+    return (l.numeroCamiseta ?? 0) < 99;
   }
 
   guardarPlanilla(): void {
     if (!this.partido) return;
+    this.persistPlanilla({ showSuccessToast: true });
+  }
+
+  private buildPlanillaBody() {
+    return {
+      local: this.local.map((l) => ({
+        jugadorId: l.jugadorId,
+        titular: l.titular,
+        numeroCamiseta: l.numeroCamiseta ?? null,
+      })),
+      visitante: this.visit.map((l) => ({
+        jugadorId: l.jugadorId,
+        titular: l.titular,
+        numeroCamiseta: l.numeroCamiseta ?? null,
+      })),
+      capitanLocalJugadorId: this.capitanLocalJugadorId,
+      capitanVisitanteJugadorId: this.capitanVisitanteJugadorId,
+      arbitroPrincipal: this.arbitroPrincipal.trim() || null,
+      juezLinea1: this.juezLinea1.trim() || null,
+      juezLinea2: this.juezLinea2.trim() || null,
+      observaciones: this.observaciones.trim() || null,
+    };
+  }
+
+  /** Si se quitó el jugador designado capitán, limpiar el selector. */
+  private sanitizeCapitanesSiJugadorNoEnPlanilla(): void {
+    const localIds = new Set(this.local.map((l) => l.jugadorId));
+    const visIds = new Set(this.visit.map((l) => l.jugadorId));
+    if (this.capitanLocalJugadorId != null && !localIds.has(this.capitanLocalJugadorId)) {
+      this.capitanLocalJugadorId = null;
+    }
+    if (
+      this.capitanVisitanteJugadorId != null &&
+      !visIds.has(this.capitanVisitanteJugadorId)
+    ) {
+      this.capitanVisitanteJugadorId = null;
+    }
+  }
+
+  /**
+   * PUT planilla + acta. Usado al agregar/quitar, cambiar titular/suplente (sin toast) y al guardar completo.
+   */
+  private persistPlanilla(opts?: { showSuccessToast?: boolean }): void {
+    if (!this.partido) return;
+    this.sanitizeCapitanesSiJugadorNoEnPlanilla();
     this.saving = true;
     this.api
-      .putPlanilla(this.partidoId, {
-        local: this.local.map((l) => ({
-          jugadorId: l.jugadorId,
-          titular: l.titular,
-          numeroCamiseta: l.numeroCamiseta ?? null,
-        })),
-        visitante: this.visit.map((l) => ({
-          jugadorId: l.jugadorId,
-          titular: l.titular,
-          numeroCamiseta: l.numeroCamiseta ?? null,
-        })),
-        capitanLocalJugadorId: this.capitanLocalJugadorId,
-        capitanVisitanteJugadorId: this.capitanVisitanteJugadorId,
-        arbitroPrincipal: this.arbitroPrincipal.trim() || null,
-        juezLinea1: this.juezLinea1.trim() || null,
-        juezLinea2: this.juezLinea2.trim() || null,
-        observaciones: this.observaciones.trim() || null,
-      })
+      .putPlanilla(this.partidoId, this.buildPlanillaBody())
       .pipe(finalize(() => (this.saving = false)))
       .subscribe({
         next: () => {
-          void Swal.fire({
-            icon: 'success',
-            title: 'Planilla guardada',
-            timer: 1200,
-            showConfirmButton: false,
-          });
+          if (opts?.showSuccessToast) {
+            void Swal.fire({
+              icon: 'success',
+              title: 'Planilla guardada',
+              timer: 1200,
+              showConfirmButton: false,
+            });
+          }
           this.api.get(this.partidoId).subscribe((p) => {
             this.partido = p;
             this.syncActaFromPartido(p);
           });
           this.loadPlanilla();
         },
-        error: (e) => apiErrorAlert(e),
+        error: (e) => {
+          apiErrorAlert(e);
+          this.api.get(this.partidoId).subscribe((p) => {
+            this.partido = p;
+            this.syncActaFromPartido(p);
+          });
+          this.loadPlanilla();
+        },
       });
   }
 
