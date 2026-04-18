@@ -2,8 +2,8 @@
 <div
   class="fixed top-0 left-0 z-60 w-64 h-full bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 pt-4 shadow-lg transition-transform duration-300
 
-  -translate-x-full   <!-- 👈 oculto por defecto (mobile) -->
-  sm:translate-x-0    <!-- 👈 visible SIEMPRE en desktop -->
+  -translate-x-full   <!-- 👈 oculto por defecto (< md) -->
+  xl:translate-x-0    <!-- 👈 visible fijo desde md -->
 
   "
   [class.translate-x-0]="isSidebarOpen"
@@ -29,7 +29,7 @@
     Menú
   </h1>
 
-  <button class="text-gray-500 hover:text-red-500 sm:hidden"
+  <button class="text-gray-500 hover:text-red-500 xl:hidden"
           (click)="closeAll()">
     <i class="fa-solid fa-x"></i>
   </button>
@@ -76,5 +76,5 @@
 <!-- OVERLAY MOBILE -->
 <div *ngIf="isSidebarOpen"
      (click)="closeAll()"
-     class="fixed inset-0 bg-black/50 backdrop-blur-sm z-30 sm:hidden">
+     class="fixed inset-0 bg-black/50 backdrop-blur-sm z-30 xl:hidden">
 </div>
