@@ -1,13 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { AuthService } from './auth.service';
-
-/** Coincide con `Rol.descripcion` en BD / seed. */
-const ROL_OPERADOR_DESCRIPCION = 'OPERADOR';
-
-function esRolOperador(rolDescripcion: string | undefined): boolean {
-  return (rolDescripcion ?? '').trim().toUpperCase() === ROL_OPERADOR_DESCRIPCION;
-}
+import { esRolOperador } from '../utils/rol.utils';
 
 /** Misma forma que el menú anterior (sidebar) para reutilizar el template. */
 export interface MenuItem {

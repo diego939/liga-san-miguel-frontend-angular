@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { isPlatformBrowser } from '@angular/common';
 import { environment } from '../../../environments/environment';
 import { Observable, tap } from 'rxjs';
+import { esRol, esRolOperador } from '../utils/rol.utils';
 
 export interface AuthUser {
   id: number;
@@ -75,5 +76,18 @@ export class AuthService {
     return this.http.get<AuthUser>(`${this.baseUrl}/api/auth/me`).pipe(
       tap((user) => this.guardarUsuario(user)),
     );
+  }
+
+  /** Rol actual es OPERADOR (`Rol.descripcion`). */
+  esOperador(): boolean {
+    return esRolOperador(this.obtenerUsuario()?.rolDescripcion);
+  }
+
+  /**
+   * Compara el rol en sesión con un valor de BD (p. ej. `'ADMIN'`).
+   * Útil en plantillas: `*ngIf="auth.tieneRol('ADMIN')"`.
+   */
+  tieneRol(rolEsperado: string): boolean {
+    return esRol(this.obtenerUsuario()?.rolDescripcion, rolEsperado);
   }
 }

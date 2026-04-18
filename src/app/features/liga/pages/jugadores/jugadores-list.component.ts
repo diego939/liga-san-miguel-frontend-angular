@@ -18,6 +18,7 @@ import { LigaSortIndicatorComponent } from '../../shared/liga-sort-indicator.com
 import { applySortClick } from '../../utils/column-sort.util';
 import { formatDateOnly } from '../../utils/date-format';
 import { ligaModal } from '../../shared/liga-ui';
+import { IfNotOperadorDirective } from '../../../../core/directives/if-not-operador.directive';
 
 @Component({
   selector: 'app-jugadores-list',
@@ -29,6 +30,7 @@ import { ligaModal } from '../../shared/liga-ui';
     RouterLink,
     LigaPaginationComponent,
     LigaSortIndicatorComponent,
+    IfNotOperadorDirective,
   ],
   templateUrl: './jugadores-list.component.html',
 })
