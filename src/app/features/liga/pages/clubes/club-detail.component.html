@@ -8,6 +8,7 @@
   <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
     <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-400">Personal</h2>
     <button
+      *appIfNotOperador
       type="button"
       (click)="openAddPer()"
       class="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-5 py-2.5"
@@ -23,7 +24,7 @@
           <th scope="col" class="px-6 py-3">Nombre</th>
           <th scope="col" class="px-6 py-3">DNI</th>
           <th scope="col" class="px-6 py-3">Teléfono</th>
-          <th scope="col" class="px-6 py-3 text-right">Acciones</th>
+          <th *appIfNotOperador scope="col" class="px-6 py-3 text-right">Acciones</th>
         </tr>
       </thead>
       <tbody>
@@ -35,7 +36,7 @@
           <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">{{ p.nombre }}</td>
           <td class="px-6 py-4">{{ p.dni || '—' }}</td>
           <td class="px-6 py-4">{{ p.telefono || '—' }}</td>
-          <td class="px-6 py-4 text-right space-x-3">
+          <td *appIfNotOperador class="px-6 py-4 text-right space-x-3">
             <button type="button" (click)="openEditPer(p)" class="font-medium text-blue-600 dark:text-blue-500 cursor-pointer decoration-none border border-blue-500 rounded-full px-2">
               Editar
             </button>

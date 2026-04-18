@@ -8,11 +8,11 @@ import Swal from 'sweetalert2';
 import type { Club, ClubPersonal } from '../../models/api.types';
 import { ClubesApiService } from '../../services/clubes-api.service';
 import { ligaModal } from '../../shared/liga-ui';
-
+import { IfNotOperadorDirective } from '../../../../core/directives/if-not-operador.directive';
 @Component({
   selector: 'app-club-detail',
   standalone: true,
-  imports: [CommonModule, RouterLink, ReactiveFormsModule],
+  imports: [CommonModule, RouterLink, ReactiveFormsModule, IfNotOperadorDirective],
   templateUrl: './club-detail.component.html',
 })
 export class ClubDetailComponent implements OnInit {

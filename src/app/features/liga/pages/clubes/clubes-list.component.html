@@ -1,7 +1,7 @@
 <div class="space-y-4">
   <div class="flex justify-between items-center">
     <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-400">Clubes</h1>
-    <button type="button" (click)="openCreate()" class="px-5 py-2.5 text-sm font-medium text-white bg-blue-700 rounded-lg hover:bg-blue-800">+ Crear club</button>
+    <button *appIfNotOperador type="button" (click)="openCreate()" class="px-5 py-2.5 text-sm font-medium text-white bg-blue-700 rounded-lg hover:bg-blue-800">+ Crear club</button>
   </div>
   <div
     class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 flex flex-wrap gap-3 items-end"
@@ -35,19 +35,19 @@
             ></span>
           </th>
           <!--<th scope="col" class="px-6 py-3">Logo</th>-->
-          <th scope="col" class="px-6 py-3 text-right">Acciones</th>
+          <th *appIfNotOperador scope="col" class="px-6 py-3 text-right">Acciones</th>
         </tr>
       </thead>
       <tbody>
         <tr
           *ngFor="let c of items"
-          title="Gestionar Personal (Delegados, etc.)"
+          title="Ver Personal (Delegados, etc.)"
           class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer"
           (click)="goDetail(c)"
         >
           <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">{{ c.nombre }}</td>
           <!--<td class="px-6 py-4">{{ c.logo || '—' }}</td>-->
-          <td class="px-6 py-4 text-right space-x-2" (click)="$event.stopPropagation()">
+          <td *appIfNotOperador class="px-6 py-4 text-right space-x-2" (click)="$event.stopPropagation()">
             <button
               type="button"
               title="Editar"
