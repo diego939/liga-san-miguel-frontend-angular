@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { menuGuard } from './core/guards/menu.guard';
+import { noOperadorGuard } from './core/guards/no-operador.guard';
 
 export const routes: Routes = [
   {
@@ -90,6 +91,7 @@ export const routes: Routes = [
           },
           {
             path: 'partidos/:partidoId/planilla',
+            canActivate: [noOperadorGuard],
             loadComponent: () =>
               import(
                 './features/liga/pages/torneos/planilla-partido.component'
