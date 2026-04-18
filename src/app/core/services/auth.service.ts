@@ -8,6 +8,8 @@ export interface AuthUser {
   id: number;
   email: string;
   rolId: number;
+  /** `Rol.descripcion` en BD (p. ej. ADMIN, OPERADOR). Opcional hasta sincronizar vía login o `/auth/me`. */
+  rolDescripcion?: string;
 }
 
 export interface AuthResponse {
@@ -66,5 +68,12 @@ export class AuthService {
     if (isPlatformBrowser(this.platformId)) {
       sessionStorage.clear();
     }
+  }
+
+  /** Sincroniza usuario en sesión con el backend (p. ej. tras desplegar o cambiar rol). */
+  refreshUsuarioSesion(): Observable<AuthUser> {
+    return this.http.get<AuthUser>(`${this.baseUrl}/api/auth/me`).pipe(
+      tap((user) => this.guardarUsuario(user)),
+    );
   }
 }

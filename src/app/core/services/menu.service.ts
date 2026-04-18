@@ -1,5 +1,13 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
+import { AuthService } from './auth.service';
+
+/** Coincide con `Rol.descripcion` en BD / seed. */
+const ROL_OPERADOR_DESCRIPCION = 'OPERADOR';
+
+function esRolOperador(rolDescripcion: string | undefined): boolean {
+  return (rolDescripcion ?? '').trim().toUpperCase() === ROL_OPERADOR_DESCRIPCION;
+}
 
 /** Misma forma que el menú anterior (sidebar) para reutilizar el template. */
 export interface MenuItem {
@@ -49,24 +57,47 @@ const LIGA_MENU: MenuItem[] = [
 
 @Injectable({ providedIn: 'root' })
 export class MenuService {
+  private readonly auth = inject(AuthService);
+
   private menusSubject = new BehaviorSubject<MenuItem[]>([]);
   menus$ = this.menusSubject.asObservable();
 
+  private buildLigaMenuForCurrentUser(): MenuItem[] {
+    const user = this.auth.obtenerUsuario();
+    if (esRolOperador(user?.rolDescripcion)) {
+      return LIGA_MENU.filter(
+        (m) =>
+          m.menuUrl !== '/pages/usuarios' && m.menuUrl !== '/pages/roles',
+      );
+    }
+    return [...LIGA_MENU];
+  }
+
   /** Menú fijo según el dominio Liga (sin API de menús en BD). */
   inicializarMenusLiga(): void {
-    this.menusSubject.next(LIGA_MENU);
+    const menus = this.buildLigaMenuForCurrentUser();
+    this.menusSubject.next(menus);
     if (typeof sessionStorage !== 'undefined') {
-      sessionStorage.setItem('menus', JSON.stringify(LIGA_MENU));
+      sessionStorage.setItem('menus', JSON.stringify(menus));
     }
   }
 
   obtenerMenus(): MenuItem[] {
+    if (this.auth.obtenerUsuario()) {
+      return this.buildLigaMenuForCurrentUser();
+    }
     const data = sessionStorage.getItem('menus');
     return data ? JSON.parse(data) : [];
   }
 
   cargarDesdeStorage(): void {
     if (typeof sessionStorage !== 'undefined') {
+      if (this.auth.obtenerUsuario()) {
+        const menus = this.buildLigaMenuForCurrentUser();
+        this.menusSubject.next(menus);
+        sessionStorage.setItem('menus', JSON.stringify(menus));
+        return;
+      }
       const data = sessionStorage.getItem('menus');
       if (data) {
         this.menusSubject.next(JSON.parse(data));
@@ -89,6 +120,16 @@ export class MenuService {
       '/pages/usuarios',
       '/pages/roles',
     ];
+    const operador = esRolOperador(this.auth.obtenerUsuario()?.rolDescripcion);
+    if (
+      operador &&
+      (path === '/pages/usuarios' ||
+        path.startsWith('/pages/usuarios/') ||
+        path === '/pages/roles' ||
+        path.startsWith('/pages/roles/'))
+    ) {
+      return false;
+    }
     if (roots.some((r) => path === r || path.startsWith(r + '/'))) {
       return true;
     }
