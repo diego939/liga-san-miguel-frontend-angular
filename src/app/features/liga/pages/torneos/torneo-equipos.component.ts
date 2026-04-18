@@ -9,11 +9,12 @@ import { ClubesApiService } from '../../services/clubes-api.service';
 import { EquiposApiService } from '../../services/equipos-api.service';
 import { ligaModal } from '../../shared/liga-ui';
 import { apiErrorAlert } from '../../utils/api-error';
+import { IfNotOperadorDirective } from '../../../../core/directives/if-not-operador.directive';
 
 @Component({
   selector: 'app-torneo-equipos',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, IfNotOperadorDirective],
   templateUrl: './torneo-equipos.component.html',
 })
 export class TorneoEquiposComponent implements OnInit {

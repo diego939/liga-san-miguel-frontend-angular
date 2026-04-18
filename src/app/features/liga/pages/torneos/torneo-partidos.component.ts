@@ -13,6 +13,8 @@ import { applySortClick } from '../../utils/column-sort.util';
 import { formatDateTime } from '../../utils/date-format';
 import { ligaModal } from '../../shared/liga-ui';
 import { apiErrorAlert } from '../../utils/api-error';
+import { IfNotOperadorDirective } from '../../../../core/directives/if-not-operador.directive';
+import { AuthService } from '../../../../core/services/auth.service';
 
 @Component({
   selector: 'app-torneo-partidos',
@@ -23,6 +25,7 @@ import { apiErrorAlert } from '../../utils/api-error';
     ReactiveFormsModule,
     LigaPaginationComponent,
     LigaSortIndicatorComponent,
+    IfNotOperadorDirective,
   ],
   templateUrl: './torneo-partidos.component.html',
 })
@@ -34,6 +37,7 @@ export class TorneoPartidosComponent implements OnInit {
   private readonly partidosApi = inject(PartidosApiService);
   private readonly equiposApi = inject(EquiposApiService);
   private readonly fb = inject(FormBuilder);
+  readonly auth = inject(AuthService);
 
   torneoId!: number;
   equipos: EquipoTorneo[] = [];

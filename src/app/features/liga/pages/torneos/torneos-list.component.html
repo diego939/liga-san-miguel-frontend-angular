@@ -1,7 +1,7 @@
 <div class="space-y-4">
   <div class="flex justify-between items-center">
     <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-400">Torneos</h1>
-    <button type="button" (click)="openCreate()" class="px-5 py-2.5 text-sm font-medium text-white bg-blue-700 rounded-lg hover:bg-blue-800">+ Crear torneo</button>
+    <button *appIfNotOperador type="button" (click)="openCreate()" class="px-5 py-2.5 text-sm font-medium text-white bg-blue-700 rounded-lg hover:bg-blue-800">+ Crear torneo</button>
   </div>
   <div
     class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 flex flex-wrap gap-3 items-end"
@@ -88,9 +88,10 @@
           <td class="px-6 py-4">{{ formatDate(t.fechaFin) }}</td>
           <td class="px-6 py-4 text-right space-x-2">
             <button type="button" (click)="gestionar(t)" class="font-medium text-green-700 dark:text-green-500 cursor-pointer decoration-none border border-green-500 rounded-full px-2">
-              Gestionar
+              Ver detalles
             </button>
             <button
+              *appIfNotOperador
               type="button"
               (click)="openEdit(t, $event)"
               class="font-medium text-blue-600 dark:text-blue-500 cursor-pointer decoration-none border border-blue-500 rounded-full px-2"

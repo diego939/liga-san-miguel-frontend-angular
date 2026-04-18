@@ -2,6 +2,7 @@
   <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
     <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-400">Equipos en el torneo</h2>
     <button
+      *appIfNotOperador
       type="button"
       (click)="openModal()"
       class="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-5 py-2.5"
@@ -33,7 +34,7 @@
             >
               Inscripciones
             </button>
-            <button type="button" (click)="quitar(e)" class="font-medium text-red-600 cursor-pointer decoration-none border border-red-500 rounded-full px-2 text-sm">Quitar</button>
+            <button *appIfNotOperador type="button" (click)="quitar(e)" class="font-medium text-red-600 cursor-pointer decoration-none border border-red-500 rounded-full px-2 text-sm">Quitar</button>
           </td>
         </tr>
       </tbody>
