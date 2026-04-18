@@ -19,6 +19,7 @@ import { LigaPaginationComponent } from '../../shared/liga-pagination.component'
 import { LigaSortIndicatorComponent } from '../../shared/liga-sort-indicator.component';
 import { applySortClick } from '../../utils/column-sort.util';
 import { ligaModal } from '../../shared/liga-ui';
+import { IfNotOperadorDirective } from '../../../../core/directives/if-not-operador.directive';
 
 @Component({
   selector: 'app-pases-list',
@@ -29,6 +30,7 @@ import { ligaModal } from '../../shared/liga-ui';
     ReactiveFormsModule,
     LigaPaginationComponent,
     LigaSortIndicatorComponent,
+    IfNotOperadorDirective,
   ],
   templateUrl: './pases-list.component.html',
 })

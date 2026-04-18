@@ -2,6 +2,7 @@
   <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
     <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-400">Pases</h1>
     <button
+      *appIfNotOperador
       type="button"
       (click)="openCreate()"
       class="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-5 py-2.5"
@@ -74,7 +75,7 @@
             ></span>
           </th>
           <th scope="col" class="px-6 py-3">Estado</th>
-          <th scope="col" class="px-6 py-3 text-right">Acciones</th>
+          <th *appIfNotOperador scope="col" class="px-6 py-3 text-right">Acciones</th>
         </tr>
       </thead>
       <tbody>
@@ -99,7 +100,7 @@
               {{ labelEstado(p) }}
             </span>
           </td>
-          <td class="px-6 py-4 text-right">
+          <td *appIfNotOperador class="px-6 py-4 text-right">
             <button
               type="button"
               (click)="openRenew(p)"
