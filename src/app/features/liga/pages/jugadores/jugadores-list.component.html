@@ -86,7 +86,7 @@
             ></span>
           </th>
           <th scope="col" class="px-6 py-3">Teléfono</th>
-          <th *appIfNotOperador scope="col" class="px-6 py-3 text-right">Acciones</th>
+          <th scope="col" class="px-6 py-3 text-right">Acciones</th>
         </tr>
       </thead>
       <tbody>
@@ -101,8 +101,17 @@
           <td class="px-6 py-4">{{ j.nombre }}</td>
           <td class="px-6 py-4">{{ formatDate(j.fechaNacimiento) }}</td>
           <td class="px-6 py-4">{{ j.telefono || '—' }}</td>
-          <td *appIfNotOperador class="px-6 py-4 text-right space-x-2" (click)="$event.stopPropagation()">
+          <td class="px-6 py-4 text-right space-x-2" (click)="$event.stopPropagation()">
             <button
+              type="button"
+              title="Ver detalles"
+              (click)="goDetail(j)"
+              class="font-medium text-green-600 dark:text-green-500 cursor-pointer decoration-none border border-green-500 rounded-full px-2"
+            >
+              Ver detalles
+            </button>
+            <button
+              *appIfNotOperador
               type="button"
               title="Editar"
               (click)="openEdit(j, $event)"
@@ -111,6 +120,7 @@
               Editar
             </button>
             <button
+              *appIfNotOperador
               type="button"
               title="Eliminar"
               (click)="remove(j, $event)"
