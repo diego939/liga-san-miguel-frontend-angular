@@ -171,12 +171,16 @@
           </div>
         </div>
         <div>
-          <label [class]="lm.label">Teléfono</label>
+          <label [class]="lm.label">Teléfono (opcional)</label>
           <input formControlName="telefono" [class]="lm.field" />
         </div>
         <div>
           <label [class]="lm.label">Fecha de nacimiento</label>
           <input type="date" formControlName="fechaNacimiento" [class]="lm.field" />
+        </div>
+        <div>
+          <label [class]="lm.label">Nacionalidad (opcional)</label>
+          <input formControlName="nacionalidad" [class]="lm.field" />
         </div>
         <div *ngIf="!editing">
           <label [class]="lm.label">Club de ingreso (pase inicial)</label>

@@ -30,6 +30,7 @@ export interface Jugador {
   telefono?: string | null;
   fechaNacimiento: string;
   createdAt?: string;
+  nacionalidad?: string | null;
 }
 
 export interface Club {

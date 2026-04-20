@@ -43,6 +43,7 @@ export class JugadoresApiService {
     apellido: string;
     telefono?: string;
     fechaNacimiento: string;
+    nacionalidad?: string;
     /** Pase inicial: origen null → destino este club. */
     clubDestinoInicialId?: number;
   }): Observable<Jugador> {
@@ -57,6 +58,7 @@ export class JugadoresApiService {
       apellido: string;
       telefono: string;
       fechaNacimiento: string;
+      nacionalidad: string;
     }>,
   ): Observable<Jugador> {
     return this.http.patch<Jugador>(`${this.base}/${id}`, body);

@@ -67,6 +67,7 @@ export class JugadoresListComponent implements OnInit {
     apellido: ['', Validators.required],
     telefono: [''],
     fechaNacimiento: ['', Validators.required],
+    nacionalidad: [''],
     /** Solo alta: pase inicial con origen null. */
     clubDestinoInicialId: [0],
   });
@@ -132,6 +133,7 @@ export class JugadoresListComponent implements OnInit {
       apellido: j.apellido,
       telefono: j.telefono ?? '',
       fechaNacimiento: j.fechaNacimiento.slice(0, 10),
+      nacionalidad: j.nacionalidad ?? '',
       clubDestinoInicialId: 0,
     });
     this.modalOpen = true;
@@ -169,6 +171,7 @@ export class JugadoresListComponent implements OnInit {
       apellido: v.apellido,
       telefono: v.telefono || undefined,
       fechaNacimiento: v.fechaNacimiento,
+      nacionalidad: v.nacionalidad?.trim() || undefined,
     };
     const req = this.editing
       ? this.api.update(this.editing.id, body)
