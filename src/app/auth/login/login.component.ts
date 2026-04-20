@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { AuthService } from '../../core/services/auth.service';
 import { MenuService } from '../../core/services/menu.service';
 import { Router } from '@angular/router';
@@ -13,7 +13,7 @@ import Swal from 'sweetalert2';
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'
 })
-export class LoginComponent implements OnInit {
+export class LoginComponent {
   errorMessage: string = '';
   loading = false;
 
@@ -29,17 +29,6 @@ export class LoginComponent implements OnInit {
     private router: Router
   ) {}
 
-
-  ngOnInit() {
-    if (this.authService.isLogged()) {
-      this.menuService.cargarDesdeStorage();
-      const menus = this.menuService.obtenerMenus();
-      const first =
-        menus.find((m) => m.menuUrl)?.menuUrl ?? '/pages/torneos';
-      this.router.navigateByUrl(first);
-    }
-  }
-  
   login() {
   if (this.form.invalid) return;
 
