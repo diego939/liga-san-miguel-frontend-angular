@@ -1,5 +1,7 @@
 {
   "plugins": {
-    "@tailwindcss/postcss": {}
+    "@tailwindcss/postcss": {},
+    "postcss-nesting": {},
+    "postcss-dir-pseudo-class": {}
   }
 }
