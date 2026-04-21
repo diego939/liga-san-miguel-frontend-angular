@@ -389,8 +389,9 @@
     type="button"
     (click)="guardarPlanilla()"
     [disabled]="saving"
-    class="w-full cursor-pointer rounded-xl bg-green-700 px-5 py-3.5 text-base font-semibold text-white shadow-md hover:bg-green-800 disabled:opacity-50 max-xl:sticky max-xl:bottom-3 max-xl:z-30 max-xl:shadow-lg sm:max-w-md xl:w-auto xl:rounded-lg xl:py-2.5 xl:text-sm xl:shadow-none"
+    class="w-full cursor-pointer rounded-full bg-blue-700 px-5 py-3.5 text-base font-semibold text-white shadow-md hover:bg-blue-800 disabled:opacity-50 sm:max-w-md xl:w-auto xl:rounded-lg xl:py-2.5 xl:text-sm xl:shadow-none"
   >
+  <i class="fa-solid fa-floppy-disk"></i>
     {{ saving ? 'Guardando…' : 'Guardar planilla completa' }}
   </button>
 
@@ -484,7 +485,7 @@
           Eliminar
         </button>
       </li>
-      <li *ngIf="eventos.length === 0" class="text-sm text-gray-500 dark:text-gray-300">Sin eventos registrados.</li>
+      <li *ngIf="eventos.length === 0" class="text-sm text-gray-500 dark:text-gray-600">Sin eventos registrados.</li>
     </ul>
   </section>
 
@@ -585,7 +586,7 @@
           Eliminar
         </button>
       </li>
-      <li *ngIf="cambios.length === 0" class="text-sm text-gray-500 dark:text-gray-300">Sin cambios registrados.</li>
+      <li *ngIf="cambios.length === 0" class="text-sm text-gray-500 dark:text-gray-600">Sin cambios registrados.</li>
     </ul>
   </section>
 </div>
