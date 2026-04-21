@@ -1,8 +1,12 @@
 <div class="min-h-screen flex items-center justify-center bg-neutral-primary-soft px-4 py-8 sm:px-6">
 
   <div class="w-full max-w-md p-6 sm:p-8 bg-white border border-default rounded-2xl shadow-lg">
-    <div class="w-90 mx-auto mb-4 flex items-center justify-center">
-      <img src="assets/icon/liga sm logo.png" alt="Liga San Miguel" class="w-full h-full object-contain">
+    <div class="mb-4 flex w-full min-w-0 items-center justify-center">
+      <img
+        src="assets/icon/liga sm logo.png"
+        alt="Liga San Miguel"
+        class="h-auto w-full max-w-full min-w-0 object-contain sm:max-w-[280px]"
+      />
     </div>
 
     <form [formGroup]="form" (ngSubmit)="login()">
