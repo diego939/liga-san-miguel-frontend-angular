@@ -10,6 +10,9 @@
     "serve:ssr:sistema-escuela-angular": "node dist/sistema-escuela-angular/server/server.mjs"
   },
   "private": true,
+  "engines": {
+    "node": ">=18"
+  },
   "dependencies": {
     "@angular/animations": "^17.3.0",
     "@angular/common": "^17.3.0",

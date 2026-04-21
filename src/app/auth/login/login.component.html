@@ -1,6 +1,6 @@
-<div class="min-h-screen flex items-center justify-center bg-neutral-primary-soft">
+<div class="min-h-screen flex items-center justify-center bg-neutral-primary-soft px-4 py-8 sm:px-6">
 
-  <div class="w-full max-w-md p-8 bg-white border border-default rounded-2xl shadow-lg">
+  <div class="w-full max-w-md p-6 sm:p-8 bg-white border border-default rounded-2xl shadow-lg">
     <div class="w-90 mx-auto mb-4 flex items-center justify-center">
       <img src="assets/icon/liga sm logo.png" alt="Liga San Miguel" class="w-full h-full object-contain">
     </div>
@@ -42,7 +42,7 @@
       <button
         type="submit"
         [disabled]="loading"
-        class="w-full text-white bg-black hover:bg-black-strong focus:ring-4 focus:ring-black-medium font-medium rounded-lg text-sm px-4 py-2.5 transition disabled:opacity-50"
+        class="cursor-pointer w-full text-white bg-black hover:bg-black-strong focus:ring-4 focus:ring-black-medium font-medium rounded-lg text-sm px-4 py-2.5 transition disabled:opacity-50"
       >
         <span *ngIf="!loading">Ingresar</span>
         <span *ngIf="loading">Ingresando...</span>
