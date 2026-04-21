@@ -39,81 +39,163 @@
   </div>
 
   <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
-    <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-      <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-        <tr>
-          <th
-            scope="col"
-            class="px-6 py-3 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-600 whitespace-nowrap"
-            (click)="onSort('id')"
-          >
-            <span class="inline-flex items-center"
-              ># <app-liga-sort-indicator [active]="sortBy === 'id'" [order]="sortOrder"></app-liga-sort-indicator
-            ></span>
-          </th>
-          <th scope="col" class="px-6 py-3">Jugador</th>
-          <th scope="col" class="px-6 py-3">Origen</th>
-          <th scope="col" class="px-6 py-3">Destino</th>
-          <th scope="col" class="px-6 py-3">Tipo</th>
-          <th
-            scope="col"
-            class="px-6 py-3 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-600"
-            (click)="onSort('fechaInicio')"
-          >
-            <span class="inline-flex items-center"
-              >Inicio
-              <app-liga-sort-indicator [active]="sortBy === 'fechaInicio'" [order]="sortOrder"></app-liga-sort-indicator
-            ></span>
-          </th>
-          <th
-            scope="col"
-            class="px-6 py-3 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-600"
-            (click)="onSort('fechaFin')"
-          >
-            <span class="inline-flex items-center"
-              >Fin <app-liga-sort-indicator [active]="sortBy === 'fechaFin'" [order]="sortOrder"></app-liga-sort-indicator
-            ></span>
-          </th>
-          <th scope="col" class="px-6 py-3">Estado</th>
-          <th *appIfNotOperador scope="col" class="px-6 py-3 text-right">Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr
-          *ngFor="let p of items"
-          class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
+    <p *ngIf="loading && items.length === 0" class="p-6 text-center text-gray-600 dark:text-gray-400">Cargando…</p>
+    <p *ngIf="!loading && items.length === 0" class="p-6 text-center text-gray-500 dark:text-gray-400">Sin pases</p>
+
+    <ng-container *ngIf="items.length > 0">
+      <div class="xl:hidden border-b border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-700 dark:bg-gray-900/50">
+        <label
+          for="pases-sort"
+          class="mb-2 block text-xs font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-400"
         >
-          <td class="px-6 py-4 text-gray-500">{{ p.id }}</td>
-          <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">
-            {{ p.jugador ? (p.jugador.apellido + ', ' + p.jugador.nombre) : p.jugadorId }}
-          </td>
-          <td class="px-6 py-4">{{ p.clubOrigen?.nombre }}</td>
-          <td class="px-6 py-4">{{ p.clubDestino?.nombre }}</td>
-          <td class="px-6 py-4">{{ p.tipo }}</td>
-          <td class="px-6 py-4">{{ formatDt(p.fechaInicio) }}</td>
-          <td class="px-6 py-4">{{ p.fechaFin ? formatDt(p.fechaFin) : '—' }}</td>
-          <td class="px-6 py-4">
-            <span
-              class="text-xs font-medium px-2.5 py-0.5 rounded"
-              [ngClass]="labelEstado(p) === 'Activo' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'"
+          Ordenar por
+        </label>
+        <select
+          id="pases-sort"
+          name="pasesSort"
+          class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500"
+          [ngModel]="sortSelectValue"
+          (ngModelChange)="onSortSelect($event)"
+        >
+          <option value="id:asc"># — ascendente</option>
+          <option value="id:desc"># — descendente</option>
+          <option value="fechaInicio:asc">Inicio — ascendente</option>
+          <option value="fechaInicio:desc">Inicio — descendente</option>
+          <option value="fechaFin:asc">Fin — ascendente</option>
+          <option value="fechaFin:desc">Fin — descendente</option>
+        </select>
+      </div>
+
+      <ul class="xl:hidden divide-y divide-gray-200 dark:divide-gray-700" role="list">
+        <li *ngFor="let p of items" class="bg-white px-4 py-4 dark:bg-gray-800">
+          <div class="flex flex-col gap-3">
+            <div class="flex items-center justify-between gap-3">
+              <span class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">#</span>
+              <span class="text-sm tabular-nums text-gray-700 dark:text-gray-300">{{ p.id }}</span>
+            </div>
+            <div class="flex flex-col gap-1">
+              <span class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Jugador</span>
+              <span class="text-sm font-medium text-gray-900 dark:text-white">
+                {{ p.jugador ? (p.jugador.apellido + ', ' + p.jugador.nombre) : p.jugadorId }}
+              </span>
+            </div>
+            <div class="flex flex-col gap-1">
+              <span class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Origen</span>
+              <span class="text-sm text-gray-800 dark:text-gray-200">{{ p.clubOrigen?.nombre }}</span>
+            </div>
+            <div class="flex flex-col gap-1">
+              <span class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Destino</span>
+              <span class="text-sm text-gray-800 dark:text-gray-200">{{ p.clubDestino?.nombre }}</span>
+            </div>
+            <div class="flex flex-col gap-1">
+              <span class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Tipo</span>
+              <span class="text-sm text-gray-800 dark:text-gray-200">{{ p.tipo }}</span>
+            </div>
+            <div class="flex flex-col gap-1">
+              <span class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Inicio</span>
+              <span class="text-sm text-gray-800 dark:text-gray-200">{{ formatDt(p.fechaInicio) }}</span>
+            </div>
+            <div class="flex flex-col gap-1">
+              <span class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Fin</span>
+              <span class="text-sm text-gray-800 dark:text-gray-200">{{ p.fechaFin ? formatDt(p.fechaFin) : '—' }}</span>
+            </div>
+            <div class="flex flex-col gap-1">
+              <span class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Estado</span>
+              <span
+                class="inline-flex w-fit text-xs font-medium px-2.5 py-0.5 rounded"
+                [ngClass]="labelEstado(p) === 'Activo' ? 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300' : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'"
+              >
+                {{ labelEstado(p) }}
+              </span>
+            </div>
+            <div *appIfNotOperador class="flex flex-wrap justify-end gap-2 pt-1">
+              <button
+                type="button"
+                (click)="openRenew(p)"
+                class="font-medium text-blue-600 dark:text-blue-500 cursor-pointer decoration-none border border-blue-500 rounded-full px-3 py-1 text-sm"
+              >
+                Renovar
+              </button>
+            </div>
+          </div>
+        </li>
+      </ul>
+
+      <table class="hidden w-full text-sm text-left text-gray-500 dark:text-gray-400 xl:table">
+        <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+          <tr>
+            <th
+              scope="col"
+              class="px-6 py-3 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-600 whitespace-nowrap"
+              (click)="onSort('id')"
             >
-              {{ labelEstado(p) }}
-            </span>
-          </td>
-          <td *appIfNotOperador class="px-6 py-4 text-right">
-            <button
-              type="button"
-              (click)="openRenew(p)"
-              class="font-medium text-blue-600 dark:text-blue-500 cursor-pointer decoration-none border border-blue-500 rounded-full px-2"
+              <span class="inline-flex items-center"
+                ># <app-liga-sort-indicator [active]="sortBy === 'id'" [order]="sortOrder"></app-liga-sort-indicator
+              ></span>
+            </th>
+            <th scope="col" class="px-6 py-3">Jugador</th>
+            <th scope="col" class="px-6 py-3">Origen</th>
+            <th scope="col" class="px-6 py-3">Destino</th>
+            <th scope="col" class="px-6 py-3">Tipo</th>
+            <th
+              scope="col"
+              class="px-6 py-3 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-600"
+              (click)="onSort('fechaInicio')"
             >
-              Renovar
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <p *ngIf="!loading && items.length === 0" class="p-6 text-center text-gray-500">Sin pases</p>
-    <p *ngIf="loading" class="p-6 text-center">Cargando…</p>
+              <span class="inline-flex items-center"
+                >Inicio
+                <app-liga-sort-indicator [active]="sortBy === 'fechaInicio'" [order]="sortOrder"></app-liga-sort-indicator
+              ></span>
+            </th>
+            <th
+              scope="col"
+              class="px-6 py-3 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-600"
+              (click)="onSort('fechaFin')"
+            >
+              <span class="inline-flex items-center"
+                >Fin <app-liga-sort-indicator [active]="sortBy === 'fechaFin'" [order]="sortOrder"></app-liga-sort-indicator
+              ></span>
+            </th>
+            <th scope="col" class="px-6 py-3">Estado</th>
+            <th *appIfNotOperador scope="col" class="px-6 py-3 text-right">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            *ngFor="let p of items"
+            class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
+          >
+            <td class="px-6 py-4 text-gray-500">{{ p.id }}</td>
+            <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">
+              {{ p.jugador ? (p.jugador.apellido + ', ' + p.jugador.nombre) : p.jugadorId }}
+            </td>
+            <td class="px-6 py-4">{{ p.clubOrigen?.nombre }}</td>
+            <td class="px-6 py-4">{{ p.clubDestino?.nombre }}</td>
+            <td class="px-6 py-4">{{ p.tipo }}</td>
+            <td class="px-6 py-4">{{ formatDt(p.fechaInicio) }}</td>
+            <td class="px-6 py-4">{{ p.fechaFin ? formatDt(p.fechaFin) : '—' }}</td>
+            <td class="px-6 py-4">
+              <span
+                class="text-xs font-medium px-2.5 py-0.5 rounded"
+                [ngClass]="labelEstado(p) === 'Activo' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'"
+              >
+                {{ labelEstado(p) }}
+              </span>
+            </td>
+            <td *appIfNotOperador class="px-6 py-4 text-right">
+              <button
+                type="button"
+                (click)="openRenew(p)"
+                class="font-medium text-blue-600 dark:text-blue-500 cursor-pointer decoration-none border border-blue-500 rounded-full px-2"
+              >
+                Renovar
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </ng-container>
+    <p *ngIf="loading && items.length > 0" class="p-3 text-center text-sm text-gray-500 dark:text-gray-400">Cargando…</p>
   </div>
 
   <app-liga-pagination [page]="page" [total]="total" [limit]="limit" (prev)="prevPage()" (next)="nextPage()"></app-liga-pagination>

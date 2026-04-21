@@ -158,10 +158,34 @@ export class PasesListComponent implements OnInit {
     this.load();
   }
 
+  get sortSelectValue(): string {
+    return `${this.sortBy}:${this.sortOrder}`;
+  }
+
   onSort(key: 'fechaInicio' | 'fechaFin' | 'id'): void {
     const n = applySortClick(this.sortBy, this.sortOrder, key);
     this.sortBy = n.sortBy as typeof this.sortBy;
     this.sortOrder = n.sortOrder;
+    this.page = 1;
+    this.load();
+  }
+
+  onSortSelect(value: string): void {
+    const sep = value.indexOf(':');
+    if (sep === -1) return;
+    const by = value.slice(0, sep);
+    const ord = value.slice(sep + 1);
+    if (
+      (by !== 'id' && by !== 'fechaInicio' && by !== 'fechaFin') ||
+      (ord !== 'asc' && ord !== 'desc')
+    ) {
+      return;
+    }
+    if (this.sortBy === by && this.sortOrder === ord) {
+      return;
+    }
+    this.sortBy = by as 'fechaInicio' | 'fechaFin' | 'id';
+    this.sortOrder = ord as 'asc' | 'desc';
     this.page = 1;
     this.load();
   }
