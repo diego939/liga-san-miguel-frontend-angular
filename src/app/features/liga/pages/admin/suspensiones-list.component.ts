@@ -55,10 +55,31 @@ export class SuspensionesListComponent implements OnInit {
     this.load();
   }
 
+  get sortSelectValue(): string {
+    return `${this.sortBy}:${this.sortOrder}`;
+  }
+
   onSort(key: 'id' | 'partidosRestantes'): void {
     const n = applySortClick(this.sortBy, this.sortOrder, key);
     this.sortBy = n.sortBy as typeof this.sortBy;
     this.sortOrder = n.sortOrder;
+    this.page = 1;
+    this.load();
+  }
+
+  onSortSelect(value: string): void {
+    const sep = value.indexOf(':');
+    if (sep === -1) return;
+    const by = value.slice(0, sep);
+    const ord = value.slice(sep + 1);
+    if ((by !== 'id' && by !== 'partidosRestantes') || (ord !== 'asc' && ord !== 'desc')) {
+      return;
+    }
+    if (this.sortBy === by && this.sortOrder === ord) {
+      return;
+    }
+    this.sortBy = by as 'id' | 'partidosRestantes';
+    this.sortOrder = ord as 'asc' | 'desc';
     this.page = 1;
     this.load();
   }

@@ -9,53 +9,109 @@
     </label>
   </div>
   <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
-    <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-      <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-        <tr>
-          <th
-            scope="col"
-            class="px-6 py-3 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-600 whitespace-nowrap"
-            (click)="onSort('id')"
-          >
-            <span class="inline-flex items-center"
-              ># <app-liga-sort-indicator [active]="sortBy === 'id'" [order]="sortOrder"></app-liga-sort-indicator
-            ></span>
-          </th>
-          <th scope="col" class="px-6 py-3">Jugador</th>
-          <th scope="col" class="px-6 py-3">Torneo</th>
-          <th scope="col" class="px-6 py-3">Motivo</th>
-          <th
-            scope="col"
-            class="px-6 py-3 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-600"
-            (click)="onSort('partidosRestantes')"
-          >
-            <span class="inline-flex items-center"
-              >Partidos restantes
-              <app-liga-sort-indicator
-                [active]="sortBy === 'partidosRestantes'"
-                [order]="sortOrder"
-              ></app-liga-sort-indicator
-            ></span>
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr
-          *ngFor="let s of items"
-          class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
+    <p *ngIf="loading && items.length === 0" class="p-6 text-center text-gray-600 dark:text-gray-400">Cargando…</p>
+    <p *ngIf="!loading && items.length === 0" class="p-6 text-center text-gray-500 dark:text-gray-400">Sin suspensiones</p>
+
+    <ng-container *ngIf="items.length > 0">
+      <div class="xl:hidden border-b border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-700 dark:bg-gray-900/50">
+        <label
+          for="suspensiones-sort"
+          class="mb-2 block text-xs font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-400"
         >
-          <td class="px-6 py-4 text-gray-500">{{ s.id }}</td>
-          <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">
-            {{ s.jugador?.apellido }}, {{ s.jugador?.nombre }}
-          </td>
-          <td class="px-6 py-4">{{ s.torneo?.nombre }}</td>
-          <td class="px-6 py-4">{{ s.motivo }}</td>
-          <td class="px-6 py-4">{{ s.partidosRestantes }}</td>
-        </tr>
-      </tbody>
-    </table>
-    <p *ngIf="!loading && items.length === 0" class="p-6 text-center text-gray-500">Sin suspensiones</p>
-    <p *ngIf="loading" class="p-6 text-center">Cargando…</p>
+          Ordenar por
+        </label>
+        <select
+          id="suspensiones-sort"
+          name="suspensionesSort"
+          class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500"
+          [ngModel]="sortSelectValue"
+          (ngModelChange)="onSortSelect($event)"
+        >
+          <option value="id:asc"># — ascendente</option>
+          <option value="id:desc"># — descendente</option>
+          <option value="partidosRestantes:asc">Partidos restantes — ascendente</option>
+          <option value="partidosRestantes:desc">Partidos restantes — descendente</option>
+        </select>
+      </div>
+
+      <ul class="xl:hidden divide-y divide-gray-200 dark:divide-gray-700" role="list">
+        <li *ngFor="let s of items" class="bg-white px-4 py-4 dark:bg-gray-800">
+          <div class="flex flex-col gap-3">
+            <div class="flex items-center justify-between gap-3">
+              <span class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">#</span>
+              <span class="text-sm tabular-nums text-gray-700 dark:text-gray-300">{{ s.id }}</span>
+            </div>
+            <div class="flex flex-col gap-1">
+              <span class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Jugador</span>
+              <span class="text-sm font-medium text-gray-900 dark:text-white">
+                {{ s.jugador?.apellido }}, {{ s.jugador?.nombre }}
+              </span>
+            </div>
+            <div class="flex flex-col gap-1">
+              <span class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Torneo</span>
+              <span class="text-sm text-gray-800 dark:text-gray-200">{{ s.torneo?.nombre }}</span>
+            </div>
+            <div class="flex flex-col gap-1">
+              <span class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Motivo</span>
+              <span class="text-sm text-gray-800 dark:text-gray-200">{{ s.motivo }}</span>
+            </div>
+            <div class="flex items-center justify-between gap-3">
+              <span class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400"
+                >Partidos restantes</span
+              >
+              <span class="text-sm tabular-nums text-gray-700 dark:text-gray-300">{{ s.partidosRestantes }}</span>
+            </div>
+          </div>
+        </li>
+      </ul>
+
+      <table class="hidden w-full text-sm text-left text-gray-500 dark:text-gray-400 xl:table">
+        <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+          <tr>
+            <th
+              scope="col"
+              class="px-6 py-3 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-600 whitespace-nowrap"
+              (click)="onSort('id')"
+            >
+              <span class="inline-flex items-center"
+                ># <app-liga-sort-indicator [active]="sortBy === 'id'" [order]="sortOrder"></app-liga-sort-indicator
+              ></span>
+            </th>
+            <th scope="col" class="px-6 py-3">Jugador</th>
+            <th scope="col" class="px-6 py-3">Torneo</th>
+            <th scope="col" class="px-6 py-3">Motivo</th>
+            <th
+              scope="col"
+              class="px-6 py-3 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-600"
+              (click)="onSort('partidosRestantes')"
+            >
+              <span class="inline-flex items-center"
+                >Partidos restantes
+                <app-liga-sort-indicator
+                  [active]="sortBy === 'partidosRestantes'"
+                  [order]="sortOrder"
+                ></app-liga-sort-indicator
+              ></span>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            *ngFor="let s of items"
+            class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
+          >
+            <td class="px-6 py-4 text-gray-500">{{ s.id }}</td>
+            <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">
+              {{ s.jugador?.apellido }}, {{ s.jugador?.nombre }}
+            </td>
+            <td class="px-6 py-4">{{ s.torneo?.nombre }}</td>
+            <td class="px-6 py-4">{{ s.motivo }}</td>
+            <td class="px-6 py-4">{{ s.partidosRestantes }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </ng-container>
+    <p *ngIf="loading && items.length > 0" class="p-3 text-center text-sm text-gray-500 dark:text-gray-400">Cargando…</p>
   </div>
   <app-liga-pagination [page]="page" [total]="total" [limit]="limit" (prev)="prev()" (next)="next()"></app-liga-pagination>
 </div>
