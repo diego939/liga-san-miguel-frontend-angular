@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, inject } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { finalize } from 'rxjs/operators';
 import Swal from 'sweetalert2';
 import type { Rol, Usuario } from '../../models/api.types';
@@ -17,6 +17,7 @@ import { ligaModal } from '../../shared/liga-ui';
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     ReactiveFormsModule,
     LigaPaginationComponent,
     LigaSortIndicatorComponent,
@@ -123,10 +124,31 @@ export class UsuariosListComponent implements OnInit {
       });
   }
 
+  get sortSelectValue(): string {
+    return `${this.sortBy}:${this.sortOrder}`;
+  }
+
   onSort(key: 'email' | 'id' | 'rolId'): void {
     const n = applySortClick(this.sortBy, this.sortOrder, key);
     this.sortBy = n.sortBy as typeof this.sortBy;
     this.sortOrder = n.sortOrder;
+    this.page = 1;
+    this.load();
+  }
+
+  onSortSelect(value: string): void {
+    const sep = value.indexOf(':');
+    if (sep === -1) return;
+    const by = value.slice(0, sep);
+    const ord = value.slice(sep + 1);
+    if ((by !== 'email' && by !== 'id' && by !== 'rolId') || (ord !== 'asc' && ord !== 'desc')) {
+      return;
+    }
+    if (this.sortBy === by && this.sortOrder === ord) {
+      return;
+    }
+    this.sortBy = by as 'email' | 'id' | 'rolId';
+    this.sortOrder = ord as 'asc' | 'desc';
     this.page = 1;
     this.load();
   }
