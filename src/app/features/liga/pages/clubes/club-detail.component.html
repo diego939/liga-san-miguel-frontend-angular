@@ -17,38 +17,78 @@
     </button>
   </div>
   <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
-    <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-      <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-        <tr>
-          <th scope="col" class="px-6 py-3">Tipo</th>
-          <th scope="col" class="px-6 py-3">Nombre</th>
-          <th scope="col" class="px-6 py-3">DNI</th>
-          <th scope="col" class="px-6 py-3">Teléfono</th>
-          <th *appIfNotOperador scope="col" class="px-6 py-3 text-right">Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr
-          *ngFor="let p of personal"
-          class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
-        >
-          <td class="px-6 py-4">{{ p.tipo }}</td>
-          <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">{{ p.nombre }}</td>
-          <td class="px-6 py-4">{{ p.dni || '—' }}</td>
-          <td class="px-6 py-4">{{ p.telefono || '—' }}</td>
-          <td *appIfNotOperador class="px-6 py-4 text-right space-x-3">
-            <button type="button" (click)="openEditPer(p)" class="font-medium text-blue-600 dark:text-blue-500 cursor-pointer decoration-none border border-blue-500 rounded-full px-2">
-              Editar
-            </button>
-            <button type="button" (click)="deletePer(p)" class="font-medium text-red-600 cursor-pointer decoration-none border border-red-500 rounded-full px-2">Eliminar</button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <p *ngIf="personal.length === 0" class="p-6 text-center text-gray-500">Sin personal cargado</p>
+    <p *ngIf="personal.length === 0" class="p-6 text-center text-gray-500 dark:text-gray-400">Sin personal cargado</p>
+    <ng-container *ngIf="personal.length > 0">
+      <ul class="xl:hidden divide-y divide-gray-200 dark:divide-gray-700" role="list">
+        <li *ngFor="let p of personal" class="bg-white px-4 py-4 dark:bg-gray-800">
+          <div class="flex flex-col gap-3">
+            <div class="flex flex-col gap-1">
+              <span class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Tipo</span>
+              <span class="text-sm text-gray-800 dark:text-gray-200">{{ p.tipo }}</span>
+            </div>
+            <div class="flex flex-col gap-1">
+              <span class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Nombre</span>
+              <span class="text-sm font-medium text-gray-900 dark:text-white">{{ p.nombre }}</span>
+            </div>
+            <div class="flex flex-col gap-1">
+              <span class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">DNI</span>
+              <span class="text-sm text-gray-800 dark:text-gray-200">{{ p.dni || '—' }}</span>
+            </div>
+            <div class="flex flex-col gap-1">
+              <span class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Teléfono</span>
+              <span class="text-sm text-gray-800 dark:text-gray-200">{{ p.telefono || '—' }}</span>
+            </div>
+            <div *appIfNotOperador class="flex flex-wrap justify-end gap-2 pt-1">
+              <button
+                type="button"
+                (click)="openEditPer(p)"
+                class="font-medium text-blue-600 dark:text-blue-500 cursor-pointer decoration-none border border-blue-500 rounded-full px-3 py-1 text-sm"
+              >
+                Editar
+              </button>
+              <button
+                type="button"
+                (click)="deletePer(p)"
+                class="font-medium text-red-600 cursor-pointer decoration-none border border-red-500 rounded-full px-3 py-1 text-sm"
+              >
+                Eliminar
+              </button>
+            </div>
+          </div>
+        </li>
+      </ul>
+      <table class="hidden w-full text-sm text-left text-gray-500 dark:text-gray-400 xl:table">
+        <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+          <tr>
+            <th scope="col" class="px-6 py-3">Tipo</th>
+            <th scope="col" class="px-6 py-3">Nombre</th>
+            <th scope="col" class="px-6 py-3">DNI</th>
+            <th scope="col" class="px-6 py-3">Teléfono</th>
+            <th *appIfNotOperador scope="col" class="px-6 py-3 text-right">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            *ngFor="let p of personal"
+            class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
+          >
+            <td class="px-6 py-4">{{ p.tipo }}</td>
+            <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">{{ p.nombre }}</td>
+            <td class="px-6 py-4">{{ p.dni || '—' }}</td>
+            <td class="px-6 py-4">{{ p.telefono || '—' }}</td>
+            <td *appIfNotOperador class="px-6 py-4 text-right space-x-3">
+              <button type="button" (click)="openEditPer(p)" class="font-medium text-blue-600 dark:text-blue-500 cursor-pointer decoration-none border border-blue-500 rounded-full px-2">
+                Editar
+              </button>
+              <button type="button" (click)="deletePer(p)" class="font-medium text-red-600 cursor-pointer decoration-none border border-red-500 rounded-full px-2">Eliminar</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </ng-container>
   </div>
 </div>
-<p *ngIf="loading" class="p-8 text-center">Cargando…</p>
+<p *ngIf="loading" class="p-8 text-center text-gray-600 dark:text-gray-400">Cargando…</p>
 
 <div *ngIf="modalPer" [class]="lm.backdrop">
   <div [class]="lm.panelSm" (click)="$event.stopPropagation()">
