@@ -14,11 +14,11 @@
         <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
           <tr>
             <th scope="col" class="px-6 py-3">Equipo</th>
+            <th scope="col" class="px-6 py-3" title="Puntos">Pts</th>
             <th scope="col" class="px-6 py-3" title="Partidos jugados">PJ</th>
             <th scope="col" class="px-6 py-3" title="Ganados">PG</th>
             <th scope="col" class="px-6 py-3" title="Empates">PE</th>
             <th scope="col" class="px-6 py-3" title="Perdidos">PP</th>
-            <th scope="col" class="px-6 py-3">Pts</th>
             <th scope="col" class="px-6 py-3" title="Goles a favor">GF</th>
             <th scope="col" class="px-6 py-3" title="Goles en contra">GC</th>
             <th scope="col" class="px-6 py-3" title="Diferencia de gol">DIF</th>
@@ -30,11 +30,11 @@
             class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
           >
             <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">{{ r.clubNombre }}</td>
+            <td class="px-6 py-4 font-bold text-white">{{ r.puntos }}</td>
             <td class="px-6 py-4">{{ r.pj }}</td>
             <td class="px-6 py-4">{{ r.pg }}</td>
             <td class="px-6 py-4">{{ r.pe }}</td>
             <td class="px-6 py-4">{{ r.pp }}</td>
-            <td class="px-6 py-4 font-medium">{{ r.puntos }}</td>
             <td class="px-6 py-4">{{ r.gf }}</td>
             <td class="px-6 py-4">{{ r.gc }}</td>
             <td class="px-6 py-4">{{ r.dif }}</td>
