@@ -106,10 +106,34 @@ export class JugadoresListComponent implements OnInit {
     this.load();
   }
 
+  get sortSelectValue(): string {
+    return `${this.sortBy}:${this.sortOrder}`;
+  }
+
   onSort(key: string): void {
     const n = applySortClick(this.sortBy, this.sortOrder, key);
     this.sortBy = n.sortBy;
     this.sortOrder = n.sortOrder;
+    this.page = 1;
+    this.load();
+  }
+
+  onSortSelect(value: string): void {
+    const sep = value.indexOf(':');
+    if (sep === -1) return;
+    const by = value.slice(0, sep);
+    const ord = value.slice(sep + 1);
+    if (
+      (by !== 'dni' && by !== 'apellido' && by !== 'nombre' && by !== 'fechaNacimiento') ||
+      (ord !== 'asc' && ord !== 'desc')
+    ) {
+      return;
+    }
+    if (this.sortBy === by && this.sortOrder === ord) {
+      return;
+    }
+    this.sortBy = by;
+    this.sortOrder = ord;
     this.page = 1;
     this.load();
   }

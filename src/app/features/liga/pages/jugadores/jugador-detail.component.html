@@ -50,78 +50,152 @@
   </div>
 
   <div *ngIf="tab === 'pases'" class="relative overflow-x-auto shadow-md sm:rounded-lg">
-    <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-      <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-        <tr>
-          <th scope="col" class="px-6 py-3">Origen</th>
-          <th scope="col" class="px-6 py-3">Destino</th>
-          <th scope="col" class="px-6 py-3">Tipo</th>
-          <th scope="col" class="px-6 py-3">Inicio</th>
-          <th scope="col" class="px-6 py-3">Fin</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr
-          *ngFor="let p of pases"
-          class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
-        >
-          <td class="px-6 py-4">{{ p.clubOrigen?.nombre ?? '—' }}</td>
-          <td class="px-6 py-4">{{ p.clubDestino?.nombre }}</td>
-          <td class="px-6 py-4">{{ p.tipo }}</td>
-          <td class="px-6 py-4">{{ formatDt(p.fechaInicio) }}</td>
-          <td class="px-6 py-4">{{ p.fechaFin ? formatDt(p.fechaFin) : '—' }}</td>
-        </tr>
-      </tbody>
-    </table>
-    <p *ngIf="pases.length === 0" class="p-6 text-center text-gray-500">Sin pases</p>
+    <p *ngIf="pases.length === 0" class="p-6 text-center text-gray-500 dark:text-gray-400">Sin pases</p>
+    <ng-container *ngIf="pases.length > 0">
+      <ul class="xl:hidden divide-y divide-gray-200 dark:divide-gray-700" role="list">
+        <li *ngFor="let p of pases" class="bg-white px-4 py-4 dark:bg-gray-800">
+          <div class="flex flex-col gap-3">
+            <div class="flex flex-col gap-1">
+              <span class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Origen</span>
+              <span class="text-sm text-gray-800 dark:text-gray-200">{{ p.clubOrigen?.nombre ?? '—' }}</span>
+            </div>
+            <div class="flex flex-col gap-1">
+              <span class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Destino</span>
+              <span class="text-sm font-medium text-gray-900 dark:text-white">{{ p.clubDestino?.nombre }}</span>
+            </div>
+            <div class="flex flex-col gap-1">
+              <span class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Tipo</span>
+              <span class="text-sm text-gray-800 dark:text-gray-200">{{ p.tipo }}</span>
+            </div>
+            <div class="flex flex-col gap-1">
+              <span class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Inicio</span>
+              <span class="text-sm text-gray-800 dark:text-gray-200">{{ formatDt(p.fechaInicio) }}</span>
+            </div>
+            <div class="flex flex-col gap-1">
+              <span class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Fin</span>
+              <span class="text-sm text-gray-800 dark:text-gray-200">{{ p.fechaFin ? formatDt(p.fechaFin) : '—' }}</span>
+            </div>
+          </div>
+        </li>
+      </ul>
+      <table class="hidden w-full text-sm text-left text-gray-500 dark:text-gray-400 xl:table">
+        <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+          <tr>
+            <th scope="col" class="px-6 py-3">Origen</th>
+            <th scope="col" class="px-6 py-3">Destino</th>
+            <th scope="col" class="px-6 py-3">Tipo</th>
+            <th scope="col" class="px-6 py-3">Inicio</th>
+            <th scope="col" class="px-6 py-3">Fin</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            *ngFor="let p of pases"
+            class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
+          >
+            <td class="px-6 py-4">{{ p.clubOrigen?.nombre ?? '—' }}</td>
+            <td class="px-6 py-4">{{ p.clubDestino?.nombre }}</td>
+            <td class="px-6 py-4">{{ p.tipo }}</td>
+            <td class="px-6 py-4">{{ formatDt(p.fechaInicio) }}</td>
+            <td class="px-6 py-4">{{ p.fechaFin ? formatDt(p.fechaFin) : '—' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </ng-container>
   </div>
 
   <div *ngIf="tab === 'torneos'" class="relative overflow-x-auto shadow-md sm:rounded-lg">
-    <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-      <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-        <tr>
-          <th scope="col" class="px-6 py-3">Torneo</th>
-          <th scope="col" class="px-6 py-3">Club</th>
-          <th scope="col" class="px-6 py-3">Desde</th>
-          <th scope="col" class="px-6 py-3">Hasta</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr
-          *ngFor="let i of torneos"
-          class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
-        >
-          <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">{{ i.equipoTorneo?.torneo?.nombre }}</td>
-          <td class="px-6 py-4">{{ i.equipoTorneo?.club?.nombre }}</td>
-          <td class="px-6 py-4">{{ formatDt(i.fechaInicio) }}</td>
-          <td class="px-6 py-4">{{ i.fechaFin ? formatDt(i.fechaFin) : 'Activa' }}</td>
-        </tr>
-      </tbody>
-    </table>
-    <p *ngIf="torneos.length === 0" class="p-6 text-center text-gray-500">Sin torneos</p>
+    <p *ngIf="torneos.length === 0" class="p-6 text-center text-gray-500 dark:text-gray-400">Sin torneos</p>
+    <ng-container *ngIf="torneos.length > 0">
+      <ul class="xl:hidden divide-y divide-gray-200 dark:divide-gray-700" role="list">
+        <li *ngFor="let i of torneos" class="bg-white px-4 py-4 dark:bg-gray-800">
+          <div class="flex flex-col gap-3">
+            <div class="flex flex-col gap-1">
+              <span class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Torneo</span>
+              <span class="text-sm font-medium text-gray-900 dark:text-white">{{ i.equipoTorneo?.torneo?.nombre }}</span>
+            </div>
+            <div class="flex flex-col gap-1">
+              <span class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Club</span>
+              <span class="text-sm text-gray-800 dark:text-gray-200">{{ i.equipoTorneo?.club?.nombre }}</span>
+            </div>
+            <div class="flex flex-col gap-1">
+              <span class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Desde</span>
+              <span class="text-sm text-gray-800 dark:text-gray-200">{{ formatDt(i.fechaInicio) }}</span>
+            </div>
+            <div class="flex flex-col gap-1">
+              <span class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Hasta</span>
+              <span class="text-sm text-gray-800 dark:text-gray-200">{{ i.fechaFin ? formatDt(i.fechaFin) : 'Activa' }}</span>
+            </div>
+          </div>
+        </li>
+      </ul>
+      <table class="hidden w-full text-sm text-left text-gray-500 dark:text-gray-400 xl:table">
+        <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+          <tr>
+            <th scope="col" class="px-6 py-3">Torneo</th>
+            <th scope="col" class="px-6 py-3">Club</th>
+            <th scope="col" class="px-6 py-3">Desde</th>
+            <th scope="col" class="px-6 py-3">Hasta</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            *ngFor="let i of torneos"
+            class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
+          >
+            <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">{{ i.equipoTorneo?.torneo?.nombre }}</td>
+            <td class="px-6 py-4">{{ i.equipoTorneo?.club?.nombre }}</td>
+            <td class="px-6 py-4">{{ formatDt(i.fechaInicio) }}</td>
+            <td class="px-6 py-4">{{ i.fechaFin ? formatDt(i.fechaFin) : 'Activa' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </ng-container>
   </div>
 
   <div *ngIf="tab === 'susp'" class="relative overflow-x-auto shadow-md sm:rounded-lg">
-    <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-      <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-        <tr>
-          <th scope="col" class="px-6 py-3">Torneo</th>
-          <th scope="col" class="px-6 py-3">Motivo</th>
-          <th scope="col" class="px-6 py-3">Partidos restantes</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr
-          *ngFor="let s of suspensiones"
-          class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
-        >
-          <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">{{ s.torneo?.nombre }}</td>
-          <td class="px-6 py-4">{{ s.motivo }}</td>
-          <td class="px-6 py-4">{{ s.partidosRestantes }}</td>
-        </tr>
-      </tbody>
-    </table>
-    <p *ngIf="suspensiones.length === 0" class="p-6 text-center text-gray-500">Sin suspensiones</p>
+    <p *ngIf="suspensiones.length === 0" class="p-6 text-center text-gray-500 dark:text-gray-400">Sin suspensiones</p>
+    <ng-container *ngIf="suspensiones.length > 0">
+      <ul class="xl:hidden divide-y divide-gray-200 dark:divide-gray-700" role="list">
+        <li *ngFor="let s of suspensiones" class="bg-white px-4 py-4 dark:bg-gray-800">
+          <div class="flex flex-col gap-3">
+            <div class="flex flex-col gap-1">
+              <span class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Torneo</span>
+              <span class="text-sm font-medium text-gray-900 dark:text-white">{{ s.torneo?.nombre }}</span>
+            </div>
+            <div class="flex flex-col gap-1">
+              <span class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Motivo</span>
+              <span class="text-sm text-gray-800 dark:text-gray-200">{{ s.motivo }}</span>
+            </div>
+            <div class="flex items-center justify-between gap-3">
+              <span class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400"
+                >Partidos restantes</span
+              >
+              <span class="text-sm tabular-nums text-gray-800 dark:text-gray-200">{{ s.partidosRestantes }}</span>
+            </div>
+          </div>
+        </li>
+      </ul>
+      <table class="hidden w-full text-sm text-left text-gray-500 dark:text-gray-400 xl:table">
+        <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+          <tr>
+            <th scope="col" class="px-6 py-3">Torneo</th>
+            <th scope="col" class="px-6 py-3">Motivo</th>
+            <th scope="col" class="px-6 py-3">Partidos restantes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            *ngFor="let s of suspensiones"
+            class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
+          >
+            <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">{{ s.torneo?.nombre }}</td>
+            <td class="px-6 py-4">{{ s.motivo }}</td>
+            <td class="px-6 py-4">{{ s.partidosRestantes }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </ng-container>
   </div>
 </div>
 

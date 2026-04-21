@@ -44,96 +44,185 @@
   </div>
 
   <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
-    <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-      <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-        <tr>
-          <th
-            scope="col"
-            class="px-6 py-3 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-600"
-            (click)="onSort('dni')"
-          >
-            <span class="inline-flex items-center"
-              >DNI <app-liga-sort-indicator [active]="sortBy === 'dni'" [order]="sortOrder"></app-liga-sort-indicator
-            ></span>
-          </th>
-          <th
-            scope="col"
-            class="px-6 py-3 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-600"
-            (click)="onSort('apellido')"
-          >
-            <span class="inline-flex items-center"
-              >Apellido
-              <app-liga-sort-indicator [active]="sortBy === 'apellido'" [order]="sortOrder"></app-liga-sort-indicator
-            ></span>
-          </th>
-          <th
-            scope="col"
-            class="px-6 py-3 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-600"
-            (click)="onSort('nombre')"
-          >
-            <span class="inline-flex items-center"
-              >Nombre <app-liga-sort-indicator [active]="sortBy === 'nombre'" [order]="sortOrder"></app-liga-sort-indicator
-            ></span>
-          </th>
-          <th
-            scope="col"
-            class="px-6 py-3 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-600"
-            (click)="onSort('fechaNacimiento')"
-          >
-            <span class="inline-flex items-center"
-              >Fecha nac.
-              <app-liga-sort-indicator [active]="sortBy === 'fechaNacimiento'" [order]="sortOrder"></app-liga-sort-indicator
-            ></span>
-          </th>
-          <th scope="col" class="px-6 py-3">Teléfono</th>
-          <th scope="col" class="px-6 py-3 text-right">Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr
+    <p *ngIf="loading && items.length === 0" class="p-6 text-center text-gray-600 dark:text-gray-400">Cargando…</p>
+    <p *ngIf="!loading && items.length === 0" class="p-6 text-center text-gray-500 dark:text-gray-400">Sin resultados</p>
+
+    <ng-container *ngIf="items.length > 0">
+      <div class="xl:hidden border-b border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-700 dark:bg-gray-900/50">
+        <label
+          for="jugadores-sort"
+          class="mb-2 block text-xs font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-400"
+        >
+          Ordenar por
+        </label>
+        <select
+          id="jugadores-sort"
+          name="jugadoresSort"
+          class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500"
+          [ngModel]="sortSelectValue"
+          (ngModelChange)="onSortSelect($event)"
+        >
+          <option value="dni:asc">DNI — ascendente</option>
+          <option value="dni:desc">DNI — descendente</option>
+          <option value="apellido:asc">Apellido — A a Z</option>
+          <option value="apellido:desc">Apellido — Z a A</option>
+          <option value="nombre:asc">Nombre — A a Z</option>
+          <option value="nombre:desc">Nombre — Z a A</option>
+          <option value="fechaNacimiento:asc">Fecha nac. — ascendente</option>
+          <option value="fechaNacimiento:desc">Fecha nac. — descendente</option>
+        </select>
+      </div>
+
+      <ul class="xl:hidden divide-y divide-gray-200 dark:divide-gray-700" role="list">
+        <li
           *ngFor="let j of items"
           title="Ver detalles"
-          class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer"
+          class="cursor-pointer bg-white px-4 py-4 hover:bg-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700/50"
           (click)="goDetail(j)"
         >
-          <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">{{ j.dni }}</td>
-          <td class="px-6 py-4">{{ j.apellido }}</td>
-          <td class="px-6 py-4">{{ j.nombre }}</td>
-          <td class="px-6 py-4">{{ formatDate(j.fechaNacimiento) }}</td>
-          <td class="px-6 py-4">{{ j.telefono || '—' }}</td>
-          <td class="px-6 py-4 text-right space-x-2" (click)="$event.stopPropagation()">
-            <button
-              type="button"
-              title="Ver detalles"
-              (click)="goDetail(j)"
-              class="font-medium text-green-600 dark:text-green-500 cursor-pointer decoration-none border border-green-500 rounded-full px-2"
+          <div class="flex flex-col gap-3">
+            <div class="flex flex-col gap-1">
+              <span class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">DNI</span>
+              <span class="text-sm font-medium text-gray-900 dark:text-white">{{ j.dni }}</span>
+            </div>
+            <div class="flex flex-col gap-1">
+              <span class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Apellido</span>
+              <span class="text-sm text-gray-800 dark:text-gray-200">{{ j.apellido }}</span>
+            </div>
+            <div class="flex flex-col gap-1">
+              <span class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Nombre</span>
+              <span class="text-sm text-gray-800 dark:text-gray-200">{{ j.nombre }}</span>
+            </div>
+            <div class="flex flex-col gap-1">
+              <span class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Fecha nac.</span>
+              <span class="text-sm text-gray-800 dark:text-gray-200">{{ formatDate(j.fechaNacimiento) }}</span>
+            </div>
+            <div class="flex flex-col gap-1">
+              <span class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Teléfono</span>
+              <span class="text-sm text-gray-800 dark:text-gray-200">{{ j.telefono || '—' }}</span>
+            </div>
+            <div class="flex flex-wrap justify-end gap-2 pt-1" (click)="$event.stopPropagation()">
+              <button
+                type="button"
+                title="Ver detalles"
+                (click)="goDetail(j)"
+                class="font-medium text-green-600 dark:text-green-500 cursor-pointer decoration-none border border-green-500 rounded-full px-3 py-1 text-sm"
+              >
+                Ver detalles
+              </button>
+              <button
+                *appIfNotOperador
+                type="button"
+                title="Editar"
+                (click)="openEdit(j, $event)"
+                class="font-medium text-blue-600 dark:text-blue-500 cursor-pointer decoration-none border border-blue-500 rounded-full px-3 py-1 text-sm"
+              >
+                Editar
+              </button>
+              <button
+                *appIfNotOperador
+                type="button"
+                title="Eliminar"
+                (click)="remove(j, $event)"
+                class="font-medium text-red-600 cursor-pointer decoration-none border border-red-500 rounded-full px-3 py-1 text-sm"
+              >
+                Eliminar
+              </button>
+            </div>
+          </div>
+        </li>
+      </ul>
+
+      <table class="hidden w-full text-sm text-left text-gray-500 dark:text-gray-400 xl:table">
+        <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+          <tr>
+            <th
+              scope="col"
+              class="px-6 py-3 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-600"
+              (click)="onSort('dni')"
             >
-              Ver detalles
-            </button>
-            <button
-              *appIfNotOperador
-              type="button"
-              title="Editar"
-              (click)="openEdit(j, $event)"
-              class="font-medium text-blue-600 dark:text-blue-500 cursor-pointer decoration-none border border-blue-500 rounded-full px-2"
+              <span class="inline-flex items-center"
+                >DNI <app-liga-sort-indicator [active]="sortBy === 'dni'" [order]="sortOrder"></app-liga-sort-indicator
+              ></span>
+            </th>
+            <th
+              scope="col"
+              class="px-6 py-3 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-600"
+              (click)="onSort('apellido')"
             >
-              Editar
-            </button>
-            <button
-              *appIfNotOperador
-              type="button"
-              title="Eliminar"
-              (click)="remove(j, $event)"
-              class="font-medium text-red-600 cursor-pointer decoration-none border border-red-500 rounded-full px-2"
+              <span class="inline-flex items-center"
+                >Apellido
+                <app-liga-sort-indicator [active]="sortBy === 'apellido'" [order]="sortOrder"></app-liga-sort-indicator
+              ></span>
+            </th>
+            <th
+              scope="col"
+              class="px-6 py-3 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-600"
+              (click)="onSort('nombre')"
             >
-              Eliminar
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <p *ngIf="!loading && items.length === 0" class="p-6 text-center text-gray-500">Sin resultados</p>
-    <p *ngIf="loading" class="p-6 text-center">Cargando…</p>
+              <span class="inline-flex items-center"
+                >Nombre <app-liga-sort-indicator [active]="sortBy === 'nombre'" [order]="sortOrder"></app-liga-sort-indicator
+              ></span>
+            </th>
+            <th
+              scope="col"
+              class="px-6 py-3 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-600"
+              (click)="onSort('fechaNacimiento')"
+            >
+              <span class="inline-flex items-center"
+                >Fecha nac.
+                <app-liga-sort-indicator [active]="sortBy === 'fechaNacimiento'" [order]="sortOrder"></app-liga-sort-indicator
+              ></span>
+            </th>
+            <th scope="col" class="px-6 py-3">Teléfono</th>
+            <th scope="col" class="px-6 py-3 text-right">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            *ngFor="let j of items"
+            title="Ver detalles"
+            class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer"
+            (click)="goDetail(j)"
+          >
+            <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">{{ j.dni }}</td>
+            <td class="px-6 py-4">{{ j.apellido }}</td>
+            <td class="px-6 py-4">{{ j.nombre }}</td>
+            <td class="px-6 py-4">{{ formatDate(j.fechaNacimiento) }}</td>
+            <td class="px-6 py-4">{{ j.telefono || '—' }}</td>
+            <td class="px-6 py-4 text-right space-x-2" (click)="$event.stopPropagation()">
+              <button
+                type="button"
+                title="Ver detalles"
+                (click)="goDetail(j)"
+                class="font-medium text-green-600 dark:text-green-500 cursor-pointer decoration-none border border-green-500 rounded-full px-2"
+              >
+                Ver detalles
+              </button>
+              <button
+                *appIfNotOperador
+                type="button"
+                title="Editar"
+                (click)="openEdit(j, $event)"
+                class="font-medium text-blue-600 dark:text-blue-500 cursor-pointer decoration-none border border-blue-500 rounded-full px-2"
+              >
+                Editar
+              </button>
+              <button
+                *appIfNotOperador
+                type="button"
+                title="Eliminar"
+                (click)="remove(j, $event)"
+                class="font-medium text-red-600 cursor-pointer decoration-none border border-red-500 rounded-full px-2"
+              >
+                Eliminar
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </ng-container>
+    <p *ngIf="loading && items.length > 0" class="p-3 text-center text-sm text-gray-500 dark:text-gray-400">Cargando…</p>
   </div>
 
   <app-liga-pagination
