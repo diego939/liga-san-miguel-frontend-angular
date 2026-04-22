@@ -62,7 +62,7 @@ export class JugadoresListComponent implements OnInit {
   editing: Jugador | null = null;
 
   form = this.fb.nonNullable.group({
-    dni: ['', [Validators.required, Validators.minLength(6)]],
+    dni: ['', [Validators.required, Validators.minLength(6), Validators.pattern(/^\d+$/)]],
     nombre: ['', Validators.required],
     apellido: ['', Validators.required],
     telefono: [''],
@@ -252,6 +252,35 @@ export class JugadoresListComponent implements OnInit {
       this.page++;
       this.load();
     }
+  }
+
+  /** Solo permite dígitos.  se usa en el input de dni.*/
+  onDniKeydown(event: KeyboardEvent): void {
+    if (event.ctrlKey || event.metaKey || event.altKey) return;
+    const allowedKeys = new Set([
+      'Backspace',
+      'Delete',
+      'ArrowLeft',
+      'ArrowRight',
+      'Tab',
+      'Home',
+      'End',
+    ]);
+    if (allowedKeys.has(event.key)) return;
+    if (!/^\d$/.test(event.key)) {
+      event.preventDefault();
+    }
+  }
+
+  /** Solo permite dígitos.  se usa en el input de dni.*/
+  onDniInput(event: Event): void {
+    const input = event.target as HTMLInputElement | null;
+    if (!input) return;
+    const onlyDigits = input.value.replace(/\D+/g, '');
+    if (input.value !== onlyDigits) {
+      input.value = onlyDigits;
+    }
+    this.form.controls.dni.setValue(onlyDigits, { emitEvent: false });
   }
 
   formatDate = formatDateOnly;

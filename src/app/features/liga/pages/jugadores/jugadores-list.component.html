@@ -247,7 +247,14 @@
       <fieldset class="space-y-4 border-0 p-0 m-0 min-w-0" [disabled]="saving">
         <div>
           <label [class]="lm.label">DNI</label>
-          <input formControlName="dni" [class]="lm.field" />
+          <input
+            formControlName="dni"
+            [class]="lm.field"
+            pattern="[0-9]*"
+            inputmode="numeric"
+            (keydown)="onDniKeydown($event)"
+            (input)="onDniInput($event)"
+          />
         </div>
         <div class="grid grid-cols-2 gap-3">
           <div>
