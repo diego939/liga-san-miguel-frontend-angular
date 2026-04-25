@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   FormBuilder,
   FormsModule,
@@ -42,6 +43,7 @@ export class PasesListComponent implements OnInit {
   private readonly clubesApi = inject(ClubesApiService);
   private readonly jugadoresApi = inject(JugadoresApiService);
   private readonly fb = inject(FormBuilder);
+  private readonly destroyRef = inject(DestroyRef);
 
   items: Pase[] = [];
   total = 0;
@@ -61,6 +63,8 @@ export class PasesListComponent implements OnInit {
   dniBusqueda = '';
   jugadorEncontrado: Jugador | null = null;
   buscandoJugador = false;
+  /** Mensaje bajo el campo DNI (vacío / no encontrado); sin alerta. */
+  busquedaJugadorError: string | null = null;
 
   sortBy: 'fechaInicio' | 'fechaFin' | 'id' = 'fechaInicio';
   sortOrder: 'asc' | 'desc' = 'desc';
@@ -69,9 +73,9 @@ export class PasesListComponent implements OnInit {
   renewModal: Pase | null = null;
 
   form = this.fb.nonNullable.group({
-    jugadorId: [0, Validators.required],
+    jugadorId: [0, Validators.min(1)],
     clubOrigenId: [0],
-    clubDestinoId: [0, Validators.required],
+    clubDestinoId: [0, Validators.min(1)],
     tipo: ['DEFINITIVO' as TipoPase, Validators.required],
     fechaInicio: ['', Validators.required],
     fechaFin: [''],
@@ -80,7 +84,7 @@ export class PasesListComponent implements OnInit {
   renewForm = this.fb.nonNullable.group({
     fechaInicio: ['', Validators.required],
     fechaFin: [''],
-    tipo: ['DEFINITIVO' as TipoPase],
+    tipo: ['DEFINITIVO' as TipoPase, Validators.required],
   });
 
   ngOnInit(): void {
@@ -89,6 +93,12 @@ export class PasesListComponent implements OnInit {
       error: (e) => this.apiErrorAlert(e),
     });
     this.load();
+    this.form.controls.tipo.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.syncCreateFechaFinValidators());
+    this.renewForm.controls.tipo.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.syncRenewFechaFinValidators());
   }
 
   load(): void {
@@ -115,19 +125,47 @@ export class PasesListComponent implements OnInit {
 
   onDniBusquedaChange(): void {
     this.jugadorEncontrado = null;
+    this.busquedaJugadorError = null;
     this.form.patchValue({ jugadorId: 0, clubOrigenId: 0 });
+  }
+
+  /** Solo permite dígitos (mismo criterio que el DNI en jugadores). */
+  onDniKeydown(event: KeyboardEvent): void {
+    if (event.ctrlKey || event.metaKey || event.altKey) return;
+    const allowedKeys = new Set([
+      'Backspace',
+      'Delete',
+      'ArrowLeft',
+      'ArrowRight',
+      'Tab',
+      'Home',
+      'End',
+      'Enter',
+    ]);
+    if (allowedKeys.has(event.key)) return;
+    if (!/^\d$/.test(event.key)) {
+      event.preventDefault();
+    }
+  }
+
+  /** Filtra pegados u otros caracteres no numéricos. */
+  onDniInput(event: Event): void {
+    const input = event.target as HTMLInputElement | null;
+    if (!input) return;
+    const onlyDigits = input.value.replace(/\D+/g, '');
+    if (input.value !== onlyDigits) {
+      input.value = onlyDigits;
+    }
+    this.dniBusqueda = onlyDigits;
   }
 
   buscarJugadorPorDni(): void {
     const dni = this.dniBusqueda.trim();
     if (!dni) {
-      void Swal.fire({
-        icon: 'info',
-        title: 'Ingresá un DNI',
-        text: 'Escribí el documento y tocá Buscar.',
-      });
+      this.busquedaJugadorError = 'Ingresá un DNI y tocá Buscar.';
       return;
     }
+    this.busquedaJugadorError = null;
     this.buscandoJugador = true;
     this.jugadoresApi
       .list({ dni, limit: 20, page: 1 })
@@ -137,15 +175,13 @@ export class PasesListComponent implements OnInit {
           const dniNorm = dni.toLowerCase();
           const match = r.items.find((j) => j.dni.toLowerCase() === dniNorm);
           if (!match) {
-            void Swal.fire({
-              icon: 'warning',
-              title: 'No se encontró el jugador',
-              text: 'Ingresá el DNI completo y verificá que exista en el sistema.',
-            });
+            this.busquedaJugadorError =
+              'No se encontró un jugador con ese DNI.';
             this.jugadorEncontrado = null;
             this.form.patchValue({ jugadorId: 0 });
             return;
           }
+          this.busquedaJugadorError = null;
           this.jugadorEncontrado = match;
           this.form.patchValue({ jugadorId: match.id });
           this.autoselectClubOrigenFromPases(match.id);
@@ -196,6 +232,7 @@ export class PasesListComponent implements OnInit {
     this.saving = false;
     this.dniBusqueda = '';
     this.jugadorEncontrado = null;
+    this.busquedaJugadorError = null;
     this.form.reset({
       jugadorId: 0,
       clubOrigenId: 0,
@@ -204,6 +241,7 @@ export class PasesListComponent implements OnInit {
       fechaInicio: '',
       fechaFin: '',
     });
+    this.syncCreateFechaFinValidators();
     this.modalOpen = true;
   }
 
@@ -214,32 +252,12 @@ export class PasesListComponent implements OnInit {
   }
 
   save(): void {
+    this.syncCreateFechaFinValidators();
     if (this.form.invalid) {
       this.form.markAllAsTouched();
-      void Swal.fire({
-        icon: 'warning',
-        title: 'Datos incompletos',
-        text: 'Completá club destino, fechas y tipo de pase. Buscá un jugador por DNI.',
-      });
       return;
     }
     const v = this.form.getRawValue();
-    if (!v.jugadorId || v.jugadorId <= 0) {
-      void Swal.fire({
-        icon: 'warning',
-        title: 'Jugador requerido',
-        text: 'Buscá un jugador por DNI antes de guardar.',
-      });
-      return;
-    }
-    if (v.tipo === 'TEMPORAL' && !v.fechaFin) {
-      void Swal.fire({
-        icon: 'warning',
-        title: 'Fecha fin requerida',
-        text: 'El pase temporal requiere fecha fin.',
-      });
-      return;
-    }
     this.saving = true;
     this.pasesApi
       .create({
@@ -272,29 +290,18 @@ export class PasesListComponent implements OnInit {
       fechaFin: '',
       tipo: p.tipo,
     });
+    this.syncRenewFechaFinValidators();
     this.modalOpen = true;
   }
 
   saveRenew(): void {
     if (!this.renewModal) return;
+    this.syncRenewFechaFinValidators();
     if (this.renewForm.invalid) {
       this.renewForm.markAllAsTouched();
-      void Swal.fire({
-        icon: 'warning',
-        title: 'Datos incompletos',
-        text: 'Completá fecha de inicio y el resto de los datos del pase.',
-      });
       return;
     }
     const v = this.renewForm.getRawValue();
-    if (v.tipo === 'TEMPORAL' && !v.fechaFin) {
-      void Swal.fire({
-        icon: 'warning',
-        title: 'Fecha fin requerida',
-        text: 'El pase temporal requiere fecha fin.',
-      });
-      return;
-    }
     this.saving = true;
     this.pasesApi
       .renovar(this.renewModal.id, {
@@ -315,6 +322,36 @@ export class PasesListComponent implements OnInit {
 
   labelEstado = labelEstadoPase;
   formatDt = formatDateTime;
+
+  isInvalid(controlName: keyof typeof this.form.controls): boolean {
+    const c = this.form.controls[controlName];
+    return c.invalid && (c.dirty || c.touched);
+  }
+
+  isRenewInvalid(controlName: keyof typeof this.renewForm.controls): boolean {
+    const c = this.renewForm.controls[controlName];
+    return c.invalid && (c.dirty || c.touched);
+  }
+
+  private syncCreateFechaFinValidators(): void {
+    const fin = this.form.controls.fechaFin;
+    if (this.form.controls.tipo.value === 'TEMPORAL') {
+      fin.setValidators([Validators.required]);
+    } else {
+      fin.clearValidators();
+    }
+    fin.updateValueAndValidity({ emitEvent: false });
+  }
+
+  private syncRenewFechaFinValidators(): void {
+    const fin = this.renewForm.controls.fechaFin;
+    if (this.renewForm.controls.tipo.value === 'TEMPORAL') {
+      fin.setValidators([Validators.required]);
+    } else {
+      fin.clearValidators();
+    }
+    fin.updateValueAndValidity({ emitEvent: false });
+  }
 
   prevPage(): void {
     if (this.page > 1) {

@@ -215,9 +215,13 @@
             (keyup.enter)="buscarJugadorPorDni()"
             [ngModelOptions]="{ standalone: true }"
             [class]="lm.field"
+            [ngClass]="{ 'border-red-500 focus:border-red-500 focus:ring-red-500': !!busquedaJugadorError }"
+            pattern="[0-9]*"
+            inputmode="numeric"
             placeholder="DNI"
             autocomplete="off"
-            inputmode="numeric"
+            (keydown)="onDniKeydown($event)"
+            (input)="onDniInput($event)"
           />
         </div>
         <button
@@ -231,6 +235,7 @@
           <span aria-hidden="true"><i class="fa-solid fa-magnifying-glass"></i></span>
         </button>
       </div>
+      <p *ngIf="busquedaJugadorError" class="mt-1 w-full text-xs text-red-600">{{ busquedaJugadorError }}</p>
       <div
         *ngIf="jugadorEncontrado as j"
         class="rounded-lg border border-green-200 bg-green-50 p-3 text-sm dark:border-green-900/40 dark:bg-green-900/20"
@@ -240,8 +245,14 @@
         </p>
         <p class="mt-0.5 text-xs text-gray-600 dark:text-gray-400">DNI {{ j.dni }}</p>
       </div>
-      <p *ngIf="!jugadorEncontrado && dniBusqueda.trim()" class="text-xs text-gray-500 dark:text-gray-400">
+      <p
+        *ngIf="!jugadorEncontrado && dniBusqueda.trim() && !busquedaJugadorError"
+        class="text-xs text-gray-500 dark:text-gray-400"
+      >
         Tocá <strong>Buscar</strong> para validar el DNI.
+      </p>
+      <p *ngIf="form.controls.jugadorId.touched && form.controls.jugadorId.hasError('min')" class="text-xs text-red-600">
+        Buscá un jugador por DNI antes de guardar.
       </p>
     </div>
     <form [formGroup]="form" (ngSubmit)="save()" class="space-y-3">
@@ -257,26 +268,56 @@
           </div>
           <div>
             <label [class]="lm.label">Club destino</label>
-            <select formControlName="clubDestinoId" [class]="lm.field">
+            <select
+              formControlName="clubDestinoId"
+              [class]="lm.field"
+              [ngClass]="{ 'border-red-500 focus:border-red-500 focus:ring-red-500': isInvalid('clubDestinoId') }"
+            >
               <option [ngValue]="0">—</option>
               <option *ngFor="let c of clubs" [ngValue]="c.id">{{ c.nombre }}</option>
             </select>
+            <p *ngIf="form.controls.clubDestinoId.touched && form.controls.clubDestinoId.hasError('min')" class="mt-1 text-xs text-red-600">
+              Seleccioná el club destino.
+            </p>
           </div>
         </div>
         <div>
           <label [class]="lm.label">Tipo</label>
-          <select formControlName="tipo" [class]="lm.field">
+          <select
+            formControlName="tipo"
+            [class]="lm.field"
+            [ngClass]="{ 'border-red-500 focus:border-red-500 focus:ring-red-500': isInvalid('tipo') }"
+          >
             <option value="DEFINITIVO">Definitivo</option>
             <option value="TEMPORAL">Temporal</option>
           </select>
+          <p *ngIf="form.controls.tipo.touched && form.controls.tipo.hasError('required')" class="mt-1 text-xs text-red-600">
+            El tipo de pase es obligatorio.
+          </p>
         </div>
         <div>
           <label [class]="lm.label">Fecha inicio</label>
-          <input type="datetime-local" formControlName="fechaInicio" [class]="lm.field + ' native-date-icon native-date-inverted'" />
+          <input
+            type="datetime-local"
+            formControlName="fechaInicio"
+            [class]="lm.field + ' native-date-icon native-date-inverted'"
+            [ngClass]="{ 'border-red-500 focus:border-red-500 focus:ring-red-500': isInvalid('fechaInicio') }"
+          />
+          <p *ngIf="form.controls.fechaInicio.touched && form.controls.fechaInicio.hasError('required')" class="mt-1 text-xs text-red-600">
+            La fecha de inicio es obligatoria.
+          </p>
         </div>
         <div *ngIf="form.get('tipo')?.value === 'TEMPORAL'">
           <label [class]="lm.label">Fecha fin (temporal)</label>
-          <input type="datetime-local" formControlName="fechaFin" [class]="lm.field + ' native-date-icon native-date-inverted'" />
+          <input
+            type="datetime-local"
+            formControlName="fechaFin"
+            [class]="lm.field + ' native-date-icon native-date-inverted'"
+            [ngClass]="{ 'border-red-500 focus:border-red-500 focus:ring-red-500': isInvalid('fechaFin') }"
+          />
+          <p *ngIf="form.controls.fechaFin.touched && form.controls.fechaFin.hasError('required')" class="mt-1 text-xs text-red-600">
+            El pase temporal requiere fecha de fin.
+          </p>
         </div>
       </fieldset>
       <div class="flex justify-end mt-4">
@@ -337,18 +378,47 @@
       <fieldset class="space-y-3 border-0 p-0 m-0 min-w-0" [disabled]="saving">
         <div>
           <label [class]="lm.label">Fecha inicio</label>
-          <input type="datetime-local" formControlName="fechaInicio" [class]="lm.field + ' native-date-icon native-date-inverted'" />
+          <input
+            type="datetime-local"
+            formControlName="fechaInicio"
+            [class]="lm.field + ' native-date-icon native-date-inverted'"
+            [ngClass]="{ 'border-red-500 focus:border-red-500 focus:ring-red-500': isRenewInvalid('fechaInicio') }"
+          />
+          <p
+            *ngIf="renewForm.controls.fechaInicio.touched && renewForm.controls.fechaInicio.hasError('required')"
+            class="mt-1 text-xs text-red-600"
+          >
+            La fecha de inicio es obligatoria.
+          </p>
         </div>
         <div *ngIf="renewForm.get('tipo')?.value === 'TEMPORAL'">
           <label [class]="lm.label">Fecha fin</label>
-          <input type="datetime-local" formControlName="fechaFin" [class]="lm.field + ' native-date-icon native-date-inverted'" />
+          <input
+            type="datetime-local"
+            formControlName="fechaFin"
+            [class]="lm.field + ' native-date-icon native-date-inverted'"
+            [ngClass]="{ 'border-red-500 focus:border-red-500 focus:ring-red-500': isRenewInvalid('fechaFin') }"
+          />
+          <p
+            *ngIf="renewForm.controls.fechaFin.touched && renewForm.controls.fechaFin.hasError('required')"
+            class="mt-1 text-xs text-red-600"
+          >
+            El pase temporal requiere fecha de fin.
+          </p>
         </div>
         <div>
           <label [class]="lm.label">Tipo</label>
-          <select formControlName="tipo" [class]="lm.field">
+          <select
+            formControlName="tipo"
+            [class]="lm.field"
+            [ngClass]="{ 'border-red-500 focus:border-red-500 focus:ring-red-500': isRenewInvalid('tipo') }"
+          >
             <option value="DEFINITIVO">Definitivo</option>
             <option value="TEMPORAL">Temporal</option>
           </select>
+          <p *ngIf="renewForm.controls.tipo.touched && renewForm.controls.tipo.hasError('required')" class="mt-1 text-xs text-red-600">
+            El tipo de pase es obligatorio.
+          </p>
         </div>
       </fieldset>
       <div class="flex justify-end mt-4">
