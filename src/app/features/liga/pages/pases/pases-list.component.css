@@ -1,0 +1,11 @@
+.native-date-icon::-webkit-calendar-picker-indicator {
+  opacity: 1;
+  filter: brightness(0) invert(1);
+  transition: opacity 0.15s ease-in-out;
+}
+
+.native-date-icon::-webkit-calendar-picker-indicator:hover {
+  cursor: pointer;
+  opacity: 1;
+  filter: brightness(0) invert(1);
+}

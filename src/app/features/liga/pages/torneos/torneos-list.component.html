@@ -210,21 +210,39 @@
         <div class="grid grid-cols-2 gap-2">
           <div>
             <label [class]="lm.labelMuted">Inicio</label>
-            <input type="date" formControlName="fechaInicio" [class]="lm.field" />
+            <input type="date" formControlName="fechaInicio" [class]="lm.field + ' native-date-icon'" />
           </div>
           <div>
             <label [class]="lm.labelMuted">Fin</label>
-            <input type="date" formControlName="fechaFin" [class]="lm.field" />
+            <input type="date" formControlName="fechaFin" [class]="lm.field + ' native-date-icon'" />
           </div>
         </div>
         <div class="grid grid-cols-2 gap-2">
           <div>
             <label [class]="lm.labelMuted">Límite foráneos</label>
-            <input type="number" formControlName="limiteForaneos" [class]="lm.field" />
+            <input
+              type="text"
+              formControlName="limiteForaneos"
+              [class]="lm.field"
+              inputmode="numeric"
+              pattern="[0-9]*"
+              autocomplete="off"
+              (keydown)="onDigitsKeydown($event)"
+              (input)="onDigitsInput($event, 'limiteForaneos')"
+            />
           </div>
           <div>
-            <label [class]="lm.labelMuted">Máx. jugadores por equipo</label>
-            <input type="number" formControlName="maxJugadores" [class]="lm.field" />
+            <label [class]="lm.labelMuted">Máx. jugadores</label>
+            <input
+              type="text"
+              formControlName="maxJugadores"
+              [class]="lm.field"
+              inputmode="numeric"
+              pattern="[0-9]*"
+              autocomplete="off"
+              (keydown)="onDigitsKeydown($event)"
+              (input)="onDigitsInput($event, 'maxJugadores')"
+            />
           </div>
         </div>
       </fieldset>

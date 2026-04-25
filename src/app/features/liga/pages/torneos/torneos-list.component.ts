@@ -26,6 +26,7 @@ import { IfNotOperadorDirective } from '../../../../core/directives/if-not-opera
     IfNotOperadorDirective,
   ],
   templateUrl: './torneos-list.component.html',
+  styleUrls: ['./torneos-list.component.css'],
 })
 export class TorneosListComponent implements OnInit {
   readonly lm = ligaModal;
@@ -156,6 +157,38 @@ export class TorneosListComponent implements OnInit {
   close(): void {
     this.modalOpen = false;
     this.saving = false;
+  }
+
+  onDigitsKeydown(event: KeyboardEvent): void {
+    if (event.ctrlKey || event.metaKey || event.altKey) return;
+    const allowedKeys = new Set([
+      'Backspace',
+      'Delete',
+      'ArrowLeft',
+      'ArrowRight',
+      'Tab',
+      'Home',
+      'End',
+    ]);
+    if (allowedKeys.has(event.key)) return;
+    if (!/^\d$/.test(event.key)) {
+      event.preventDefault();
+    }
+  }
+
+  onDigitsInput(event: Event, controlName: 'limiteForaneos' | 'maxJugadores'): void {
+    const input = event.target as HTMLInputElement | null;
+    if (!input) return;
+    const digitsOnly = input.value.replace(/\D+/g, '');
+    if (input.value !== digitsOnly) {
+      input.value = digitsOnly;
+    }
+    const parsed = digitsOnly === '' ? null : Number(digitsOnly);
+    if (controlName === 'maxJugadores') {
+      this.form.controls.maxJugadores.setValue(parsed ?? 0, { emitEvent: false });
+      return;
+    }
+    this.form.controls.limiteForaneos.setValue(parsed, { emitEvent: false });
   }
 
   save(): void {

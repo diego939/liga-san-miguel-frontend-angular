@@ -272,7 +272,11 @@
         </div>
         <div>
           <label [class]="lm.label">Fecha de nacimiento</label>
-          <input type="date" formControlName="fechaNacimiento" [class]="lm.field" />
+          <input
+            type="date"
+            formControlName="fechaNacimiento"
+            [class]="lm.field + ' native-date-icon'"
+          />
         </div>
         <div>
           <label [class]="lm.label">Nacionalidad (opcional)</label>

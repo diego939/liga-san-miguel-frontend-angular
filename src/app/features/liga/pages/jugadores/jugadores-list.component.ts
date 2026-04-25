@@ -33,6 +33,7 @@ import { IfNotOperadorDirective } from '../../../../core/directives/if-not-opera
     IfNotOperadorDirective,
   ],
   templateUrl: './jugadores-list.component.html',
+  styleUrl: './jugadores-list.component.css',
 })
 export class JugadoresListComponent implements OnInit {
   private readonly api = inject(JugadoresApiService);

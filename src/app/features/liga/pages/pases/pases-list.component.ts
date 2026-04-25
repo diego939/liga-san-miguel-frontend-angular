@@ -33,6 +33,7 @@ import { IfNotOperadorDirective } from '../../../../core/directives/if-not-opera
     IfNotOperadorDirective,
   ],
   templateUrl: './pases-list.component.html',
+  styleUrl: './pases-list.component.css',
 })
 export class PasesListComponent implements OnInit {
   readonly lm = ligaModal;
