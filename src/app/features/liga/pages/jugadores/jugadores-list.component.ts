@@ -142,6 +142,8 @@ export class JugadoresListComponent implements OnInit {
   openCreate(): void {
     this.editing = null;
     this.saving = false;
+    this.form.controls.clubDestinoInicialId.setValidators([Validators.min(1)]);
+    this.form.controls.clubDestinoInicialId.updateValueAndValidity({ emitEvent: false });
     this.form.reset({
       clubDestinoInicialId: 0,
     });
@@ -152,6 +154,8 @@ export class JugadoresListComponent implements OnInit {
     ev.stopPropagation();
     this.editing = j;
     this.saving = false;
+    this.form.controls.clubDestinoInicialId.clearValidators();
+    this.form.controls.clubDestinoInicialId.updateValueAndValidity({ emitEvent: false });
     this.form.patchValue({
       dni: j.dni,
       nombre: j.nombre,
@@ -172,24 +176,9 @@ export class JugadoresListComponent implements OnInit {
   save(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
-      void Swal.fire({
-        icon: 'warning',
-        title: 'Datos incompletos',
-        text: 'Completá DNI, nombre, apellido y fecha de nacimiento.',
-      });
       return;
     }
     const v = this.form.getRawValue();
-    if (!this.editing) {
-      if (!v.clubDestinoInicialId || v.clubDestinoInicialId <= 0) {
-        void Swal.fire({
-          icon: 'warning',
-          title: 'Club requerido',
-          text: 'Seleccioná el club de ingreso para registrar el pase inicial del jugador.',
-        });
-        return;
-      }
-    }
     const body = {
       dni: v.dni,
       nombre: v.nombre,
@@ -285,6 +274,11 @@ export class JugadoresListComponent implements OnInit {
   }
 
   formatDate = formatDateOnly;
+
+  isInvalid(controlName: keyof typeof this.form.controls): boolean {
+    const control = this.form.controls[controlName];
+    return control.invalid && (control.dirty || control.touched);
+  }
 
   private apiErrorMessage(err: unknown): string {
     if (!(err instanceof HttpErrorResponse)) {

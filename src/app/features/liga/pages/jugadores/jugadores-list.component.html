@@ -250,20 +250,44 @@
           <input
             formControlName="dni"
             [class]="lm.field"
+            [ngClass]="{ 'border-red-500 focus:border-red-500 focus:ring-red-500': isInvalid('dni') }"
             pattern="[0-9]*"
             inputmode="numeric"
             (keydown)="onDniKeydown($event)"
             (input)="onDniInput($event)"
           />
+          <p *ngIf="form.controls.dni.touched && form.controls.dni.hasError('required')" class="mt-1 text-xs text-red-600">
+            El DNI es obligatorio.
+          </p>
+          <p *ngIf="form.controls.dni.touched && form.controls.dni.hasError('minlength')" class="mt-1 text-xs text-red-600">
+            El DNI debe tener al menos 6 dígitos.
+          </p>
+          <p *ngIf="form.controls.dni.touched && form.controls.dni.hasError('pattern')" class="mt-1 text-xs text-red-600">
+            El DNI solo puede contener números.
+          </p>
         </div>
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label [class]="lm.label">Nombre</label>
-            <input formControlName="nombre" [class]="lm.field" />
+            <input
+              formControlName="nombre"
+              [class]="lm.field"
+              [ngClass]="{ 'border-red-500 focus:border-red-500 focus:ring-red-500': isInvalid('nombre') }"
+            />
+            <p *ngIf="form.controls.nombre.touched && form.controls.nombre.hasError('required')" class="mt-1 text-xs text-red-600">
+              El nombre es obligatorio.
+            </p>
           </div>
           <div>
             <label [class]="lm.label">Apellido</label>
-            <input formControlName="apellido" [class]="lm.field" />
+            <input
+              formControlName="apellido"
+              [class]="lm.field"
+              [ngClass]="{ 'border-red-500 focus:border-red-500 focus:ring-red-500': isInvalid('apellido') }"
+            />
+            <p *ngIf="form.controls.apellido.touched && form.controls.apellido.hasError('required')" class="mt-1 text-xs text-red-600">
+              El apellido es obligatorio.
+            </p>
           </div>
         </div>
         <div>
@@ -276,7 +300,14 @@
             type="date"
             formControlName="fechaNacimiento"
             [class]="lm.field + ' native-date-icon native-date-inverted'"
+            [ngClass]="{ 'border-red-500 focus:border-red-500 focus:ring-red-500': isInvalid('fechaNacimiento') }"
           />
+          <p
+            *ngIf="form.controls.fechaNacimiento.touched && form.controls.fechaNacimiento.hasError('required')"
+            class="mt-1 text-xs text-red-600"
+          >
+            La fecha de nacimiento es obligatoria.
+          </p>
         </div>
         <div>
           <label [class]="lm.label">Nacionalidad (opcional)</label>
@@ -284,10 +315,20 @@
         </div>
         <div *ngIf="!editing">
           <label [class]="lm.label">Club de ingreso (pase inicial)</label>
-          <select formControlName="clubDestinoInicialId" [class]="lm.field">
+          <select
+            formControlName="clubDestinoInicialId"
+            [class]="lm.field"
+            [ngClass]="{ 'border-red-500 focus:border-red-500 focus:ring-red-500': isInvalid('clubDestinoInicialId') }"
+          >
             <option [ngValue]="0">Seleccionar club…</option>
             <option *ngFor="let c of clubs" [ngValue]="c.id">{{ c.nombre }}</option>
           </select>
+          <p
+            *ngIf="form.controls.clubDestinoInicialId.touched && form.controls.clubDestinoInicialId.hasError('min')"
+            class="mt-1 text-xs text-red-600"
+          >
+            Seleccioná el club de ingreso para registrar el pase inicial.
+          </p>
           <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
             Se registra un pase definitivo sin club de origen hacia el club elegido.
           </p>
