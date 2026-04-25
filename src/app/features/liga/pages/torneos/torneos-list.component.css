@@ -9,3 +9,9 @@
   opacity: 1;
   filter: brightness(0) invert(1);
 }
+
+.native-date-inverted {
+  color: #fff !important;
+  border-color: #374151 !important;
+  color-scheme: dark;
+}

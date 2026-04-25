@@ -28,6 +28,7 @@ import { AuthService } from '../../../../core/services/auth.service';
     IfNotOperadorDirective,
   ],
   templateUrl: './torneo-partidos.component.html',
+  styleUrls: ['./torneo-partidos.component.css'],
 })
 export class TorneoPartidosComponent implements OnInit {
   readonly lm = ligaModal;

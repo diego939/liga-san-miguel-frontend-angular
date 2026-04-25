@@ -272,11 +272,11 @@
         </div>
         <div>
           <label [class]="lm.label">Fecha inicio</label>
-          <input type="datetime-local" formControlName="fechaInicio" [class]="lm.field + ' native-date-icon'" />
+          <input type="datetime-local" formControlName="fechaInicio" [class]="lm.field + ' native-date-icon native-date-inverted'" />
         </div>
         <div *ngIf="form.get('tipo')?.value === 'TEMPORAL'">
           <label [class]="lm.label">Fecha fin (temporal)</label>
-          <input type="datetime-local" formControlName="fechaFin" [class]="lm.field + ' native-date-icon'" />
+          <input type="datetime-local" formControlName="fechaFin" [class]="lm.field + ' native-date-icon native-date-inverted'" />
         </div>
       </fieldset>
       <div class="flex justify-end mt-4">
@@ -337,11 +337,11 @@
       <fieldset class="space-y-3 border-0 p-0 m-0 min-w-0" [disabled]="saving">
         <div>
           <label [class]="lm.label">Fecha inicio</label>
-          <input type="datetime-local" formControlName="fechaInicio" [class]="lm.field + ' native-date-icon'" />
+          <input type="datetime-local" formControlName="fechaInicio" [class]="lm.field + ' native-date-icon native-date-inverted'" />
         </div>
         <div *ngIf="renewForm.get('tipo')?.value === 'TEMPORAL'">
           <label [class]="lm.label">Fecha fin</label>
-          <input type="datetime-local" formControlName="fechaFin" [class]="lm.field + ' native-date-icon'" />
+          <input type="datetime-local" formControlName="fechaFin" [class]="lm.field + ' native-date-icon native-date-inverted'" />
         </div>
         <div>
           <label [class]="lm.label">Tipo</label>
