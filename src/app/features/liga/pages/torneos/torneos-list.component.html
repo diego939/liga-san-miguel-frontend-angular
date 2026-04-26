@@ -204,17 +204,65 @@
     <h3 [class]="lm.titleSm">{{ editing ? 'Editar torneo' : 'Nuevo torneo' }}</h3>
     <form [formGroup]="form" (ngSubmit)="save()" class="space-y-3">
       <fieldset class="space-y-3 border-0 p-0 m-0 min-w-0" [disabled]="saving">
-        <input formControlName="nombre" placeholder="Nombre" [class]="lm.field" />
-        <input formControlName="categoria" placeholder="Categoría" [class]="lm.field" />
-        <input formControlName="formato" placeholder="Formato" [class]="lm.field" />
+        <div>
+          <label [class]="lm.labelMuted">Nombre</label>
+          <input formControlName="nombre" placeholder="Nombre del torneo" [class]="isInvalid('nombre') ? lm.field + ' ' + lm.fieldInvalid : lm.field" />
+          <p *ngIf="form.controls.nombre.touched && form.controls.nombre.hasError('required')" class="mt-1 text-xs text-red-600">
+            El nombre es obligatorio.
+          </p>
+        </div>
+        <div>
+          <label [class]="lm.labelMuted">Categoría</label>
+          <input
+            formControlName="categoria"
+            placeholder="Categoría"
+            list="torneo-categorias-sugeridas"
+            [class]="isInvalid('categoria') ? lm.field + ' ' + lm.fieldInvalid : lm.field"
+          />
+          <datalist id="torneo-categorias-sugeridas">
+            <option value="Primera"></option>
+            <option value="Segunda"></option>
+            <option value="Sub 11"></option>
+            <option value="Sub 12"></option>
+            <option value="Sub 13"></option>
+            <option value="Sub 14"></option>
+            <option value="Sub 15"></option>
+            <option value="Sub 16"></option>
+            <option value="Sub 17"></option>
+            <option value="Sub 18"></option>
+            <option value="Sub 19"></option>
+            <option value="Sub 20"></option>
+          </datalist>
+          <p *ngIf="form.controls.categoria.touched && form.controls.categoria.hasError('required')" class="mt-1 text-xs text-red-600">
+            La categoría es obligatoria.
+          </p>
+        </div>
+        <div>
+          <label [class]="lm.labelMuted">Formato:</label>
+          <p class="text-sm text-gray-900 dark:text-gray-200">{{ form.controls.formato.value }}</p>
+        </div>
         <div class="grid grid-cols-2 gap-2">
           <div>
             <label [class]="lm.labelMuted">Inicio</label>
-            <input type="date" formControlName="fechaInicio" [class]="lm.field + ' native-date-icon native-date-inverted'" />
+            <input
+              type="date"
+              formControlName="fechaInicio"
+              [class]="(isInvalid('fechaInicio') ? lm.field + ' ' + lm.fieldInvalid : lm.field) + ' native-date-icon native-date-inverted'"
+            />
+            <p *ngIf="form.controls.fechaInicio.touched && form.controls.fechaInicio.hasError('required')" class="mt-1 text-xs text-red-600">
+              La fecha de inicio es obligatoria.
+            </p>
           </div>
           <div>
             <label [class]="lm.labelMuted">Fin</label>
-            <input type="date" formControlName="fechaFin" [class]="lm.field + ' native-date-icon native-date-inverted'" />
+            <input
+              type="date"
+              formControlName="fechaFin"
+              [class]="(isInvalid('fechaFin') ? lm.field + ' ' + lm.fieldInvalid : lm.field) + ' native-date-icon native-date-inverted'"
+            />
+            <p *ngIf="form.controls.fechaFin.touched && form.controls.fechaFin.hasError('required')" class="mt-1 text-xs text-red-600">
+              La fecha de fin es obligatoria.
+            </p>
           </div>
         </div>
         <div class="grid grid-cols-2 gap-2">
@@ -236,13 +284,19 @@
             <input
               type="text"
               formControlName="maxJugadores"
-              [class]="lm.field"
+              [class]="isInvalid('maxJugadores') ? lm.field + ' ' + lm.fieldInvalid : lm.field"
               inputmode="numeric"
               pattern="[0-9]*"
               autocomplete="off"
               (keydown)="onDigitsKeydown($event)"
               (input)="onDigitsInput($event, 'maxJugadores')"
             />
+            <p *ngIf="form.controls.maxJugadores.touched && form.controls.maxJugadores.hasError('required')" class="mt-1 text-xs text-red-600">
+              El máximo de jugadores es obligatorio.
+            </p>
+            <p *ngIf="form.controls.maxJugadores.touched && form.controls.maxJugadores.hasError('min')" class="mt-1 text-xs text-red-600">
+              El máximo de jugadores debe ser al menos 1.
+            </p>
           </div>
         </div>
       </fieldset>

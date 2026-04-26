@@ -50,7 +50,7 @@ export class TorneosListComponent implements OnInit {
   form = this.fb.nonNullable.group({
     nombre: ['', Validators.required],
     categoria: ['', Validators.required],
-    formato: ['', Validators.required],
+    formato: ['Todos Contra Todos', Validators.required],
     fechaInicio: ['', Validators.required],
     fechaFin: ['', Validators.required],
     limiteForaneos: [null as number | null],
@@ -129,7 +129,7 @@ export class TorneosListComponent implements OnInit {
     this.form.reset({
       nombre: '',
       categoria: '',
-      formato: '',
+      formato: 'Todos Contra Todos',
       fechaInicio: '',
       fechaFin: '',
       limiteForaneos: null,
@@ -194,11 +194,6 @@ export class TorneosListComponent implements OnInit {
   save(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
-      void Swal.fire({
-        icon: 'warning',
-        title: 'Datos incompletos',
-        text: 'Completá nombre, categoría, formato, fechas y máximo de jugadores.',
-      });
       return;
     }
     const v = this.form.getRawValue();
@@ -228,6 +223,11 @@ export class TorneosListComponent implements OnInit {
   }
 
   formatDate = formatDateOnly;
+
+  isInvalid(controlName: keyof typeof this.form.controls): boolean {
+    const c = this.form.controls[controlName];
+    return c.invalid && (c.touched || c.dirty);
+  }
 
   prevPage(): void {
     if (this.page > 1) {
