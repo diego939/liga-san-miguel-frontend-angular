@@ -1,34 +1,88 @@
-:host ::ng-deep .datepicker-picker {
-  background-color: #111827;
-  color: #e5e7eb;
-  border: 1px solid #374151;
+/* Estilos exclusivos para el datepicker de Jugadores */
+:host {
+  --liga-date-radius: 1.5rem;
 }
 
-:host ::ng-deep .datepicker-header .datepicker-title,
-:host ::ng-deep .datepicker-header .datepicker-controls .button,
-:host ::ng-deep .datepicker-main .dow {
-  color: #e5e7eb;
+:host ::ng-deep .liga-date-field .mat-mdc-form-field-subscript-wrapper {
+  display: none;
 }
 
-:host ::ng-deep .datepicker-controls .button:hover,
-:host ::ng-deep .datepicker-main .datepicker-cell:not(.disabled):hover {
-  background-color: #1f2937;
+:host ::ng-deep .liga-date-field .mat-mdc-text-field-wrapper {
+  border-radius: var(--liga-date-radius);
+  overflow: hidden;
+  background-color: rgb(249 250 251) !important;
 }
 
-:host ::ng-deep .datepicker-main .datepicker-cell {
-  color: #d1d5db;
+:host ::ng-deep .liga-date-field .mdc-text-field--outlined {
+  border-radius: var(--liga-date-radius);
+  background-color: transparent !important;
+  border: 1px solid rgb(209 213 219) !important;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
 
-:host ::ng-deep .datepicker-main .datepicker-cell.disabled {
-  color: #6b7280;
+:host-context(.dark) ::ng-deep .liga-date-field .mat-mdc-text-field-wrapper {
+  background-color: rgb(55 65 81) !important;
 }
 
-:host ::ng-deep .datepicker-main .datepicker-cell.selected,
-:host ::ng-deep .datepicker-main .datepicker-cell.focused {
-  background-color: #2563eb;
-  color: #ffffff;
+:host-context(.dark) ::ng-deep .liga-date-field .mdc-text-field--outlined {
+  border-color: rgb(75 85 99) !important;
 }
 
-:host ::ng-deep .datepicker-footer .datepicker-controls .button {
-  color: #c4b5fd;
+:host ::ng-deep .liga-date-field .mat-mdc-form-field-focus-overlay {
+  background-color: transparent !important;
+}
+
+:host ::ng-deep .liga-date-field .mat-mdc-input-element {
+  background-color: transparent !important;
+}
+
+:host ::ng-deep .liga-date-field .mdc-notched-outline__leading,
+:host ::ng-deep .liga-date-field .mdc-notched-outline__notch,
+:host ::ng-deep .liga-date-field .mdc-notched-outline__trailing {
+  border-width: 0 !important;
+}
+
+:host ::ng-deep .liga-date-field .mdc-notched-outline__leading {
+  border-top-left-radius: var(--liga-date-radius) !important;
+  border-bottom-left-radius: var(--liga-date-radius) !important;
+}
+
+:host ::ng-deep .liga-date-field .mdc-notched-outline__trailing {
+  border-top-right-radius: var(--liga-date-radius) !important;
+  border-bottom-right-radius: var(--liga-date-radius) !important;
+}
+
+:host ::ng-deep .liga-date-field .mat-mdc-input-element {
+  color: rgb(224, 224, 228) !important;
+}
+
+:host-context(.dark) ::ng-deep .liga-date-field .mat-mdc-input-element {
+  color: rgb(255 255 255) !important;
+}
+
+:host ::ng-deep .liga-date-field .mat-mdc-input-element::placeholder {
+  color: rgb(107 114 128) !important;
+}
+
+:host-context(.dark) ::ng-deep .liga-date-field .mat-mdc-input-element::placeholder {
+  color: rgb(156 163 175) !important;
+}
+
+:host ::ng-deep .liga-date-field .mat-mdc-icon-button {
+  color: rgb(107 114 128) !important;
+  border-radius: var(--liga-date-radius);
+}
+
+:host-context(.dark) ::ng-deep .liga-date-field .mat-mdc-icon-button {
+  color: rgb(156 163 175) !important;
+}
+
+:host ::ng-deep .liga-date-field .mdc-text-field--focused {
+  border-color: rgb(59 130 246) !important;
+  border-width: 2px !important;
+  box-shadow: 0 0 0 4px rgb(59 130 246 / 0.35) !important;
+}
+
+:host ::ng-deep .liga-date-field.invalid .mdc-text-field--outlined {
+  border-color: rgb(239 68 68) !important;
 }

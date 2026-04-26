@@ -249,8 +249,7 @@
           <label [class]="lm.label">DNI</label>
           <input
             formControlName="dni"
-            [class]="lm.field"
-            [ngClass]="{ 'border-red-500 focus:border-red-500 focus:ring-red-500': isInvalid('dni') }"
+            [class]="isInvalid('dni') ? lm.field + ' ' + lm.fieldInvalid : lm.field"
             pattern="[0-9]*"
             inputmode="numeric"
             (keydown)="onDniKeydown($event)"
@@ -271,8 +270,7 @@
             <label [class]="lm.label">Nombre</label>
             <input
               formControlName="nombre"
-              [class]="lm.field"
-              [ngClass]="{ 'border-red-500 focus:border-red-500 focus:ring-red-500': isInvalid('nombre') }"
+              [class]="isInvalid('nombre') ? lm.field + ' ' + lm.fieldInvalid : lm.field"
             />
             <p *ngIf="form.controls.nombre.touched && form.controls.nombre.hasError('required')" class="mt-1 text-xs text-red-600">
               El nombre es obligatorio.
@@ -282,8 +280,7 @@
             <label [class]="lm.label">Apellido</label>
             <input
               formControlName="apellido"
-              [class]="lm.field"
-              [ngClass]="{ 'border-red-500 focus:border-red-500 focus:ring-red-500': isInvalid('apellido') }"
+              [class]="isInvalid('apellido') ? lm.field + ' ' + lm.fieldInvalid : lm.field"
             />
             <p *ngIf="form.controls.apellido.touched && form.controls.apellido.hasError('required')" class="mt-1 text-xs text-red-600">
               El apellido es obligatorio.
@@ -296,47 +293,23 @@
         </div>
         <div>
           <label [class]="lm.label">Fecha de nacimiento</label>
-          <div class="grid grid-cols-1 gap-2 sm:grid-cols-3">
-            <div>
-              <label [class]="lm.labelMuted">Año</label>
-              <select
-                [(ngModel)]="nacAnio"
-                [ngModelOptions]="{ standalone: true }"
-                (ngModelChange)="onNacimientoPartChange()"
-                [class]="lm.field"
-                [ngClass]="{ 'border-red-500 focus:border-red-500 focus:ring-red-500': isInvalid('fechaNacimiento') }"
-              >
-                <option [ngValue]="null">Año…</option>
-                <option *ngFor="let a of nacimientoAnios" [ngValue]="a">{{ a }}</option>
-              </select>
-            </div>
-            <div>
-              <label [class]="lm.labelMuted">Mes</label>
-              <select
-                [(ngModel)]="nacMes"
-                [ngModelOptions]="{ standalone: true }"
-                (ngModelChange)="onNacimientoPartChange()"
-                [class]="lm.field"
-                [ngClass]="{ 'border-red-500 focus:border-red-500 focus:ring-red-500': isInvalid('fechaNacimiento') }"
-              >
-                <option [ngValue]="null">Mes…</option>
-                <option *ngFor="let item of nacimientoMeses" [ngValue]="item.val">{{ item.nom }}</option>
-              </select>
-            </div>
-            <div>
-              <label [class]="lm.labelMuted">Día</label>
-              <select
-                [(ngModel)]="nacDia"
-                [ngModelOptions]="{ standalone: true }"
-                (ngModelChange)="onNacimientoPartChange()"
-                [class]="lm.field"
-                [ngClass]="{ 'border-red-500 focus:border-red-500 focus:ring-red-500': isInvalid('fechaNacimiento') }"
-              >
-                <option [ngValue]="null">Día…</option>
-                <option *ngFor="let d of nacimientoDias" [ngValue]="d">{{ d }}</option>
-              </select>
-            </div>
-          </div>
+          <mat-form-field
+            appearance="outline"
+            subscriptSizing="dynamic"
+            class="w-full liga-date-field"
+            [ngClass]="{ invalid: isInvalid('fechaNacimiento') }"
+          >
+            <input
+              matInput
+              [matDatepicker]="pickerNacimiento"
+              [ngModel]="fechaNacimientoDate"
+              [ngModelOptions]="{ standalone: true }"
+              (ngModelChange)="onNacimientoDateChange($event)"
+              placeholder="dd/mm/aaaa"
+            />
+            <mat-datepicker-toggle matIconSuffix [for]="pickerNacimiento"></mat-datepicker-toggle>
+            <mat-datepicker #pickerNacimiento></mat-datepicker>
+          </mat-form-field>
           <p
             *ngIf="form.controls.fechaNacimiento.touched && form.controls.fechaNacimiento.hasError('required')"
             class="mt-1 text-xs text-red-600"
@@ -352,8 +325,7 @@
           <label [class]="lm.label">Club de ingreso (pase inicial)</label>
           <select
             formControlName="clubDestinoInicialId"
-            [class]="lm.field"
-            [ngClass]="{ 'border-red-500 focus:border-red-500 focus:ring-red-500': isInvalid('clubDestinoInicialId') }"
+            [class]="isInvalid('clubDestinoInicialId') ? lm.field + ' ' + lm.fieldInvalid : lm.field"
           >
             <option [ngValue]="0">Seleccionar club…</option>
             <option *ngFor="let c of clubs" [ngValue]="c.id">{{ c.nombre }}</option>

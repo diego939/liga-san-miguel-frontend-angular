@@ -7,6 +7,10 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { DateAdapter, MatNativeDateModule, MAT_DATE_FORMATS, MAT_DATE_LOCALE } from '@angular/material/core';
 import { Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 import Swal from 'sweetalert2';
@@ -20,6 +24,18 @@ import { formatDateOnly } from '../../utils/date-format';
 import { ligaModal } from '../../shared/liga-ui';
 import { IfNotOperadorDirective } from '../../../../core/directives/if-not-operador.directive';
 
+const LIGA_DATE_FORMATS = {
+  parse: {
+    dateInput: { day: '2-digit', month: '2-digit', year: 'numeric' },
+  },
+  display: {
+    dateInput: { day: '2-digit', month: '2-digit', year: 'numeric' },
+    monthYearLabel: { month: 'short', year: 'numeric' },
+    dateA11yLabel: { day: '2-digit', month: 'long', year: 'numeric' },
+    monthYearA11yLabel: { month: 'long', year: 'numeric' },
+  },
+} as const;
+
 @Component({
   selector: 'app-jugadores-list',
   standalone: true,
@@ -31,6 +47,14 @@ import { IfNotOperadorDirective } from '../../../../core/directives/if-not-opera
     LigaPaginationComponent,
     LigaSortIndicatorComponent,
     IfNotOperadorDirective,
+    MatDatepickerModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatNativeDateModule,
+  ],
+  providers: [
+    { provide: MAT_DATE_LOCALE, useValue: 'es-AR' },
+    { provide: MAT_DATE_FORMATS, useValue: LIGA_DATE_FORMATS },
   ],
   templateUrl: './jugadores-list.component.html',
   styleUrl: './jugadores-list.component.css',
@@ -40,6 +64,7 @@ export class JugadoresListComponent implements OnInit {
   private readonly clubesApi = inject(ClubesApiService);
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
+  private readonly dateAdapter = inject<DateAdapter<Date>>(DateAdapter<Date>);
 
   readonly lm = ligaModal;
 
@@ -61,31 +86,7 @@ export class JugadoresListComponent implements OnInit {
 
   modalOpen = false;
   editing: Jugador | null = null;
-  nacAnio: number | null = null;
-  nacMes: number | null = null;
-  nacDia: number | null = null;
-
-  readonly nacimientoAnios: number[] = (() => {
-    const y = new Date().getFullYear();
-    const out: number[] = [];
-    for (let a = y; a >= 1900; a--) out.push(a);
-    return out;
-  })();
-
-  readonly nacimientoMeses: readonly { val: number; nom: string }[] = [
-    { val: 1, nom: 'Enero' },
-    { val: 2, nom: 'Febrero' },
-    { val: 3, nom: 'Marzo' },
-    { val: 4, nom: 'Abril' },
-    { val: 5, nom: 'Mayo' },
-    { val: 6, nom: 'Junio' },
-    { val: 7, nom: 'Julio' },
-    { val: 8, nom: 'Agosto' },
-    { val: 9, nom: 'Septiembre' },
-    { val: 10, nom: 'Octubre' },
-    { val: 11, nom: 'Noviembre' },
-    { val: 12, nom: 'Diciembre' },
-  ];
+  fechaNacimientoDate: Date | null = null;
 
   form = this.fb.nonNullable.group({
     dni: ['', [Validators.required, Validators.minLength(6), Validators.pattern(/^\d+$/)]],
@@ -99,6 +100,7 @@ export class JugadoresListComponent implements OnInit {
   });
 
   ngOnInit(): void {
+    this.dateAdapter.setLocale('es-AR');
     this.clubesApi.listAllForSelect().subscribe({
       next: (r) => (this.clubs = r.items),
       error: (e) => this.apiErrorAlert(e),
@@ -172,7 +174,7 @@ export class JugadoresListComponent implements OnInit {
     this.form.reset({
       clubDestinoInicialId: 0,
     });
-    this.syncNacimientoPartsFromForm();
+    this.syncNacimientoDateFromForm();
     this.modalOpen = true;
   }
 
@@ -191,7 +193,7 @@ export class JugadoresListComponent implements OnInit {
       nacionalidad: j.nacionalidad ?? '',
       clubDestinoInicialId: 0,
     });
-    this.syncNacimientoPartsFromForm();
+    this.syncNacimientoDateFromForm();
     this.modalOpen = true;
   }
 
@@ -307,57 +309,35 @@ export class JugadoresListComponent implements OnInit {
     return control.invalid && (control.dirty || control.touched);
   }
 
-  get nacimientoDias(): number[] {
-    if (this.nacAnio == null || this.nacMes == null) return [];
-    const max = new Date(this.nacAnio, this.nacMes, 0).getDate();
-    return Array.from({ length: max }, (_, i) => i + 1);
-  }
-
-  onNacimientoPartChange(): void {
+  onNacimientoDateChange(value: Date | null): void {
+    this.fechaNacimientoDate = value;
     this.form.controls.fechaNacimiento.markAsTouched();
-    const y = this.nacAnio;
-    const m = this.nacMes;
-    let d = this.nacDia;
-    if (y == null || m == null || d == null) {
+    if (!value) {
       this.form.patchValue({ fechaNacimiento: '' }, { emitEvent: false });
       return;
     }
-    const maxD = new Date(y, m, 0).getDate();
-    if (d > maxD) {
-      d = maxD;
-      this.nacDia = d;
-    }
-    const iso = `${String(y).padStart(4, '0')}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-    this.form.patchValue({ fechaNacimiento: iso }, { emitEvent: false });
+    this.form.patchValue({ fechaNacimiento: this.toIsoDate(value) }, { emitEvent: false });
   }
 
-  private syncNacimientoPartsFromForm(): void {
+  private syncNacimientoDateFromForm(): void {
     const raw = this.form.controls.fechaNacimiento.value?.trim();
     if (!raw || raw.length < 10) {
-      this.nacAnio = null;
-      this.nacMes = null;
-      this.nacDia = null;
+      this.fechaNacimientoDate = null;
       return;
     }
-    const parts = raw.slice(0, 10).split('-');
-    if (parts.length !== 3) {
-      this.nacAnio = null;
-      this.nacMes = null;
-      this.nacDia = null;
+    const parsed = new Date(`${raw.slice(0, 10)}T00:00:00`);
+    if (Number.isNaN(parsed.getTime())) {
+      this.fechaNacimientoDate = null;
       return;
     }
-    const y = Number(parts[0]);
-    const m = Number(parts[1]);
-    const d = Number(parts[2]);
-    if (!Number.isFinite(y) || !Number.isFinite(m) || !Number.isFinite(d)) {
-      this.nacAnio = null;
-      this.nacMes = null;
-      this.nacDia = null;
-      return;
-    }
-    this.nacAnio = y;
-    this.nacMes = m;
-    this.nacDia = d;
+    this.fechaNacimientoDate = parsed;
+  }
+
+  private toIsoDate(value: Date): string {
+    const year = value.getFullYear();
+    const month = String(value.getMonth() + 1).padStart(2, '0');
+    const day = String(value.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 
   private apiErrorMessage(err: unknown): string {
