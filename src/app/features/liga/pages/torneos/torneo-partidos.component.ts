@@ -101,16 +101,12 @@ export class TorneoPartidosComponent implements OnInit {
   crear(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
-      void Swal.fire({
-        icon: 'warning',
-        title: 'Datos incompletos',
-        text: 'Elegí equipos local y visitante y la fecha del partido.',
-      });
       return;
     }
     const v = this.form.getRawValue();
     if (v.equipoLocalId === v.equipoVisitanteId) {
-      void Swal.fire('Equipos distintos', 'Local y visitante no pueden ser el mismo', 'warning');
+      this.form.controls.equipoLocalId.markAsTouched();
+      this.form.controls.equipoVisitanteId.markAsTouched();
       return;
     }
     this.saving = true;
@@ -220,5 +216,16 @@ export class TorneoPartidosComponent implements OnInit {
       this.page++;
       this.load();
     }
+  }
+
+  isInvalid(controlName: keyof typeof this.form.controls): boolean {
+    const c = this.form.controls[controlName];
+    return c.invalid && (c.touched || c.dirty);
+  }
+
+  get equiposIguales(): boolean {
+    const local = this.form.controls.equipoLocalId.value;
+    const visitante = this.form.controls.equipoVisitanteId.value;
+    return local > 0 && visitante > 0 && local === visitante;
   }
 }

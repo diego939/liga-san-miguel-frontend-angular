@@ -174,21 +174,46 @@
       <fieldset class="space-y-3 border-0 p-0 m-0 min-w-0" [disabled]="saving">
         <div>
           <label [class]="lm.label">Local</label>
-          <select formControlName="equipoLocalId" [class]="lm.field">
+          <select
+            formControlName="equipoLocalId"
+            [class]="isInvalid('equipoLocalId') || equiposIguales ? lm.field + ' ' + lm.fieldInvalid : lm.field"
+          >
             <option [ngValue]="0">—</option>
             <option *ngFor="let e of equipos" [ngValue]="e.id">{{ e.club.nombre }}</option>
           </select>
+          <p *ngIf="form.controls.equipoLocalId.touched && form.controls.equipoLocalId.hasError('min')" class="mt-1 text-xs text-red-600">
+            Seleccioná el equipo local.
+          </p>
         </div>
         <div>
           <label [class]="lm.label">Visitante</label>
-          <select formControlName="equipoVisitanteId" [class]="lm.field">
+          <select
+            formControlName="equipoVisitanteId"
+            [class]="isInvalid('equipoVisitanteId') || equiposIguales ? lm.field + ' ' + lm.fieldInvalid : lm.field"
+          >
             <option [ngValue]="0">—</option>
             <option *ngFor="let e of equipos" [ngValue]="e.id">{{ e.club.nombre }}</option>
           </select>
+          <p
+            *ngIf="form.controls.equipoVisitanteId.touched && form.controls.equipoVisitanteId.hasError('min')"
+            class="mt-1 text-xs text-red-600"
+          >
+            Seleccioná el equipo visitante.
+          </p>
         </div>
+        <p *ngIf="equiposIguales && (form.controls.equipoLocalId.touched || form.controls.equipoVisitanteId.touched)" class="text-xs text-red-600">
+          Local y visitante no pueden ser el mismo equipo.
+        </p>
         <div>
           <label [class]="lm.label">Fecha y hora</label>
-          <input type="datetime-local" formControlName="fecha" [class]="lm.field + ' native-date-icon native-date-inverted'" />
+          <input
+            type="datetime-local"
+            formControlName="fecha"
+            [class]="(isInvalid('fecha') ? lm.field + ' ' + lm.fieldInvalid : lm.field) + ' native-date-icon native-date-inverted'"
+          />
+          <p *ngIf="form.controls.fecha.touched && form.controls.fecha.hasError('required')" class="mt-1 text-xs text-red-600">
+            La fecha y hora del partido es obligatoria.
+          </p>
         </div>
       </fieldset>
       <div class="flex justify-end mt-4">
