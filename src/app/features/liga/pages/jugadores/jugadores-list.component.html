@@ -296,19 +296,47 @@
         </div>
         <div>
           <label [class]="lm.label">Fecha de nacimiento</label>
-          <input
-            #fechaNacimientoInput
-            type="text"
-            datepicker
-            datepicker-autohide
-            datepicker-buttons
-            datepicker-format="dd/mm/yyyy"
-            [class]="lm.field"
-            [ngClass]="{ 'border-red-500 focus:border-red-500 focus:ring-red-500': isInvalid('fechaNacimiento') }"
-            placeholder="dd/mm/aaaa"
-            readonly
-            (blur)="onFechaNacimientoBlur()"
-          />
+          <div class="grid grid-cols-1 gap-2 sm:grid-cols-3">
+            <div>
+              <label [class]="lm.labelMuted">Año</label>
+              <select
+                [(ngModel)]="nacAnio"
+                [ngModelOptions]="{ standalone: true }"
+                (ngModelChange)="onNacimientoPartChange()"
+                [class]="lm.field"
+                [ngClass]="{ 'border-red-500 focus:border-red-500 focus:ring-red-500': isInvalid('fechaNacimiento') }"
+              >
+                <option [ngValue]="null">Año…</option>
+                <option *ngFor="let a of nacimientoAnios" [ngValue]="a">{{ a }}</option>
+              </select>
+            </div>
+            <div>
+              <label [class]="lm.labelMuted">Mes</label>
+              <select
+                [(ngModel)]="nacMes"
+                [ngModelOptions]="{ standalone: true }"
+                (ngModelChange)="onNacimientoPartChange()"
+                [class]="lm.field"
+                [ngClass]="{ 'border-red-500 focus:border-red-500 focus:ring-red-500': isInvalid('fechaNacimiento') }"
+              >
+                <option [ngValue]="null">Mes…</option>
+                <option *ngFor="let item of nacimientoMeses" [ngValue]="item.val">{{ item.nom }}</option>
+              </select>
+            </div>
+            <div>
+              <label [class]="lm.labelMuted">Día</label>
+              <select
+                [(ngModel)]="nacDia"
+                [ngModelOptions]="{ standalone: true }"
+                (ngModelChange)="onNacimientoPartChange()"
+                [class]="lm.field"
+                [ngClass]="{ 'border-red-500 focus:border-red-500 focus:ring-red-500': isInvalid('fechaNacimiento') }"
+              >
+                <option [ngValue]="null">Día…</option>
+                <option *ngFor="let d of nacimientoDias" [ngValue]="d">{{ d }}</option>
+              </select>
+            </div>
+          </div>
           <p
             *ngIf="form.controls.fechaNacimiento.touched && form.controls.fechaNacimiento.hasError('required')"
             class="mt-1 text-xs text-red-600"
