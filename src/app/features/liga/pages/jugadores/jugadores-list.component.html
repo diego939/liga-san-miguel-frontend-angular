@@ -297,10 +297,17 @@
         <div>
           <label [class]="lm.label">Fecha de nacimiento</label>
           <input
-            type="date"
-            formControlName="fechaNacimiento"
-            [class]="lm.field + ' native-date-icon native-date-inverted'"
+            #fechaNacimientoInput
+            type="text"
+            datepicker
+            datepicker-autohide
+            datepicker-buttons
+            datepicker-format="dd/mm/yyyy"
+            [class]="lm.field"
             [ngClass]="{ 'border-red-500 focus:border-red-500 focus:ring-red-500': isInvalid('fechaNacimiento') }"
+            placeholder="dd/mm/aaaa"
+            readonly
+            (blur)="onFechaNacimientoBlur()"
           />
           <p
             *ngIf="form.controls.fechaNacimiento.touched && form.controls.fechaNacimiento.hasError('required')"

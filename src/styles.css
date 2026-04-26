@@ -9,6 +9,7 @@
 
 /* Source files */
 @source "../node_modules/flowbite";
+@source "../node_modules/flowbite-datepicker";
 
 /* Shared native date/datetime input UI */
 .native-date-icon::-webkit-calendar-picker-indicator {

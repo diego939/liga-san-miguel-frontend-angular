@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, OnInit, inject } from '@angular/core';
+import { AfterViewChecked, Component, ElementRef, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import {
   FormBuilder,
   FormsModule,
@@ -10,6 +10,7 @@ import {
 import { Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 import Swal from 'sweetalert2';
+import { Datepicker as FlowbiteDatepicker } from 'flowbite-datepicker';
 import { ClubesApiService } from '../../services/clubes-api.service';
 import { JugadoresApiService } from '../../services/jugadores-api.service';
 import type { Club, Jugador } from '../../models/api.types';
@@ -35,7 +36,7 @@ import { IfNotOperadorDirective } from '../../../../core/directives/if-not-opera
   templateUrl: './jugadores-list.component.html',
   styleUrl: './jugadores-list.component.css',
 })
-export class JugadoresListComponent implements OnInit {
+export class JugadoresListComponent implements OnInit, AfterViewChecked, OnDestroy {
   private readonly api = inject(JugadoresApiService);
   private readonly clubesApi = inject(ClubesApiService);
   private readonly fb = inject(FormBuilder);
@@ -61,6 +62,8 @@ export class JugadoresListComponent implements OnInit {
 
   modalOpen = false;
   editing: Jugador | null = null;
+  @ViewChild('fechaNacimientoInput') private fechaNacimientoInput?: ElementRef<HTMLInputElement>;
+  private fechaNacimientoDatepicker: any = null;
 
   form = this.fb.nonNullable.group({
     dni: ['', [Validators.required, Validators.minLength(6), Validators.pattern(/^\d+$/)]],
@@ -79,6 +82,15 @@ export class JugadoresListComponent implements OnInit {
       error: (e) => this.apiErrorAlert(e),
     });
     this.load();
+  }
+
+  ngAfterViewChecked(): void {
+    if (!this.modalOpen) return;
+    this.initFechaNacimientoDatepicker();
+  }
+
+  ngOnDestroy(): void {
+    this.destroyFechaNacimientoDatepicker();
   }
 
   load(): void {
@@ -148,6 +160,7 @@ export class JugadoresListComponent implements OnInit {
       clubDestinoInicialId: 0,
     });
     this.modalOpen = true;
+    queueMicrotask(() => this.syncFechaNacimientoPickerFromForm());
   }
 
   openEdit(j: Jugador, ev: Event): void {
@@ -166,11 +179,13 @@ export class JugadoresListComponent implements OnInit {
       clubDestinoInicialId: 0,
     });
     this.modalOpen = true;
+    queueMicrotask(() => this.syncFechaNacimientoPickerFromForm());
   }
 
   closeModal(): void {
     this.modalOpen = false;
     this.saving = false;
+    this.destroyFechaNacimientoDatepicker();
   }
 
   save(): void {
@@ -278,6 +293,94 @@ export class JugadoresListComponent implements OnInit {
   isInvalid(controlName: keyof typeof this.form.controls): boolean {
     const control = this.form.controls[controlName];
     return control.invalid && (control.dirty || control.touched);
+  }
+
+  onFechaNacimientoBlur(): void {
+    this.form.controls.fechaNacimiento.markAsTouched();
+  }
+
+  private initFechaNacimientoDatepicker(): void {
+    const input = this.fechaNacimientoInput?.nativeElement;
+    if (!input || this.fechaNacimientoDatepicker) return;
+    this.fechaNacimientoDatepicker = new FlowbiteDatepicker(input, {
+      autohide: true,
+      format: 'dd/mm/yyyy',
+      minDate: new Date(1900, 0, 1),
+      maxDate: new Date(),
+      buttons: true,
+      autoSelectToday: false,
+    });
+    input.addEventListener('changeDate', this.onFechaNacimientoChange as EventListener);
+    this.syncFechaNacimientoPickerFromForm();
+  }
+
+  private destroyFechaNacimientoDatepicker(): void {
+    const input = this.fechaNacimientoInput?.nativeElement;
+    if (input) {
+      input.removeEventListener('changeDate', this.onFechaNacimientoChange as EventListener);
+    }
+    if (this.fechaNacimientoDatepicker) {
+      this.fechaNacimientoDatepicker.destroy?.();
+      this.fechaNacimientoDatepicker = null;
+    }
+  }
+
+  private readonly onFechaNacimientoChange = (): void => {
+    const selected = this.fechaNacimientoDatepicker?.getDate() as string | Date | undefined;
+    if (!selected) {
+      this.form.controls.fechaNacimiento.setValue('');
+      this.form.controls.fechaNacimiento.markAsTouched();
+      return;
+    }
+    let year: number;
+    let month: number;
+    let day: number;
+    if (selected instanceof Date) {
+      if (Number.isNaN(selected.getTime())) {
+        this.form.controls.fechaNacimiento.setValue('');
+        this.form.controls.fechaNacimiento.markAsTouched();
+        return;
+      }
+      year = selected.getFullYear();
+      month = selected.getMonth() + 1;
+      day = selected.getDate();
+    } else {
+      const parts = selected.split('/');
+      if (parts.length !== 3) {
+        this.form.controls.fechaNacimiento.setValue('');
+        this.form.controls.fechaNacimiento.markAsTouched();
+        return;
+      }
+      day = Number(parts[0]);
+      month = Number(parts[1]);
+      year = Number(parts[2]);
+      if (!Number.isFinite(day) || !Number.isFinite(month) || !Number.isFinite(year)) {
+        this.form.controls.fechaNacimiento.setValue('');
+        this.form.controls.fechaNacimiento.markAsTouched();
+        return;
+      }
+    }
+    const yyyy = String(year).padStart(4, '0');
+    const mm = String(month).padStart(2, '0');
+    const dd = String(day).padStart(2, '0');
+    this.form.controls.fechaNacimiento.setValue(`${yyyy}-${mm}-${dd}`);
+    this.form.controls.fechaNacimiento.markAsTouched();
+  };
+
+  private syncFechaNacimientoPickerFromForm(): void {
+    const iso = this.form.controls.fechaNacimiento.value;
+    if (!this.fechaNacimientoDatepicker) return;
+    if (!iso) {
+      this.fechaNacimientoDatepicker.setDate('', { clear: true });
+      return;
+    }
+    const [y, m, d] = iso.split('-').map(Number);
+    if (!y || !m || !d) {
+      this.fechaNacimientoDatepicker.setDate('', { clear: true });
+      return;
+    }
+    const display = `${String(d).padStart(2, '0')}/${String(m).padStart(2, '0')}/${String(y).padStart(4, '0')}`;
+    this.fechaNacimientoDatepicker.setDate(display);
   }
 
   private apiErrorMessage(err: unknown): string {

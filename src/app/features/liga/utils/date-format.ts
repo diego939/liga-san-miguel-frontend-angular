@@ -19,6 +19,12 @@ export function formatDateTime(iso: string | undefined | null): string {
 
 export function formatDateOnly(iso: string | undefined | null): string {
   if (!iso) return '—';
+  const raw = String(iso).trim();
+  const dateOnlyMatch = raw.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (dateOnlyMatch) {
+    const [, year, month, day] = dateOnlyMatch;
+    return `${day}/${month}/${year}`;
+  }
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return iso;
   return d.toLocaleDateString('es-AR', {
