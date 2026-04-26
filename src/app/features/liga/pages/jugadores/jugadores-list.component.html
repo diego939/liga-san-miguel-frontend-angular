@@ -319,7 +319,17 @@
         </div>
         <div>
           <label [class]="lm.label">Nacionalidad (opcional)</label>
-          <input formControlName="nacionalidad" [class]="lm.field" />
+          <input formControlName="nacionalidad" [class]="lm.field" list="nacionalidades-sugeridas" placeholder="Nacionalidad" />
+          <datalist id="nacionalidades-sugeridas">
+            <option value="Argentino"></option>
+            <option value="Chileno"></option>
+            <option value="Uruguayo"></option>
+            <option value="Paraguayo"></option>
+            <option value="Boliviano"></option>
+            <option value="Peruano"></option>
+            <option value="Ecuatoriano"></option>
+            <option value="Colombiano"></option>
+          </datalist>
         </div>
         <div *ngIf="!editing">
           <label [class]="lm.label">Club de ingreso (pase inicial)</label>
