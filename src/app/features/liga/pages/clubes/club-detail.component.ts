@@ -94,11 +94,6 @@ export class ClubDetailComponent implements OnInit {
   savePer(): void {
     if (this.perForm.invalid) {
       this.perForm.markAllAsTouched();
-      void Swal.fire({
-        icon: 'warning',
-        title: 'Datos incompletos',
-        text: 'Completá tipo y nombre del personal.',
-      });
       return;
     }
     const v = this.perForm.getRawValue();
@@ -141,6 +136,11 @@ export class ClubDetailComponent implements OnInit {
         error: (e) => this.apiErrorAlert(e),
       });
     });
+  }
+
+  isPerInvalid(controlName: keyof typeof this.perForm.controls): boolean {
+    const c = this.perForm.controls[controlName];
+    return c.invalid && (c.touched || c.dirty);
   }
 
   private apiErrorMessage(err: unknown): string {

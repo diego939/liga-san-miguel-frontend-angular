@@ -97,11 +97,28 @@
       <fieldset class="space-y-3 border-0 p-0 m-0 min-w-0" [disabled]="savingPer">
         <div>
           <label [class]="lm.label">Tipo</label>
-          <input formControlName="tipo" placeholder="Ej. DELEGADO" [class]="lm.field" />
+          <input
+            formControlName="tipo"
+            placeholder="Ej. DELEGADO"
+            list="club-personal-tipos"
+            [class]="isPerInvalid('tipo') ? lm.field + ' ' + lm.fieldInvalid : lm.field"
+          />
+          <datalist id="club-personal-tipos">
+            <option value="DELEGADO TITULAR"></option>
+            <option value="DELEGADO SUPLENTE"></option>
+            <option value="DIRECTOR TÉCNICO"></option>
+            <option value="CUERPO TÉCNICO"></option>
+          </datalist>
+          <p *ngIf="perForm.controls.tipo.touched && perForm.controls.tipo.hasError('required')" class="mt-1 text-xs text-red-600">
+            El tipo es obligatorio.
+          </p>
         </div>
         <div>
           <label [class]="lm.label">Nombre</label>
-          <input formControlName="nombre" [class]="lm.field" />
+          <input formControlName="nombre" [class]="isPerInvalid('nombre') ? lm.field + ' ' + lm.fieldInvalid : lm.field" />
+          <p *ngIf="perForm.controls.nombre.touched && perForm.controls.nombre.hasError('required')" class="mt-1 text-xs text-red-600">
+            El nombre es obligatorio.
+          </p>
         </div>
         <div>
           <label [class]="lm.label">DNI <span class="font-normal text-gray-500">(opcional)</span></label>

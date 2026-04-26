@@ -131,11 +131,6 @@ export class ClubesListComponent implements OnInit {
   save(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
-      void Swal.fire({
-        icon: 'warning',
-        title: 'Datos incompletos',
-        text: 'Ingresá el nombre del club.',
-      });
       return;
     }
     const v = this.form.getRawValue();
@@ -179,6 +174,11 @@ export class ClubesListComponent implements OnInit {
       this.page++;
       this.load();
     }
+  }
+
+  isInvalid(controlName: keyof typeof this.form.controls): boolean {
+    const c = this.form.controls[controlName];
+    return c.invalid && (c.touched || c.dirty);
   }
 
   private apiErrorMessage(err: unknown): string {

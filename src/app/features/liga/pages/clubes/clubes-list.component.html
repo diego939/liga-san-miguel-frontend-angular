@@ -172,7 +172,10 @@
       <fieldset class="space-y-4 border-0 p-0 m-0 min-w-0" [disabled]="saving">
         <div>
           <label [class]="lm.label">Nombre</label>
-          <input formControlName="nombre" [class]="lm.field" />
+          <input formControlName="nombre" [class]="isInvalid('nombre') ? lm.field + ' ' + lm.fieldInvalid : lm.field" />
+          <p *ngIf="form.controls.nombre.touched && form.controls.nombre.hasError('required')" class="mt-1 text-xs text-red-600">
+            El nombre del club es obligatorio.
+          </p>
         </div>
         <!--<div>
           <label [class]="lm.label">Logo (URL)</label>
