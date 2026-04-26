@@ -214,8 +214,7 @@
             (ngModelChange)="onDniBusquedaChange()"
             (keyup.enter)="buscarJugadorPorDni()"
             [ngModelOptions]="{ standalone: true }"
-            [class]="lm.field"
-            [ngClass]="{ 'border-red-500 focus:border-red-500 focus:ring-red-500': !!busquedaJugadorError }"
+            [class]="busquedaJugadorError ? lm.field + ' ' + lm.fieldInvalid : lm.field"
             pattern="[0-9]*"
             inputmode="numeric"
             placeholder="DNI"
@@ -257,7 +256,7 @@
     </div>
     <form [formGroup]="form" (ngSubmit)="save()" class="space-y-3">
       <input type="hidden" formControlName="jugadorId" />
-      <fieldset class="space-y-3 border-0 p-0 m-0 min-w-0" [disabled]="saving">
+      <fieldset *ngIf="jugadorEncontrado" class="space-y-3 border-0 p-0 m-0 min-w-0" [disabled]="saving">
         <div class="grid grid-cols-2 gap-2">
           <div>
             <label [class]="lm.label">Club origen</label>
@@ -270,8 +269,7 @@
             <label [class]="lm.label">Club destino</label>
             <select
               formControlName="clubDestinoId"
-              [class]="lm.field"
-              [ngClass]="{ 'border-red-500 focus:border-red-500 focus:ring-red-500': isInvalid('clubDestinoId') }"
+              [class]="isInvalid('clubDestinoId') ? lm.field + ' ' + lm.fieldInvalid : lm.field"
             >
               <option [ngValue]="0">—</option>
               <option *ngFor="let c of clubs" [ngValue]="c.id">{{ c.nombre }}</option>
@@ -285,8 +283,7 @@
           <label [class]="lm.label">Tipo</label>
           <select
             formControlName="tipo"
-            [class]="lm.field"
-            [ngClass]="{ 'border-red-500 focus:border-red-500 focus:ring-red-500': isInvalid('tipo') }"
+            [class]="isInvalid('tipo') ? lm.field + ' ' + lm.fieldInvalid : lm.field"
           >
             <option value="DEFINITIVO">Definitivo</option>
             <option value="TEMPORAL">Temporal</option>
@@ -300,8 +297,9 @@
           <input
             type="datetime-local"
             formControlName="fechaInicio"
-            [class]="lm.field + ' native-date-icon native-date-inverted'"
-            [ngClass]="{ 'border-red-500 focus:border-red-500 focus:ring-red-500': isInvalid('fechaInicio') }"
+            [class]="
+              (isInvalid('fechaInicio') ? lm.field + ' ' + lm.fieldInvalid : lm.field) + ' native-date-icon native-date-inverted'
+            "
           />
           <p *ngIf="form.controls.fechaInicio.touched && form.controls.fechaInicio.hasError('required')" class="mt-1 text-xs text-red-600">
             La fecha de inicio es obligatoria.
@@ -312,8 +310,7 @@
           <input
             type="datetime-local"
             formControlName="fechaFin"
-            [class]="lm.field + ' native-date-icon native-date-inverted'"
-            [ngClass]="{ 'border-red-500 focus:border-red-500 focus:ring-red-500': isInvalid('fechaFin') }"
+            [class]="(isInvalid('fechaFin') ? lm.field + ' ' + lm.fieldInvalid : lm.field) + ' native-date-icon native-date-inverted'"
           />
           <p *ngIf="form.controls.fechaFin.touched && form.controls.fechaFin.hasError('required')" class="mt-1 text-xs text-red-600">
             El pase temporal requiere fecha de fin.
@@ -331,6 +328,7 @@
           Cancelar
         </button>
         <button
+          *ngIf="jugadorEncontrado"
           class="mx-1 cursor-pointer text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700"
           type="submit"
           [class]="lm.btnPrimary"
@@ -381,8 +379,10 @@
           <input
             type="datetime-local"
             formControlName="fechaInicio"
-            [class]="lm.field + ' native-date-icon native-date-inverted'"
-            [ngClass]="{ 'border-red-500 focus:border-red-500 focus:ring-red-500': isRenewInvalid('fechaInicio') }"
+            [class]="
+              (isRenewInvalid('fechaInicio') ? lm.field + ' ' + lm.fieldInvalid : lm.field) +
+              ' native-date-icon native-date-inverted'
+            "
           />
           <p
             *ngIf="renewForm.controls.fechaInicio.touched && renewForm.controls.fechaInicio.hasError('required')"
@@ -396,8 +396,9 @@
           <input
             type="datetime-local"
             formControlName="fechaFin"
-            [class]="lm.field + ' native-date-icon native-date-inverted'"
-            [ngClass]="{ 'border-red-500 focus:border-red-500 focus:ring-red-500': isRenewInvalid('fechaFin') }"
+            [class]="
+              (isRenewInvalid('fechaFin') ? lm.field + ' ' + lm.fieldInvalid : lm.field) + ' native-date-icon native-date-inverted'
+            "
           />
           <p
             *ngIf="renewForm.controls.fechaFin.touched && renewForm.controls.fechaFin.hasError('required')"
@@ -410,8 +411,7 @@
           <label [class]="lm.label">Tipo</label>
           <select
             formControlName="tipo"
-            [class]="lm.field"
-            [ngClass]="{ 'border-red-500 focus:border-red-500 focus:ring-red-500': isRenewInvalid('tipo') }"
+            [class]="isRenewInvalid('tipo') ? lm.field + ' ' + lm.fieldInvalid : lm.field"
           >
             <option value="DEFINITIVO">Definitivo</option>
             <option value="TEMPORAL">Temporal</option>
