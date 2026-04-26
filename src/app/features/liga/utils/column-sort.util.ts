@@ -10,6 +10,7 @@ export function defaultSortOrderForKey(key: string): SortOrder {
     case 'fecha':
       return 'asc';
     case 'fechaNacimiento':
+    case 'anioNacimiento':
       return 'asc';
     case 'id':
       return 'asc';

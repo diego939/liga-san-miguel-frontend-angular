@@ -93,7 +93,8 @@ export class JugadoresListComponent implements OnInit {
     nombre: ['', Validators.required],
     apellido: ['', Validators.required],
     telefono: [''],
-    fechaNacimiento: ['', Validators.required],
+    anioNacimiento: [2000, Validators.required],
+    fechaNacimiento: [''],
     nacionalidad: [''],
     /** Solo alta: pase inicial con origen null. */
     clubDestinoInicialId: [0],
@@ -152,7 +153,11 @@ export class JugadoresListComponent implements OnInit {
     const by = value.slice(0, sep);
     const ord = value.slice(sep + 1);
     if (
-      (by !== 'dni' && by !== 'apellido' && by !== 'nombre' && by !== 'fechaNacimiento') ||
+      (by !== 'dni' &&
+        by !== 'apellido' &&
+        by !== 'nombre' &&
+        by !== 'anioNacimiento' &&
+        by !== 'fechaNacimiento') ||
       (ord !== 'asc' && ord !== 'desc')
     ) {
       return;
@@ -172,6 +177,13 @@ export class JugadoresListComponent implements OnInit {
     this.form.controls.clubDestinoInicialId.setValidators([Validators.min(1)]);
     this.form.controls.clubDestinoInicialId.updateValueAndValidity({ emitEvent: false });
     this.form.reset({
+      dni: '',
+      nombre: '',
+      apellido: '',
+      telefono: '',
+      anioNacimiento: 2000,
+      fechaNacimiento: '',
+      nacionalidad: '',
       clubDestinoInicialId: 0,
     });
     this.syncNacimientoDateFromForm();
@@ -189,7 +201,8 @@ export class JugadoresListComponent implements OnInit {
       nombre: j.nombre,
       apellido: j.apellido,
       telefono: j.telefono ?? '',
-      fechaNacimiento: j.fechaNacimiento.slice(0, 10),
+      anioNacimiento: j.anioNacimiento,
+      fechaNacimiento: j.fechaNacimiento?.slice(0, 10) ?? '',
       nacionalidad: j.nacionalidad ?? '',
       clubDestinoInicialId: 0,
     });
@@ -208,18 +221,24 @@ export class JugadoresListComponent implements OnInit {
       return;
     }
     const v = this.form.getRawValue();
-    const body = {
+    const anio = Number(v.anioNacimiento);
+    const fechaTrim = v.fechaNacimiento?.trim() ?? '';
+    const base = {
       dni: v.dni,
       nombre: v.nombre,
       apellido: v.apellido,
       telefono: v.telefono || undefined,
-      fechaNacimiento: v.fechaNacimiento,
+      anioNacimiento: anio,
       nacionalidad: v.nacionalidad?.trim() || undefined,
     };
     const req = this.editing
-      ? this.api.update(this.editing.id, body)
+      ? this.api.update(this.editing.id, {
+          ...base,
+          fechaNacimiento: fechaTrim.length > 0 ? fechaTrim : null,
+        })
       : this.api.create({
-          ...body,
+          ...base,
+          ...(fechaTrim.length > 0 ? { fechaNacimiento: fechaTrim } : {}),
           clubDestinoInicialId: v.clubDestinoInicialId,
         });
     this.saving = true;

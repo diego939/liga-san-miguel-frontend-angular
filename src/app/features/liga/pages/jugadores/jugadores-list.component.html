@@ -68,6 +68,8 @@
           <option value="apellido:desc">Apellido — Z a A</option>
           <option value="nombre:asc">Nombre — A a Z</option>
           <option value="nombre:desc">Nombre — Z a A</option>
+          <option value="anioNacimiento:asc">Año nac. — ascendente</option>
+          <option value="anioNacimiento:desc">Año nac. — descendente</option>
           <option value="fechaNacimiento:asc">Fecha nac. — ascendente</option>
           <option value="fechaNacimiento:desc">Fecha nac. — descendente</option>
         </select>
@@ -92,6 +94,10 @@
             <div class="flex flex-col gap-1">
               <span class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Nombre</span>
               <span class="text-sm text-gray-800 dark:text-gray-200">{{ j.nombre }}</span>
+            </div>
+            <div class="flex flex-col gap-1">
+              <span class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Año nac.</span>
+              <span class="text-sm text-gray-800 dark:text-gray-200">{{ j.anioNacimiento }}</span>
             </div>
             <div class="flex flex-col gap-1">
               <span class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Fecha nac.</span>
@@ -167,6 +173,16 @@
             <th
               scope="col"
               class="px-6 py-3 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-600"
+              (click)="onSort('anioNacimiento')"
+            >
+              <span class="inline-flex items-center"
+                >Año nac.
+                <app-liga-sort-indicator [active]="sortBy === 'anioNacimiento'" [order]="sortOrder"></app-liga-sort-indicator
+              ></span>
+            </th>
+            <th
+              scope="col"
+              class="px-6 py-3 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-600"
               (click)="onSort('fechaNacimiento')"
             >
               <span class="inline-flex items-center"
@@ -188,6 +204,7 @@
             <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">{{ j.dni }}</td>
             <td class="px-6 py-4">{{ j.apellido }}</td>
             <td class="px-6 py-4">{{ j.nombre }}</td>
+            <td class="px-6 py-4 tabular-nums">{{ j.anioNacimiento }}</td>
             <td class="px-6 py-4">{{ formatDate(j.fechaNacimiento) }}</td>
             <td class="px-6 py-4">{{ j.telefono || '—' }}</td>
             <td class="px-6 py-4 text-right space-x-2" (click)="$event.stopPropagation()">
@@ -292,7 +309,21 @@
           <input formControlName="telefono" [class]="lm.field" />
         </div>
         <div>
-          <label [class]="lm.label">Fecha de nacimiento</label>
+          <label [class]="lm.label">Año de nacimiento</label>
+          <input
+            type="number"
+            formControlName="anioNacimiento"
+            [class]="isInvalid('anioNacimiento') ? lm.field + ' ' + lm.fieldInvalid : lm.field"
+          />
+          <p
+            *ngIf="form.controls.anioNacimiento.touched && form.controls.anioNacimiento.hasError('required')"
+            class="mt-1 text-xs text-red-600"
+          >
+            El año de nacimiento es obligatorio.
+          </p>
+        </div>
+        <div>
+          <label [class]="lm.label">Fecha de nacimiento (opcional)</label>
           <mat-form-field
             appearance="outline"
             subscriptSizing="dynamic"
@@ -310,12 +341,6 @@
             <mat-datepicker-toggle matIconSuffix [for]="pickerNacimiento"></mat-datepicker-toggle>
             <mat-datepicker #pickerNacimiento></mat-datepicker>
           </mat-form-field>
-          <p
-            *ngIf="form.controls.fechaNacimiento.touched && form.controls.fechaNacimiento.hasError('required')"
-            class="mt-1 text-xs text-red-600"
-          >
-            La fecha de nacimiento es obligatoria.
-          </p>
         </div>
         <div>
           <label [class]="lm.label">Nacionalidad (opcional)</label>

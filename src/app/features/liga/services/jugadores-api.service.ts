@@ -41,8 +41,9 @@ export class JugadoresApiService {
     dni: string;
     nombre: string;
     apellido: string;
+    anioNacimiento: number;
     telefono?: string;
-    fechaNacimiento: string;
+    fechaNacimiento?: string;
     nacionalidad?: string;
     /** Pase inicial: origen null → destino este club. */
     clubDestinoInicialId?: number;
@@ -57,7 +58,8 @@ export class JugadoresApiService {
       nombre: string;
       apellido: string;
       telefono: string;
-      fechaNacimiento: string;
+      anioNacimiento: number;
+      fechaNacimiento: string | null;
       nacionalidad: string;
     }>,
   ): Observable<Jugador> {

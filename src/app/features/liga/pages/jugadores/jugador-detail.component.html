@@ -43,9 +43,9 @@
   <div *ngIf="tab === 'datos'" class="p-4 bg-white border rounded-lg dark:bg-gray-800 dark:border-gray-700 grid sm:grid-cols-2 gap-4 text-sm">
     <div><span class="text-gray-500">DNI</span><p class="font-medium dark:text-gray-400">{{ j.dni }}</p></div>
     <div><span class="text-gray-500">Teléfono</span><p class="font-medium dark:text-gray-400">{{ j.telefono || '—' }}</p></div>
-    <div><span class="text-gray-500">Fecha nacimiento</span><p class="font-medium dark:text-gray-400">{{ formatDate(j.fechaNacimiento) }}</p></div>
+    <div><span class="text-gray-500">Año de nacimiento</span><p class="font-medium dark:text-gray-400">{{ j.anioNacimiento }}</p></div>
+    <div><span class="text-gray-500">Fecha de nacimiento</span><p class="font-medium dark:text-gray-400">{{ formatDate(j.fechaNacimiento) }}</p></div>
     <div><span class="text-gray-500">Nacionalidad</span><p class="font-medium dark:text-gray-400">{{ j.nacionalidad || '—' }}</p></div>
-    <div><span class="text-gray-500">Año de nacimiento</span><p class="font-medium dark:text-gray-400">{{ j.fechaNacimiento | date:'yyyy' }}</p></div>
     <div><span class="text-gray-500">Fecha de inscripción</span><p class="font-medium dark:text-gray-400">{{ formatDt(j.createdAt) }}</p></div>
   </div>
 

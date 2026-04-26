@@ -28,7 +28,8 @@ export interface Jugador {
   nombre: string;
   apellido: string;
   telefono?: string | null;
-  fechaNacimiento: string;
+  anioNacimiento: number;
+  fechaNacimiento?: string | null;
   createdAt?: string;
   nacionalidad?: string | null;
 }
