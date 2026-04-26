@@ -116,15 +116,52 @@
 <div *ngIf="modal" [class]="lm.backdrop">
   <div [class]="lm.panelMd" (click)="$event.stopPropagation()">
     <h3 [class]="lm.titleSm">{{ editing ? 'Editar usuario' : 'Nuevo usuario' }}</h3>
-    <form [formGroup]="form" (ngSubmit)="save()" class="space-y-3">
+    <form [formGroup]="form" (ngSubmit)="save()" class="space-y-3" autocomplete="off">
       <fieldset class="space-y-3 border-0 p-0 m-0 min-w-0" [disabled]="loading">
-        <input formControlName="email" type="email" placeholder="Email" [class]="lm.field" />
-        <input formControlName="password" type="password" placeholder="Contraseña (mín. 6)" [class]="lm.field" />
+        <div>
+          <input
+            formControlName="email"
+            type="email"
+            placeholder="Email"
+            autocomplete="off"
+            autocapitalize="off"
+            autocorrect="off"
+            spellcheck="false"
+            [class]="isInvalid('email') ? lm.field + ' ' + lm.fieldInvalid : lm.field"
+          />
+          <p *ngIf="form.controls.email.touched && form.controls.email.hasError('required')" class="mt-1 text-xs text-red-600">
+            El email es obligatorio.
+          </p>
+          <p *ngIf="form.controls.email.touched && form.controls.email.hasError('email')" class="mt-1 text-xs text-red-600">
+            Ingresá un email válido.
+          </p>
+        </div>
+        <div>
+          <input
+            formControlName="password"
+            type="password"
+            [placeholder]="editing ? 'Contraseña (opcional, mín. 6)' : 'Contraseña (mín. 6)'"
+            autocomplete="new-password"
+            [class]="isInvalid('password') ? lm.field + ' ' + lm.fieldInvalid : lm.field"
+          />
+          <p
+            *ngIf="!editing && form.controls.password.touched && form.controls.password.hasError('required')"
+            class="mt-1 text-xs text-red-600"
+          >
+            La contraseña es obligatoria.
+          </p>
+          <p *ngIf="form.controls.password.touched && form.controls.password.hasError('minlength')" class="mt-1 text-xs text-red-600">
+            La contraseña debe tener al menos 6 caracteres.
+          </p>
+        </div>
         <label [class]="lm.label">Rol</label>
-        <select formControlName="rolId" [class]="lm.field">
+        <select formControlName="rolId" [class]="isInvalid('rolId') ? lm.field + ' ' + lm.fieldInvalid : lm.field">
           <option [ngValue]="0">Seleccionar rol</option>
           <option *ngFor="let r of roles" [ngValue]="r.id">{{ r.descripcion }}</option>
         </select>
+        <p *ngIf="form.controls.rolId.touched && form.controls.rolId.hasError('min')" class="mt-1 text-xs text-red-600">
+          Seleccioná un rol.
+        </p>
       </fieldset>
       <div class="flex justify-end mt-4">
         <button class="mx-1 cursor-pointer text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700" type="button" (click)="modal = false" [class]="lm.btnSecondary" [disabled]="loading">Cancelar</button>

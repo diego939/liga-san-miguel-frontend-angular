@@ -74,6 +74,8 @@ export class UsuariosListComponent implements OnInit {
   openCreate(): void {
     this.editing = null;
     this.loading = false;
+    this.form.controls.password.setValidators([Validators.required, Validators.minLength(6)]);
+    this.form.controls.password.updateValueAndValidity({ emitEvent: false });
     this.form.reset({ email: '', password: '', rolId: 0 });
     this.modal = true;
   }
@@ -81,6 +83,8 @@ export class UsuariosListComponent implements OnInit {
   openEdit(u: Usuario): void {
     this.editing = u;
     this.loading = false;
+    this.form.controls.password.setValidators([Validators.minLength(6)]);
+    this.form.controls.password.updateValueAndValidity({ emitEvent: false });
     this.form.patchValue({ email: u.email, password: '', rolId: u.rolId });
     this.modal = true;
   }
@@ -88,22 +92,9 @@ export class UsuariosListComponent implements OnInit {
   save(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
-      void Swal.fire({
-        icon: 'warning',
-        title: 'Datos incompletos',
-        text: 'Todos los campos son requeridos.',
-      });
       return;
     }
     const v = this.form.getRawValue();
-    if (!this.editing && (!v.password || v.password.length < 6)) {
-      void Swal.fire({
-        icon: 'warning',
-        title: 'Contraseña requerida',
-        text: 'La contraseña debe tener al menos 6 caracteres.',
-      });
-      return;
-    }
     const req = this.editing
       ? this.api.update(this.editing.id, {
           email: v.email,
@@ -174,6 +165,11 @@ export class UsuariosListComponent implements OnInit {
       this.page++;
       this.load();
     }
+  }
+
+  isInvalid(controlName: keyof typeof this.form.controls): boolean {
+    const c = this.form.controls[controlName];
+    return c.invalid && (c.touched || c.dirty);
   }
 
   /**
