@@ -28,6 +28,7 @@ export class UsuariosListComponent implements OnInit {
   readonly lm = ligaModal;
 
   loading = false;
+  showPassword = false;
 
   private readonly api = inject(UsuariosApiService);
   private readonly rolesApi = inject(RolesApiService);
@@ -74,6 +75,7 @@ export class UsuariosListComponent implements OnInit {
   openCreate(): void {
     this.editing = null;
     this.loading = false;
+    this.showPassword = false;
     this.form.controls.password.setValidators([Validators.required, Validators.minLength(6)]);
     this.form.controls.password.updateValueAndValidity({ emitEvent: false });
     this.form.reset({ email: '', password: '', rolId: 0 });
@@ -83,6 +85,7 @@ export class UsuariosListComponent implements OnInit {
   openEdit(u: Usuario): void {
     this.editing = u;
     this.loading = false;
+    this.showPassword = false;
     this.form.controls.password.setValidators([Validators.minLength(6)]);
     this.form.controls.password.updateValueAndValidity({ emitEvent: false });
     this.form.patchValue({ email: u.email, password: '', rolId: u.rolId });
@@ -170,6 +173,10 @@ export class UsuariosListComponent implements OnInit {
   isInvalid(controlName: keyof typeof this.form.controls): boolean {
     const c = this.form.controls[controlName];
     return c.invalid && (c.touched || c.dirty);
+  }
+
+  togglePasswordVisibility(): void {
+    this.showPassword = !this.showPassword;
   }
 
   /**
