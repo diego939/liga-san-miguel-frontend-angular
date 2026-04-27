@@ -1,17 +1,17 @@
 .native-date-icon::-webkit-calendar-picker-indicator {
   opacity: 1;
-  filter: brightness(0) invert(1);
+  filter: brightness(0) saturate(100%) invert(77%) sepia(3%) saturate(206%) hue-rotate(314deg) brightness(90%) contrast(91%);
   transition: opacity 0.15s ease-in-out;
 }
 
 .native-date-icon::-webkit-calendar-picker-indicator:hover {
   cursor: pointer;
   opacity: 1;
-  filter: brightness(0) invert(1);
+  filter: brightness(0) saturate(100%) invert(77%) sepia(3%) saturate(206%) hue-rotate(314deg) brightness(90%) contrast(91%);
 }
 
 .native-date-inverted {
-  color: #fff !important;
+  color: #bbb7b7 !important;
   border-color: #374151 !important;
   color-scheme: dark;
 }

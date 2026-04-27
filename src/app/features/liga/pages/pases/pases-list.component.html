@@ -16,14 +16,14 @@
   >
     <div>
       <label class="block mb-1 text-sm font-medium text-gray-900 dark:text-white">Club</label>
-      <select [(ngModel)]="filterClubId" class="rounded-lg border p-2.5 dark:bg-gray-700 min-w-[10rem] text-gray-200">
+      <select [(ngModel)]="filterClubId" class="rounded-lg border p-2.5 dark:bg-gray-700 min-w-[10rem] dark:text-gray-200 text-gray-900">
         <option [ngValue]="null">Todos</option>
         <option *ngFor="let c of clubs" [ngValue]="c.id">{{ c.nombre }}</option>
       </select>
     </div>
     <div>
       <label class="block mb-1 text-sm font-medium text-gray-900 dark:text-white">Estado</label>
-      <select [(ngModel)]="filterEstado" class="rounded-lg border p-2.5 dark:bg-gray-700 text-gray-200">
+      <select [(ngModel)]="filterEstado" class="rounded-lg border p-2.5 dark:bg-gray-700 dark:text-gray-200 text-gray-900">
         <option value="todos">Todos</option>
         <option value="activo">Activo</option>
         <option value="vencido">Vencido</option>
@@ -319,7 +319,7 @@
       </fieldset>
       <div class="flex justify-end mt-4">
         <button
-          class="mx-1 cursor-pointer text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700"
+          class="mx-1 cursor-pointer dark:text-white text-gray-900 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700"
           type="button"
           (click)="closeModal()"
           [class]="lm.btnSecondary"
@@ -423,7 +423,7 @@
       </fieldset>
       <div class="flex justify-end mt-4">
         <button
-          class="mx-1 cursor-pointer text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700"
+          class="mx-1 cursor-pointer dark:text-white text-gray-900 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700"
           type="button"
           (click)="closeModal()"
           [class]="lm.btnSecondary"

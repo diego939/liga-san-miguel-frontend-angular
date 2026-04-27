@@ -53,7 +53,7 @@
 }
 
 :host ::ng-deep .liga-date-field .mat-mdc-input-element {
-  color: rgb(224, 224, 228) !important;
+  color: inherit !important;
 }
 
 :host-context(.dark) ::ng-deep .liga-date-field .mat-mdc-input-element {
