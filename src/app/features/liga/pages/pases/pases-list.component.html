@@ -298,7 +298,8 @@
             type="datetime-local"
             formControlName="fechaInicio"
             [class]="
-              (isInvalid('fechaInicio') ? lm.field + ' ' + lm.fieldInvalid : lm.field) + ' native-date-icon native-date-inverted'
+              (isInvalid('fechaInicio') ? lm.field + ' ' + lm.fieldInvalid : lm.field) +
+              ' native-date-icon-light native-date-light native-date-icon native-date-inverted'
             "
           />
           <p *ngIf="form.controls.fechaInicio.touched && form.controls.fechaInicio.hasError('required')" class="mt-1 text-xs text-red-600">
@@ -310,7 +311,10 @@
           <input
             type="datetime-local"
             formControlName="fechaFin"
-            [class]="(isInvalid('fechaFin') ? lm.field + ' ' + lm.fieldInvalid : lm.field) + ' native-date-icon native-date-inverted'"
+            [class]="
+              (isInvalid('fechaFin') ? lm.field + ' ' + lm.fieldInvalid : lm.field) +
+              ' native-date-icon-light native-date-light native-date-icon native-date-inverted'
+            "
           />
           <p *ngIf="form.controls.fechaFin.touched && form.controls.fechaFin.hasError('required')" class="mt-1 text-xs text-red-600">
             El pase temporal requiere fecha de fin.
@@ -381,7 +385,7 @@
             formControlName="fechaInicio"
             [class]="
               (isRenewInvalid('fechaInicio') ? lm.field + ' ' + lm.fieldInvalid : lm.field) +
-              ' native-date-icon native-date-inverted'
+              ' native-date-icon-light native-date-light native-date-icon native-date-inverted'
             "
           />
           <p
@@ -397,7 +401,8 @@
             type="datetime-local"
             formControlName="fechaFin"
             [class]="
-              (isRenewInvalid('fechaFin') ? lm.field + ' ' + lm.fieldInvalid : lm.field) + ' native-date-icon native-date-inverted'
+              (isRenewInvalid('fechaFin') ? lm.field + ' ' + lm.fieldInvalid : lm.field) +
+              ' native-date-icon-light native-date-light native-date-icon native-date-inverted'
             "
           />
           <p

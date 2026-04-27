@@ -1,17 +1,58 @@
-.native-date-icon::-webkit-calendar-picker-indicator {
+/* Modo claro: icono del indicador nativo legible sobre fondo claro */
+.native-date-icon-light::-webkit-calendar-picker-indicator {
   opacity: 1;
-  filter: brightness(0) saturate(100%) invert(77%) sepia(3%) saturate(206%) hue-rotate(314deg) brightness(90%) contrast(91%);
+  filter: brightness(0);
   transition: opacity 0.15s ease-in-out;
 }
 
-.native-date-icon::-webkit-calendar-picker-indicator:hover {
+.native-date-icon-light::-webkit-calendar-picker-indicator:hover {
   cursor: pointer;
   opacity: 1;
-  filter: brightness(0) saturate(100%) invert(77%) sepia(3%) saturate(206%) hue-rotate(314deg) brightness(90%) contrast(91%);
+  filter: brightness(0);
 }
 
-.native-date-inverted {
-  color: #bbb7b7 !important;
+/* Modo claro: calendario/popover del input alineado con tema claro */
+.native-date-light {
+  color-scheme: light;
+  color: #2c2c2c !important;
+  border-color: #c5c7c9 !important;
+}
+
+/* Modo oscuro (sistema o clase .dark en un ancestro, como Tailwind class strategy) */
+@media (prefers-color-scheme: dark) {
+  .native-date-icon::-webkit-calendar-picker-indicator {
+    opacity: 1;
+    filter: brightness(0) invert(1);
+    transition: opacity 0.15s ease-in-out;
+  }
+
+  .native-date-icon::-webkit-calendar-picker-indicator:hover {
+    cursor: pointer;
+    opacity: 1;
+    filter: brightness(0) invert(1);
+  }
+
+  .native-date-inverted {
+    color: #fff !important;
+    border-color: #374151 !important;
+    color-scheme: dark;
+  }
+}
+
+:host-context(.dark) .native-date-icon::-webkit-calendar-picker-indicator {
+  opacity: 1;
+  filter: brightness(0) invert(1);
+  transition: opacity 0.15s ease-in-out;
+}
+
+:host-context(.dark) .native-date-icon::-webkit-calendar-picker-indicator:hover {
+  cursor: pointer;
+  opacity: 1;
+  filter: brightness(0) invert(1);
+}
+
+:host-context(.dark) .native-date-inverted {
+  color: #fff !important;
   border-color: #374151 !important;
   color-scheme: dark;
 }

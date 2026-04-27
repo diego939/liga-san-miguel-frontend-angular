@@ -247,7 +247,10 @@
             <input
               type="date"
               formControlName="fechaInicio"
-              [class]="(isInvalid('fechaInicio') ? lm.field + ' ' + lm.fieldInvalid : lm.field) + ' native-date-icon native-date-inverted'"
+              [class]="
+                (isInvalid('fechaInicio') ? lm.field + ' ' + lm.fieldInvalid : lm.field) +
+                ' native-date-icon-light native-date-light native-date-icon native-date-inverted'
+              "
             />
             <p *ngIf="form.controls.fechaInicio.touched && form.controls.fechaInicio.hasError('required')" class="mt-1 text-xs text-red-600">
               La fecha de inicio es obligatoria.
@@ -258,7 +261,10 @@
             <input
               type="date"
               formControlName="fechaFin"
-              [class]="(isInvalid('fechaFin') ? lm.field + ' ' + lm.fieldInvalid : lm.field) + ' native-date-icon native-date-inverted'"
+              [class]="
+                (isInvalid('fechaFin') ? lm.field + ' ' + lm.fieldInvalid : lm.field) +
+                ' native-date-icon-light native-date-light native-date-icon native-date-inverted'
+              "
             />
             <p *ngIf="form.controls.fechaFin.touched && form.controls.fechaFin.hasError('required')" class="mt-1 text-xs text-red-600">
               La fecha de fin es obligatoria.
