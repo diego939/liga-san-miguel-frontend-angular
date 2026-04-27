@@ -16,6 +16,7 @@ import Swal from 'sweetalert2';
 export class LoginComponent {
   errorMessage: string = '';
   loading = false;
+  showPassword = false;
 
   form = this.fb.group({
     email: [''],
@@ -28,6 +29,10 @@ export class LoginComponent {
     private menuService: MenuService,
     private router: Router
   ) {}
+
+  togglePasswordVisibility() {
+    this.showPassword = !this.showPassword;
+  }
 
   login() {
   if (this.form.invalid) return;
