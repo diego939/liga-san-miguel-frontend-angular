@@ -85,7 +85,18 @@
           <div class="flex flex-col gap-3">
             <div class="flex flex-col gap-1">
               <span class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">DNI</span>
-              <span class="text-sm font-medium text-gray-900 dark:text-white">{{ j.dni }}</span>
+              <div class="inline-flex items-center gap-2">
+                <span class="text-sm font-medium text-gray-900 dark:text-white">{{ j.dni }}</span>
+                <button
+                  type="button"
+                  title="Copiar DNI"
+                  aria-label="Copiar DNI"
+                  class="text-gray-500 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400 cursor-pointer"
+                  (click)="copyDni(j.dni, $event)"
+                >
+                  <i class="fa-regular fa-copy"></i>
+                </button>
+              </div>
             </div>
             <div class="flex flex-col gap-1">
               <span class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Apellido</span>
@@ -201,7 +212,20 @@
             class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer"
             (click)="goDetail(j)"
           >
-            <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">{{ j.dni }}</td>
+            <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">
+              <div class="inline-flex items-center gap-2">
+                <span>{{ j.dni }}</span>
+                <button
+                  type="button"
+                  title="Copiar DNI"
+                  aria-label="Copiar DNI"
+                  class="text-gray-500 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400 cursor-pointer"
+                  (click)="copyDni(j.dni, $event)"
+                >
+                  <i class="fa-regular fa-copy"></i>
+                </button>
+              </div>
+            </td>
             <td class="px-6 py-4">{{ j.apellido }}</td>
             <td class="px-6 py-4">{{ j.nombre }}</td>
             <td class="px-6 py-4 tabular-nums">{{ j.anioNacimiento }}</td>

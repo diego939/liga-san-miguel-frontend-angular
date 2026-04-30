@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs/operators';
+import Swal from 'sweetalert2';
 import { JugadoresApiService } from '../../services/jugadores-api.service';
 import type { Inscripcion, Jugador, Pase, Suspension } from '../../models/api.types';
 import { formatDateOnly, formatDateTime } from '../../utils/date-format';
@@ -45,6 +46,50 @@ export class JugadorDetailComponent implements OnInit {
 
   setTab(t: typeof this.tab): void {
     this.tab = t;
+  }
+
+  copyDni(dni: string): void {
+    const textToCopy = dni?.trim();
+    if (!textToCopy) return;
+    void this.writeClipboard(textToCopy)
+      .then(() => {
+        void Swal.fire({
+          toast: true,
+          position: 'top',
+          icon: 'success',
+          title: 'DNI copiado al portapapeles',
+          showConfirmButton: false,
+          timer: 1800,
+          timerProgressBar: true,
+        });
+      })
+      .catch(() => {
+        void Swal.fire({
+          toast: true,
+          position: 'top',
+          icon: 'error',
+          title: 'No se pudo copiar el DNI',
+          showConfirmButton: false,
+          timer: 1800,
+          timerProgressBar: true,
+        });
+      });
+  }
+
+  private async writeClipboard(text: string): Promise<void> {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text);
+      return;
+    }
+    const helper = document.createElement('textarea');
+    helper.value = text;
+    helper.setAttribute('readonly', '');
+    helper.style.position = 'fixed';
+    helper.style.opacity = '0';
+    document.body.appendChild(helper);
+    helper.select();
+    document.execCommand('copy');
+    document.body.removeChild(helper);
   }
 
   formatDate = formatDateOnly;

@@ -41,7 +41,21 @@
   </div>
 
   <div *ngIf="tab === 'datos'" class="p-4 bg-white border rounded-lg dark:bg-gray-800 dark:border-gray-700 grid sm:grid-cols-2 gap-4 text-sm">
-    <div><span class="text-gray-500">DNI</span><p class="font-medium dark:text-gray-400">{{ j.dni }}</p></div>
+    <div>
+      <span class="text-gray-500">DNI</span>
+      <div class="mt-1 flex items-center gap-2">
+        <p class="font-medium dark:text-gray-400">{{ j.dni }}</p>
+        <button
+          type="button"
+          title="Copiar DNI"
+          aria-label="Copiar DNI"
+          class="text-gray-500 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400 cursor-pointer"
+          (click)="copyDni(j.dni)"
+        >
+          <i class="fa-regular fa-copy"></i>
+        </button>
+      </div>
+    </div>
     <div><span class="text-gray-500">Teléfono</span><p class="font-medium dark:text-gray-400">{{ j.telefono || '—' }}</p></div>
     <div><span class="text-gray-500">Año de nacimiento</span><p class="font-medium dark:text-gray-400">{{ j.anioNacimiento }}</p></div>
     <div><span class="text-gray-500">Fecha de nacimiento</span><p class="font-medium dark:text-gray-400">{{ formatDate(j.fechaNacimiento) }}</p></div>

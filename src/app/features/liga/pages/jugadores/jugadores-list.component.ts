@@ -278,6 +278,27 @@ export class JugadoresListComponent implements OnInit {
     void this.router.navigate(['/pages/jugadores', j.id]);
   }
 
+  copyDni(dni: string, ev: Event): void {
+    ev.stopPropagation();
+    const textToCopy = dni?.trim();
+    if (!textToCopy) return;
+    void this.writeClipboard(textToCopy)
+      .then(() => {
+        void Swal.fire({
+          toast: true,
+          position: 'top',
+          icon: 'success',
+          title: 'DNI copiado al portapapeles',
+          showConfirmButton: false,
+          timer: 1800,
+          timerProgressBar: true,
+        });
+      })
+      .catch(() => {
+        this.apiErrorAlert('No se pudo copiar el DNI al portapapeles.');
+      });
+  }
+
   prevPage(): void {
     if (this.page > 1) {
       this.page--;
@@ -357,6 +378,22 @@ export class JugadoresListComponent implements OnInit {
     const month = String(value.getMonth() + 1).padStart(2, '0');
     const day = String(value.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
+  }
+
+  private async writeClipboard(text: string): Promise<void> {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text);
+      return;
+    }
+    const helper = document.createElement('textarea');
+    helper.value = text;
+    helper.setAttribute('readonly', '');
+    helper.style.position = 'fixed';
+    helper.style.opacity = '0';
+    document.body.appendChild(helper);
+    helper.select();
+    document.execCommand('copy');
+    document.body.removeChild(helper);
   }
 
   private apiErrorMessage(err: unknown): string {
