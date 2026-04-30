@@ -16,7 +16,7 @@
 
     <ng-container *ngIf="items.length > 0">
       <ul class="xl:hidden divide-y divide-gray-200 dark:divide-gray-700" role="list">
-        <li *ngFor="let e of items" class="bg-white px-4 py-4 dark:bg-gray-800">
+        <li *ngFor="let e of items" class="bg-white px-4 py-4 dark:bg-gray-800 cursor-pointer" title="Ver inscripciones (Lista de buena fe del club)" (click)="inscripciones(e)">
           <div class="flex flex-col gap-3">
             <div class="flex flex-col gap-1">
               <span class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Club</span>
@@ -60,7 +60,9 @@
         <tbody>
           <tr
             *ngFor="let e of items"
-            class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
+            class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer"
+            title="Ver inscripciones (Lista de buena fe del club)"
+            (click)="inscripciones(e)"
           >
             <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">{{ e.club.nombre }}</td>
             <td class="px-6 py-4">{{ e.jugadoresInscriptosActivos ?? '—' }}</td>

@@ -55,7 +55,7 @@
       </div>
 
       <ul class="xl:hidden divide-y divide-gray-200 dark:divide-gray-700" role="list">
-        <li *ngFor="let t of items" class="bg-white px-4 py-4 dark:bg-gray-800">
+        <li *ngFor="let t of items" class="bg-white px-4 py-4 dark:bg-gray-800 cursor-pointer" title="Ver detalles" (click)="gestionar(t)">
           <div class="flex flex-col gap-3">
             <div class="flex items-center justify-between gap-3">
               <span class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">ID</span>
@@ -169,7 +169,9 @@
         <tbody>
           <tr
             *ngFor="let t of items"
-            class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
+            class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer"
+            title="Ver detalles"
+            (click)="gestionar(t)"
           >
             <td class="px-6 py-4 text-gray-500">{{ t.id }}</td>
             <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">{{ t.nombre }}</td>
