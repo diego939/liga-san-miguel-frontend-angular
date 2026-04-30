@@ -31,6 +31,7 @@
             <div class="flex flex-wrap justify-end gap-2 pt-1">
               <button
                 type="button"
+                title="Ver inscripciones (Lista de buena fe del club)"
                 (click)="inscripciones(e)"
                 class="font-medium text-blue-600 dark:text-blue-500 cursor-pointer decoration-none border border-blue-500 rounded-full px-3 py-1 text-sm"
               >
@@ -39,6 +40,7 @@
               <button
                 *appIfNotOperador
                 type="button"
+                title="Quitar club del torneo"
                 (click)="quitar(e)"
                 class="font-medium text-red-600 cursor-pointer decoration-none border border-red-500 rounded-full px-3 py-1 text-sm"
               >
@@ -69,12 +71,13 @@
             <td class="px-6 py-4 text-right space-x-2">
               <button
                 type="button"
+                title="Ver inscripciones (Lista de buena fe del club)"
                 (click)="inscripciones(e)"
                 class="font-medium text-blue-600 dark:text-blue-500 cursor-pointer decoration-none border border-blue-500 rounded-full px-2 text-sm"
               >
                 Inscripciones
               </button>
-              <button *appIfNotOperador type="button" (click)="quitar(e)" class="font-medium text-red-600 cursor-pointer decoration-none border border-red-500 rounded-full px-2 text-sm">Quitar</button>
+              <button *appIfNotOperador type="button" title="Quitar club del torneo" (click)="quitar(e)" class="font-medium text-red-600 cursor-pointer decoration-none border border-red-500 rounded-full px-2 text-sm">Quitar</button>
             </td>
           </tr>
         </tbody>

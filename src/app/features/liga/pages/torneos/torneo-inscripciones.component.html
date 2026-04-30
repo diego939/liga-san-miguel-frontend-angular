@@ -151,6 +151,7 @@
                 <button
                   *ngIf="!ins.fechaFin"
                   type="button"
+                  title="Quitar jugador de la lista"
                   (click)="quitar(ins)"
                   [disabled]="cerrandoInsId === ins.id"
                   class="font-medium text-red-600 cursor-pointer decoration-none border border-red-500 rounded-full px-3 py-1 text-sm disabled:opacity-50"
@@ -268,6 +269,7 @@
               <button
                 *ngIf="!ins.fechaFin"
                 type="button"
+                title="Quitar jugador de la lista"
                 (click)="quitar(ins)"
                 [disabled]="cerrandoInsId === ins.id"
                 class="font-medium text-red-600 cursor-pointer decoration-none border border-red-500 rounded-full px-2 text-sm disabled:opacity-50"

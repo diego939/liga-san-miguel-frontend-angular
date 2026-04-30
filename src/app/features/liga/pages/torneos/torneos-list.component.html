@@ -92,6 +92,7 @@
               <button
                 *appIfNotOperador
                 type="button"
+                title="Editar"
                 (click)="openEdit(t, $event)"
                 class="font-medium text-blue-600 dark:text-blue-500 cursor-pointer decoration-none border border-blue-500 rounded-full px-3 py-1 text-sm"
               >
@@ -180,12 +181,13 @@
             <td class="px-6 py-4">{{ formatDate(t.fechaInicio) }}</td>
             <td class="px-6 py-4">{{ formatDate(t.fechaFin) }}</td>
             <td class="px-6 py-4 text-right space-x-2">
-              <button type="button" (click)="gestionar(t)" class="font-medium text-green-700 dark:text-green-500 cursor-pointer decoration-none border border-green-500 rounded-full px-2">
+              <button type="button" title="Ver detalles" (click)="gestionar(t)" class="font-medium text-green-700 dark:text-green-500 cursor-pointer decoration-none border border-green-500 rounded-full px-2">
                 Ver detalles
               </button>
               <button
                 *appIfNotOperador
                 type="button"
+                title="Editar"
                 (click)="openEdit(t, $event)"
                 class="font-medium text-blue-600 dark:text-blue-500 cursor-pointer decoration-none border border-blue-500 rounded-full px-2"
               >
