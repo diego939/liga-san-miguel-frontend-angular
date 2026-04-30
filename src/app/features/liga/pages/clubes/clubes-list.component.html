@@ -99,21 +99,21 @@
           <tr>
             <th
               scope="col"
+              class="px-6 py-3 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-600 whitespace-nowrap"
+              (click)="onSort('id')"
+            >
+              <span class="inline-flex items-center"
+                >ID <app-liga-sort-indicator [active]="sortBy === 'id'" [order]="sortOrder"></app-liga-sort-indicator
+              ></span>
+            </th>
+            <th
+              scope="col"
               class="px-6 py-3 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-600"
               (click)="onSort('nombre')"
             >
               <span class="inline-flex items-center"
                 >Nombre
                 <app-liga-sort-indicator [active]="sortBy === 'nombre'" [order]="sortOrder"></app-liga-sort-indicator
-              ></span>
-            </th>
-            <th
-              scope="col"
-              class="px-6 py-3 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-600 whitespace-nowrap"
-              (click)="onSort('id')"
-            >
-              <span class="inline-flex items-center"
-                >ID <app-liga-sort-indicator [active]="sortBy === 'id'" [order]="sortOrder"></app-liga-sort-indicator
               ></span>
             </th>
             <th scope="col" class="px-6 py-3 text-right">Acciones</th>
@@ -126,8 +126,8 @@
             class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer"
             (click)="goDetail(c)"
           >
-            <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">{{ c.nombre }}</td>
             <td class="px-6 py-4 text-gray-500">{{ c.id }}</td>
+            <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">{{ c.nombre }}</td>
             <td class="px-6 py-4 text-right space-x-2" (click)="$event.stopPropagation()">
               <button
                 type="button"
