@@ -5,7 +5,7 @@
   >
     <label class="flex items-center gap-2 text-sm text-gray-900 dark:text-gray-400">
       <input type="checkbox" [(ngModel)]="soloActivas" (change)="apply()" />
-      Solo activas (partidos restantes &gt; 0)
+      Solo activas (partidos pendientes o fecha vigente)
     </label>
   </div>
   <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
@@ -31,6 +31,8 @@
           <option value="id:desc"># — descendente</option>
           <option value="partidosRestantes:asc">Partidos restantes — ascendente</option>
           <option value="partidosRestantes:desc">Partidos restantes — descendente</option>
+          <option value="fechaHasta:asc">Fecha hasta — ascendente</option>
+          <option value="fechaHasta:desc">Fecha hasta — descendente</option>
         </select>
       </div>
 
@@ -48,6 +50,10 @@
               </span>
             </div>
             <div class="flex flex-col gap-1">
+              <span class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Club</span>
+              <span class="text-sm text-gray-800 dark:text-gray-200">{{ s.clubNombre ?? '—' }}</span>
+            </div>
+            <div class="flex flex-col gap-1">
               <span class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Torneo</span>
               <span class="text-sm text-gray-800 dark:text-gray-200">{{ s.torneo?.nombre }}</span>
             </div>
@@ -56,11 +62,20 @@
               <span class="text-sm text-gray-800 dark:text-gray-200">{{ s.motivo }}</span>
             </div>
             <div class="flex items-center justify-between gap-3">
-              <span class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400"
-                >Partidos restantes</span
-              >
-              <span class="text-sm tabular-nums text-gray-700 dark:text-gray-300">{{ s.partidosRestantes }}</span>
+              <span class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                Vigencia
+              </span>
+              <span class="text-sm tabular-nums text-gray-700 dark:text-gray-300">
+                {{ s.partidosRestantes != null ? (s.partidosRestantes + ' partido(s)') : ((s.fechaHasta | date : 'shortDate') || '—') }}
+              </span>
             </div>
+            <button
+              type="button"
+              (click)="editarSuspension(s)"
+              class="w-full cursor-pointer rounded-lg border border-blue-600 bg-blue-50 px-3 py-2.5 text-sm font-semibold text-blue-800 hover:bg-blue-100 dark:border-blue-400 dark:bg-blue-950/50 dark:text-blue-100 dark:hover:bg-blue-900/40"
+            >
+              Editar vigencia
+            </button>
           </div>
         </li>
       </ul>
@@ -78,6 +93,7 @@
               ></span>
             </th>
             <th scope="col" class="px-6 py-3">Jugador</th>
+            <th scope="col" class="px-6 py-3">Club</th>
             <th scope="col" class="px-6 py-3">Torneo</th>
             <th scope="col" class="px-6 py-3">Motivo</th>
             <th
@@ -93,6 +109,20 @@
                 ></app-liga-sort-indicator
               ></span>
             </th>
+            <th
+              scope="col"
+              class="px-6 py-3 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-600"
+              (click)="onSort('fechaHasta')"
+            >
+              <span class="inline-flex items-center"
+                >Fecha hasta
+                <app-liga-sort-indicator
+                  [active]="sortBy === 'fechaHasta'"
+                  [order]="sortOrder"
+                ></app-liga-sort-indicator
+              ></span>
+            </th>
+            <th scope="col" class="px-6 py-3">Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -104,9 +134,20 @@
             <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">
               {{ s.jugador?.apellido }}, {{ s.jugador?.nombre }}
             </td>
+            <td class="px-6 py-4">{{ s.clubNombre ?? '—' }}</td>
             <td class="px-6 py-4">{{ s.torneo?.nombre }}</td>
             <td class="px-6 py-4">{{ s.motivo }}</td>
-            <td class="px-6 py-4">{{ s.partidosRestantes }}</td>
+            <td class="px-6 py-4">{{ s.partidosRestantes ?? '—' }}</td>
+            <td class="px-6 py-4">{{ s.fechaHasta ? (s.fechaHasta | date : 'shortDate') : '—' }}</td>
+            <td class="px-6 py-4">
+              <button
+                type="button"
+                (click)="editarSuspension(s)"
+                class="font-medium text-blue-600 dark:text-blue-500 cursor-pointer decoration-none border border-blue-500 rounded-full px-2"
+              >
+                Editar
+              </button>
+            </td>
           </tr>
         </tbody>
       </table>

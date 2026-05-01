@@ -166,7 +166,10 @@ export interface Suspension {
   jugadorId: number;
   torneoId: number;
   motivo: string;
-  partidosRestantes: number;
+  partidosRestantes?: number | null;
+  fechaHasta?: string | null;
+  /** Club del jugador en ese torneo (inscripción activa), si aplica. */
+  clubNombre?: string | null;
   jugador?: Jugador;
   torneo?: Torneo;
 }
@@ -189,6 +192,22 @@ export interface GoleadorRow {
   goles: number;
   jugador: Jugador | null;
   clubNombre: string | null;
+}
+
+/** Amarillas y rojas por jugador + totales del torneo (API GET …/tarjetas). */
+export interface TarjetaJugadorRow {
+  jugadorId: number;
+  amarillas: number;
+  rojas: number;
+  jugador: Jugador | null;
+  clubNombre: string | null;
+}
+
+export interface TarjetasTorneoResponse {
+  totalAmarillas: number;
+  totalRojas: number;
+  jugadoresAmonestados: number;
+  jugadores: TarjetaJugadorRow[];
 }
 
 export interface PreviewInscripcion {

@@ -43,14 +43,19 @@ export class SuspensionesApiService {
     jugadorId: number;
     torneoId: number;
     motivo: string;
-    partidosRestantes: number;
+    partidosRestantes?: number;
+    fechaHasta?: string;
   }): Observable<Suspension> {
     return this.http.post<Suspension>(this.base, body);
   }
 
   update(
     id: number,
-    body: Partial<{ motivo: string; partidosRestantes: number }>,
+    body: Partial<{
+      motivo: string;
+      partidosRestantes: number;
+      fechaHasta: string;
+    }>,
   ): Observable<Suspension> {
     return this.http.patch<Suspension>(`${this.base}/${id}`, body);
   }

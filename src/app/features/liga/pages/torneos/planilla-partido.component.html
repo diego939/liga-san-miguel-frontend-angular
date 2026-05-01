@@ -400,7 +400,10 @@
     <p class="text-xs leading-relaxed text-gray-500 dark:text-gray-600" *ngIf="p.estado !== 'EN_JUEGO'">
       El partido debe estar <strong class="text-gray-800 dark:text-gray-600">en juego</strong> para registrar goles y tarjetas.
     </p>
-    <p class="text-xs leading-relaxed text-gray-600 dark:text-gray-600">Solo pueden anotarse jugadores que ya figuren en la planilla guardada arriba.</p>
+    <p class="text-xs leading-relaxed text-gray-600 dark:text-gray-600">
+      Solo pueden anotarse jugadores que ya figuren en la planilla guardada arriba.
+      Para tarjeta roja se abrirá un modal para definir la suspensión.
+    </p>
     <form [formGroup]="evForm" (ngSubmit)="registrarEvento()" class="flex flex-col gap-4 xl:flex-row xl:flex-wrap xl:items-end xl:gap-3">
       <div class="flex w-full flex-col gap-4 xl:w-auto xl:flex-row xl:flex-wrap xl:items-end xl:gap-2">
         <div class="flex min-w-0 flex-1 flex-col gap-1 xl:min-w-[14rem]">

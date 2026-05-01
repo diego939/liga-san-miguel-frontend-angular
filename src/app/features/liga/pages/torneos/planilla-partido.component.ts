@@ -33,6 +33,7 @@ type Line = {
   dni?: string;
   numeroCamiseta?: number | null;
 };
+type SuspensionRojaPayload = { partidosRestantes?: number; fechaHasta?: string };
 
 @Component({
   selector: 'app-planilla-partido',
@@ -516,7 +517,81 @@ export class PlanillaPartidoComponent implements OnInit {
       });
   }
 
-  registrarEvento(): void {
+  private async pedirConfiguracionSuspensionRoja(): Promise<SuspensionRojaPayload | null> {
+    const result = await Swal.fire<SuspensionRojaPayload>({
+      title: 'Configurar suspensión por roja',
+      html:
+        '<div class="text-left space-y-3">' +
+        '<p class="text-sm text-gray-600">Elegí cómo se cumple la suspensión automática por tarjeta roja.</p>' +
+        '<div>' +
+        '<label for="susp-modo" class="mb-1 block text-xs font-medium uppercase tracking-wide text-gray-500">Tipo de suspensión</label>' +
+        '<select id="susp-modo" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30">' +
+        '<option value="partidos">Por partidos</option>' +
+        '<option value="fecha">Hasta fecha</option>' +
+        '</select>' +
+        '</div>' +
+        '<div>' +
+        '<label for="susp-partidos" class="mb-1 block text-xs font-medium uppercase tracking-wide text-gray-500">Partidos restantes</label>' +
+        '<input id="susp-partidos" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30" type="number" min="1" value="1">' +
+        '</div>' +
+        '<div>' +
+        '<label for="susp-fecha" class="mb-1 block text-xs font-medium uppercase tracking-wide text-gray-500">Fecha hasta</label>' +
+        '<input id="susp-fecha" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30" type="date">' +
+        '</div>' +
+        '</div>',
+      showCancelButton: true,
+      confirmButtonText: 'Aplicar',
+      cancelButtonText: 'Cancelar',
+      focusConfirm: false,
+      width: 560,
+      customClass: {
+        popup: 'rounded-xl',
+        title: 'text-lg font-semibold text-gray-900',
+        confirmButton:
+          'inline-flex items-center justify-center rounded-lg bg-blue-700 px-4 py-2 text-sm font-medium text-white hover:bg-blue-800',
+        cancelButton:
+          'inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50',
+      },
+      buttonsStyling: false,
+      didOpen: () => {
+        const modoEl = document.getElementById('susp-modo') as HTMLSelectElement | null;
+        const partidosEl = document.getElementById('susp-partidos') as HTMLInputElement | null;
+        const fechaEl = document.getElementById('susp-fecha') as HTMLInputElement | null;
+        const updateVisibility = () => {
+          const byPartidos = modoEl?.value === 'partidos';
+          if (partidosEl) partidosEl.disabled = !byPartidos;
+          if (fechaEl) fechaEl.disabled = byPartidos;
+        };
+        modoEl?.addEventListener('change', updateVisibility);
+        updateVisibility();
+      },
+      preConfirm: () => {
+        const mode = (document.getElementById('susp-modo') as HTMLSelectElement | null)?.value;
+        const partidosRaw = (document.getElementById('susp-partidos') as HTMLInputElement | null)
+          ?.value;
+        const fechaRaw = (document.getElementById('susp-fecha') as HTMLInputElement | null)?.value;
+        if (mode === 'partidos') {
+          const partidos = Number(partidosRaw);
+          if (!Number.isInteger(partidos) || partidos < 1) {
+            Swal.showValidationMessage('Ingresá una cantidad válida de partidos (mínimo 1).');
+            return;
+          }
+          return { partidosRestantes: partidos };
+        }
+        if (!fechaRaw) {
+          Swal.showValidationMessage('Seleccioná una fecha para la suspensión.');
+          return;
+        }
+        return { fechaHasta: fechaRaw };
+      },
+    });
+    if (!result.isConfirmed) {
+      return null;
+    }
+    return result.value ?? null;
+  }
+
+  async registrarEvento(): Promise<void> {
     if (!this.partido || this.partido.estado !== 'EN_JUEGO') {
       void Swal.fire({
         icon: 'warning',
@@ -536,12 +611,21 @@ export class PlanillaPartidoComponent implements OnInit {
     }
     const v = this.evForm.getRawValue();
     const notas = v.notas.trim() || null;
+    let suspensionRoja: SuspensionRojaPayload | undefined;
+    if (v.tipo === 'ROJA') {
+      const cfg = await this.pedirConfiguracionSuspensionRoja();
+      if (!cfg) {
+        return;
+      }
+      suspensionRoja = cfg;
+    }
     this.api
       .addEvento(this.partidoId, {
         jugadorId: v.jugadorId,
         tipo: v.tipo,
         minuto: v.minuto,
         notas,
+        suspensionRoja,
       })
       .subscribe({
         next: () => {

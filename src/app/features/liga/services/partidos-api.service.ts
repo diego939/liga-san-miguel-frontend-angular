@@ -131,7 +131,16 @@ export class PartidosApiService {
 
   addEvento(
     id: number,
-    body: { jugadorId: number; tipo: TipoEvento; minuto: number; notas?: string | null },
+    body: {
+      jugadorId: number;
+      tipo: TipoEvento;
+      minuto: number;
+      notas?: string | null;
+      suspensionRoja?: {
+        partidosRestantes?: number;
+        fechaHasta?: string;
+      };
+    },
   ): Observable<EventoPartido> {
     return this.http.post<EventoPartido>(
       `${this.base}/partidos/${id}/eventos`,

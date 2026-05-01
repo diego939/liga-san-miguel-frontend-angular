@@ -5,6 +5,7 @@ export function defaultSortOrderForKey(key: string): SortOrder {
   switch (key) {
     case 'fechaInicio':
     case 'fechaFin':
+    case 'fechaHasta':
     case 'createdAt':
       return 'desc';
     case 'fecha':
