@@ -8,7 +8,7 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { forkJoin } from 'rxjs';
+import { forkJoin, firstValueFrom } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import Swal from 'sweetalert2';
 import type {
@@ -22,6 +22,7 @@ import type {
 } from '../../models/api.types';
 import { environment } from '../../../../../environments/environment';
 import { InscripcionesApiService } from '../../services/inscripciones-api.service';
+import { EstadisticasApiService } from '../../services/estadisticas-api.service';
 import { PartidosApiService } from '../../services/partidos-api.service';
 import { apiErrorAlert } from '../../utils/api-error';
 import { inscripcionSolapaDiaCivil } from '../../utils/liga-day-bounds';
@@ -33,7 +34,8 @@ type Line = {
   dni?: string;
   numeroCamiseta?: number | null;
 };
-type SuspensionRojaPayload = { partidosRestantes?: number; fechaHasta?: string };
+/** Misma forma que `suspensionRoja` / `suspensionAcumulacionAmarillas` en el API. */
+type SuspensionEventoPayload = { partidosRestantes?: number; fechaHasta?: string };
 
 @Component({
   selector: 'app-planilla-partido',
@@ -44,6 +46,7 @@ type SuspensionRojaPayload = { partidosRestantes?: number; fechaHasta?: string }
 export class PlanillaPartidoComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly api = inject(PartidosApiService);
+  private readonly estadisticasApi = inject(EstadisticasApiService);
   private readonly inscripcionesApi = inject(InscripcionesApiService);
   private readonly fb = inject(FormBuilder);
 
@@ -517,12 +520,15 @@ export class PlanillaPartidoComponent implements OnInit {
       });
   }
 
-  private async pedirConfiguracionSuspensionRoja(): Promise<SuspensionRojaPayload | null> {
-    const result = await Swal.fire<SuspensionRojaPayload>({
-      title: 'Configurar suspensión por roja',
+  private async pedirConfiguracionSuspension(
+    title: string,
+    introHtml: string,
+  ): Promise<SuspensionEventoPayload | null> {
+    const result = await Swal.fire<SuspensionEventoPayload>({
+      title,
       html:
         '<div class="text-left space-y-3">' +
-        '<p class="text-sm text-gray-600">Elegí cómo se cumple la suspensión automática por tarjeta roja.</p>' +
+        introHtml +
         '<div>' +
         '<label for="susp-modo" class="mb-1 block text-xs font-medium uppercase tracking-wide text-gray-500">Tipo de suspensión</label>' +
         '<select id="susp-modo" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30">' +
@@ -542,6 +548,7 @@ export class PlanillaPartidoComponent implements OnInit {
       showCancelButton: true,
       confirmButtonText: 'Aplicar',
       cancelButtonText: 'Cancelar',
+      reverseButtons: true,
       focusConfirm: false,
       width: 560,
       customClass: {
@@ -591,6 +598,20 @@ export class PlanillaPartidoComponent implements OnInit {
     return result.value ?? null;
   }
 
+  private pedirConfiguracionSuspensionRoja(): Promise<SuspensionEventoPayload | null> {
+    return this.pedirConfiguracionSuspension(
+      'Configurar suspensión por roja',
+      '<p class="text-sm text-gray-600">Elegí cómo se cumple la suspensión por tarjeta roja.</p>',
+    );
+  }
+
+  private pedirConfiguracionSuspensionAcumulacionAmarillas(): Promise<SuspensionEventoPayload | null> {
+    return this.pedirConfiguracionSuspension(
+      'Suspensión por acumulación de amarillas',
+      '<p class="text-sm text-gray-600">Con esta tarjeta el jugador alcanza 5, 10, 15… amarillas en el torneo. Definí la suspensión (partidos o hasta una fecha).</p>',
+    );
+  }
+
   async registrarEvento(): Promise<void> {
     if (!this.partido || this.partido.estado !== 'EN_JUEGO') {
       void Swal.fire({
@@ -611,13 +632,33 @@ export class PlanillaPartidoComponent implements OnInit {
     }
     const v = this.evForm.getRawValue();
     const notas = v.notas.trim() || null;
-    let suspensionRoja: SuspensionRojaPayload | undefined;
+    let suspensionRoja: SuspensionEventoPayload | undefined;
     if (v.tipo === 'ROJA') {
       const cfg = await this.pedirConfiguracionSuspensionRoja();
       if (!cfg) {
         return;
       }
       suspensionRoja = cfg;
+    }
+    let suspensionAcumulacionAmarillas: SuspensionEventoPayload | undefined;
+    if (v.tipo === 'AMARILLA' && this.partido) {
+      try {
+        const tarjetas = await firstValueFrom(
+          this.estadisticasApi.tarjetas(this.partido.torneoId),
+        );
+        const row = tarjetas.jugadores.find((j) => j.jugadorId === v.jugadorId);
+        const amarillasPrevias = row?.amarillas ?? 0;
+        if ((amarillasPrevias + 1) % 5 === 0) {
+          const cfg = await this.pedirConfiguracionSuspensionAcumulacionAmarillas();
+          if (!cfg) {
+            return;
+          }
+          suspensionAcumulacionAmarillas = cfg;
+        }
+      } catch (e) {
+        apiErrorAlert(e);
+        return;
+      }
     }
     this.api
       .addEvento(this.partidoId, {
@@ -626,6 +667,7 @@ export class PlanillaPartidoComponent implements OnInit {
         minuto: v.minuto,
         notas,
         suspensionRoja,
+        suspensionAcumulacionAmarillas,
       })
       .subscribe({
         next: () => {

@@ -140,6 +140,10 @@ export class PartidosApiService {
         partidosRestantes?: number;
         fechaHasta?: string;
       };
+      suspensionAcumulacionAmarillas?: {
+        partidosRestantes?: number;
+        fechaHasta?: string;
+      };
     },
   ): Observable<EventoPartido> {
     return this.http.post<EventoPartido>(

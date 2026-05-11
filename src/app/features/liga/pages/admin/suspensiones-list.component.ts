@@ -109,6 +109,53 @@ export class SuspensionesListComponent implements OnInit {
     return j ? `${j.apellido}, ${j.nombre}` : `#${s.jugadorId}`;
   }
 
+  /** Vigencia activa: partidos pendientes o fecha hasta definida. */
+  suspensionConVigencia(s: Suspension): boolean {
+    if ((s.partidosRestantes ?? 0) > 0) {
+      return true;
+    }
+    return s.fechaHasta != null && String(s.fechaHasta).trim() !== '';
+  }
+
+  quitarSuspension(s: Suspension): void {
+    if (!this.suspensionConVigencia(s)) {
+      return;
+    }
+    const jugador = this.escapeHtml(this.labelJugador(s));
+    void Swal.fire({
+      title: '¿Quitar la suspensión?',
+      html:
+        `<p class="text-left text-sm text-gray-700">Se anulará la vigencia de la suspensión #${s.id} (${jugador}). ` +
+        'El registro se mantiene en el historial con partidos restantes en 0 y sin fecha límite.</p>',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Quitar suspensión',
+      cancelButtonText: 'Cancelar',
+      reverseButtons: true,
+      focusCancel: true,
+      buttonsStyling: true,
+      confirmButtonColor: '#b91c1c',
+    }).then((r) => {
+      if (!r.isConfirmed) {
+        return;
+      }
+      this.api
+        .update(s.id, { partidosRestantes: 0, fechaHasta: null })
+        .subscribe({
+          next: () => {
+            void Swal.fire({
+              icon: 'success',
+              title: 'Suspensión quitada',
+              timer: 1200,
+              showConfirmButton: false,
+            });
+            this.load();
+          },
+          error: (e) => apiErrorAlert(e),
+        });
+    });
+  }
+
   async editarSuspension(s: Suspension): Promise<void> {
     const initialModo =
       s.fechaHasta != null && String(s.fechaHasta).trim() !== ''
@@ -126,7 +173,7 @@ export class SuspensionesListComponent implements OnInit {
       html:
         '<div class="text-left space-y-3">' +
         `<p class="text-sm text-gray-600">Suspensión #${s.id} · ${this.escapeHtml(this.labelJugador(s))}</p>` +
-        '<p class="text-xs text-gray-500">Si elegís por partidos, la fecha se borra. Si elegís hasta fecha, los partidos restantes se borran. La fecha mostrada usa el día civil en la zona del sistema (Argentina), alineada con el API.</p>' +
+        `<p class="text-sm text-gray-800"><span class="font-medium text-gray-700">Motivo:</span> ${this.escapeHtml(s.motivo ?? '—')}</p>` +
         '<div>' +
         '<label for="edit-susp-modo" class="mb-1 block text-xs font-medium uppercase tracking-wide text-gray-500">Tipo de suspensión</label>' +
         '<select id="edit-susp-modo" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30">' +

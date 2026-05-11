@@ -54,7 +54,7 @@ export class SuspensionesApiService {
     body: Partial<{
       motivo: string;
       partidosRestantes: number;
-      fechaHasta: string;
+      fechaHasta: string | null;
     }>,
   ): Observable<Suspension> {
     return this.http.patch<Suspension>(`${this.base}/${id}`, body);
